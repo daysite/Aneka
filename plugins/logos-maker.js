@@ -61,5 +61,6 @@ const handler = async (m, { conn, args, command }) => {
 };
 
 handler.command = handler help = Object.keys(logos);
+handler.tags = ['logos'];
 export default handler;
 
