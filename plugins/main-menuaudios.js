@@ -1,6 +1,10 @@
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let usertag = '@' + m.sender.split('@')[0]
   let imgPath = './src/catalogo.jpg'
+  const _uptime = process.uptime() * 1000;
+  const uptime = clockString(_uptime);
+  let totalreg = Object.keys(global.db.data.users).length
+  let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
   let tags = { owner: '𝖮ɯ𝗇𝖾𝗋' }
 
   let defaultMenu = {
@@ -14,10 +18,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🌴 Nombre: ${botname}
 ☕ Creador: Dev.Criss 🇦🇱
 📚 Librería: Baileys
-⏰ Uptime: 
+⏰ Uptime: ${uptime}
 🚀 Type: NodeJs
-🧇 Usuarios regs: 
-🥞 Usuarios totales:
+🧇 Usuarios regs: ${totalreg}
+🥞 Usuarios totales: ${rtotalreg}
 `,
     header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ☕  ੭`,
     body: cmd => `${xowner} ${cmd}`,
