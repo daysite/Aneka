@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+/*import fetch from 'node-fetch';
 
 const handler = async (m, {conn, usedPrefix, text}) => {
 
@@ -67,4 +67,5 @@ const handler = async (m, {conn, usedPrefix, text}) => {
 handler.command = /^(menulogos|menu2)$/i;
 handler.fail = null;
 
-export default handler;
+export default handler;*/
+
