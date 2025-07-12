@@ -9,6 +9,6 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 
 handler.help = ['balogo <txt1> <txt2>'];
 handler.command = ['balogo'];
-handler.tags = ['tools']
+handler.tags = ['logos']
 
 export default handler;
