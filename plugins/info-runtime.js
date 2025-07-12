@@ -1,6 +1,6 @@
 let handler = async (m, { usedPrefix, command }) => {
   let uptime = process.uptime()
-  let runtime = `${packname}
+  let runtime = `${textbot}
 
 > 🌷 ${club}
 
