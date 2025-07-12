@@ -117,7 +117,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   await conn.sendMessage(m.chat, {
     video: { url: vid },
     caption: text,
-    mentions: [m.sender]
+    mentions: [m.sender],
     gifPlayback: true
   }, { quoted: fkontak })
 }
