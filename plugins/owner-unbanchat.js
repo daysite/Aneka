@@ -8,8 +8,8 @@ await conn.reply(m.chat, `*${xowner} Shadow Ultra se activó para este chat.*`, 
 handler.help = ['unbanchat'];
 handler.tags = ['owner'];
 handler.command = ['unbanchat','desbanearchat','desbanchat', 'activar']
-handler.admin = true;
-//handler.rowner = true
+//handler.admin = true;
+handler.rowner = true
 handler.group = true
 
 export default handler
