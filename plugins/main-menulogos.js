@@ -73,7 +73,7 @@ export default handler;*/
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let usertag = '@' + m.sender.split('@')[0]
   let imgPath = './src/catalogo.jpg'
-  let tags = { owner: 'Logos' }
+  let tags = { logos: 'Logos' }
 
   let defaultMenu = {
     before: `
