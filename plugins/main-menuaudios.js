@@ -18,10 +18,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🚀 Type: NodeJs
 🧇 Usuarios regs: 
 🥞 Usuarios totales:
-`,
-    header: category => `┏━━⪩「 ${category} 」⪨`,
-    body: cmd => `┃ ${cmd}`,
-    footer: '┗━━━━━━━━━━━━━━━⪩',
+\n`,
+    header: category => `⌥   𑁯ᰍ   ͘  *`𝖮ɯ𝗇𝖾𝗋`*    ̣  あ  ☕  ੭`,
+    body: cmd => `${xowner} ${cmd}`,
+    footer: '',
     after: ''
   }
 
@@ -36,9 +36,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   for (let tag in tags) {
     groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
   }
-
-  const more = String.fromCharCode(8206)
-  const readMore = more.repeat(4001)
 
   let text = [
     defaultMenu.before(name, readMore),
