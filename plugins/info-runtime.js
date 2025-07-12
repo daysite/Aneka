@@ -1,7 +1,6 @@
 let handler = async (m, { usedPrefix, command }) => {
   let uptime = process.uptime()
   let runtime = `${textbot}
-
 > 🌷 ${club}
 
 *☁️ Tiempo activo:* \`${rTime(uptime)}\`
