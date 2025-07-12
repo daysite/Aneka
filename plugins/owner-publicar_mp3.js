@@ -33,6 +33,7 @@ const handler = async (m, { conn, usedPrefix, command }) => {
 };
 
 handler.help = ['post2'];
+handler.tags = ['owner'];
 handler.command = ['publicar2', 'send2', 'post2'];
 handler.rowner = true;
 
