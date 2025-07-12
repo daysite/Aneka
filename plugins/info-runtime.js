@@ -4,7 +4,7 @@ let handler = async (m, { usedPrefix, command }) => {
 > 🌷 ${club}
 
 *☁️ Tiempo activo:* \`${rTime(uptime)}\`
-*⏰ Hora actual: ${hora}`
+*⏰ Hora actual:* \`\`\`${hora}\`\`\``
 
   conn.reply(m.chat, runtime, m, rcanal)
 }
