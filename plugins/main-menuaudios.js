@@ -28,18 +28,17 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     footer: `> ${club}`
   }
 
+//--------< 🌹FUNTION🌹 >---------
   let help = Object.values(global.plugins)
     .filter(plugin => !plugin.disabled)
     .map(plugin => ({
       help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
       tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags]
     }))
-
   let groups = {}
   for (let tag in tags) {
     groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
   }
-
   let text = [
     defaultMenu.before,
     ...Object.keys(tags).map(tag =>
@@ -51,6 +50,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     ),
     defaultMenu.after
   ].join('\n')
+//--------< 🌹FUNTION🌹 >---------
 
   await m.react('🤴🏻')
   await conn.sendMessage(m.chat, {
