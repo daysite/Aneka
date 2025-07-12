@@ -60,7 +60,16 @@ const handler = async (m, { conn, args, command }) => {
   }
 };
 
-handler.command = handler help = Object.keys(logos);
+handler.command = Object.keys(logos);
+handler.help = [
+  'logocorazon', 'logochristmas', 'logopareja', 'logoglitch', 'logosad', 'logogaming',
+  'logosolitario', 'logodragonball', 'logoneon', 'logogatito', 'logochicagamer',
+  'logonaruto', 'logofuturista', 'logonube', 'logoangel', 'logomurcielago', 'logocielo',
+  'logograffiti3d', 'logomatrix', 'logohorror', 'logoalas', 'logoarmy', 'logopubg',
+  'logopubgfem', 'logolol', 'logoamongus', 'logovideopubg', 'logovideotiger',
+  'logovideointro', 'logovideogaming', 'logoguerrero', 'logoportadaplayer',
+  'logoportadaff', 'logoportadapubg', 'logoportadacounter'
+]
 handler.tags = ['logos'];
 export default handler;
 
