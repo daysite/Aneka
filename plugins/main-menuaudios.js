@@ -4,21 +4,21 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   let imgPath = './src/catalogo.jpg'
 
   const defaultMenu = {
-    before: (name, readMore) => `
+    before: () => `
 ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
 🌺 ׅ  ¡Hola! ¿Como estás?  ৎ୭
 ׅ ෫${tag}  ಒ
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎Bienvenido ‎ ‎  ‎ ‎✿̮    ׅ  al   ୂ
 ⿻     𝖬𝖾𝗇𝗎    ෨    𝖮𝗐𝗇𝖾𝗋    𑇙ᰍ
 
-🌴 Nombre: Shadow Ultra
-☕ Creador: Cristian
+🌴 Nombre: ${botname}
+☕ Creador: Dev.Criss 🇦🇱
 📚 Librería: Baileys
-⏰ Uptime: 26:48:07
+⏰ Uptime: 
 🚀 Type: NodeJs
-🧇 Usuarios regs: 5
-🥞 Usuarios totales: 1594
-${readMore}`,
+🧇 Usuarios regs: 
+🥞 Usuarios totales:
+`,
     header: category => `┏━━⪩「 ${category} 」⪨`,
     body: cmd => `┃ ${cmd}`,
     footer: '┗━━━━━━━━━━━━━━━⪩',
