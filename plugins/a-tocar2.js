@@ -67,7 +67,7 @@ const defaultMenu = {
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let name = await conn.getName(m.sender)
   let tag = `@${m.sender.split('@')[0]}`
-  let tags = { rpg: 'Economía' }
+  let tags = { owner: 'Owner' }
   let imgPath = './src/catalogo.jpg'
 
   let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => ({
