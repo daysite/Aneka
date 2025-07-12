@@ -55,7 +55,7 @@ handler.tags = ['rpg']
 handler.command = ['menue', 'menueco', 'menueconomia']
 
 export default handler*/
-
+/*
 const defaultMenu = {
   before: (name, readMore) => `💸 ¡Hola *${name}*, aquí está mi menú de economía:\n\n${readMore}`,
   header: category => `┏━━⪩「 *${category}* 」⪨`,
@@ -110,4 +110,4 @@ handler.help = ['menueconomia']
 handler.tags = ['rpg']
 handler.command = ['menue', 'menueco', 'menueconomia']
 
-export default handler
+export default handler*/
