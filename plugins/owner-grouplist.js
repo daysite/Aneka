@@ -48,7 +48,7 @@ const handler = async (m, { conn }) => {
   }
 };
 
-handler.help = ['groups', 'grouplist'];
+handler.help = ['grouplist'];
 handler.tags = ['owner'];
 handler.command = /^(groups|grouplist|listadegrupo|gruposlista|listagrupos|listgroup)$/i;
 handler.rowner = true;
