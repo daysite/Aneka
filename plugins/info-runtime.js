@@ -1,8 +1,11 @@
 let handler = async (m, { usedPrefix, command }) => {
   let uptime = process.uptime()
-  let runtime = `${global.packname}
+  let runtime = `${packname}
 
-*☁️ Tiempo activo:* \`${rTime(uptime)}\``
+> 🌷 ${club}
+
+*☁️ Tiempo activo:* \`${rTime(uptime)}\`
+*⏰ Hora actual: ${hora}`
 
   conn.reply(m.chat, runtime, m, rcanal)
 }
