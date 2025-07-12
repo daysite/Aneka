@@ -144,7 +144,7 @@ global.canalIdM = ["120363357231409846@newsletter", "120363318267632676@newslett
 global.canalNombreM = [" 𐚁 ֹ ִ 𝖲𝗁⍺𝖽𑄈𝗐′𝗌 𝖢𝗅𝗎𝖻 ୧ ֹ ִ🌹ᩚ꤬ᰍ", "ꘓꘓ   ໒🌤️ؑ   𝖲𝗎𝗇ẜ𝗅⍺𝗋𝖾   𝖳𝖾⍺𑜀  ୭", "⿻ ׄ ˚. Տ𝗁⍺𝖽ᦅ𝗐  ⚡︎  𝖴𝗅ł𝗋⍺ ׄㅤ🥞ᩧᰰ˚"]
 global.channelRD = await getRandomChannel()
 
-global.icono = [
+global.icons = [
 "https://files.catbox.moe/uu9lz5.jpg",
 "https://files.catbox.moe/0a0e5s.jpg",
 "https://files.catbox.moe/xe4y9r.jpg",
