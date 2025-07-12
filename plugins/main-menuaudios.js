@@ -20,8 +20,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 📚 Librería: Baileys
 ⏰ Uptime: ${uptime}
 🚀 Type: NodeJs
-🧇 Usuarios regs: ${totalreg}
-🥞 Usuarios totales: ${rtotalreg}
+🧇 Usuarios regs: ${rtotalreg}
+🥞 Usuarios totales: ${totalreg}
 `,
     header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ☕  ੭`,
     body: cmd => `${xowner} ${cmd}`,
