@@ -24,7 +24,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     header: category => `⌥   𑁯ᰍ   ͘  *\`𝖮ɯ𝗇𝖾𝗋\`*    ̣  あ  ☕  ੭`,
     body: cmd => `${xowner} ${cmd}`,
     footer: '',
-    after: ''
+    after: dev
   }
 
   let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => ({
