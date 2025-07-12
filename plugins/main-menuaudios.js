@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+/*import fetch from 'node-fetch';
 
 const handler = async (m, { conn, usedPrefix, isPrems }) => {
   try {
@@ -45,23 +45,6 @@ ${readMore}
 𑂯 ׁ${xowner} ${usedPrefix}autoadmin 
 > ${club}
 `.trim();
-/*
-    conn.sendMessage(m.chat, {
-      text: text,
-      contextInfo: {
-        mentionedJid: conn.parseMention(text),
-        isForwarded: true,
-        forwardingScore: 999,
-        externalAdReply: {
-          title: `${await conn.getName(m.sender)}, Welcome to my developer menu, follow me on Instagram, thank you very much.`,
-          body: dev,
-          thumbnail: await (await fetch(img)).buffer(),
-          sourceUrl: insta,
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
-    }, { quoted: fkontak });*/
 
   await conn.sendLuffy(m.chat, txt, shadow, text, img, img, ig, fkontak)
 
@@ -82,7 +65,7 @@ function clockString(ms) {
   let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
   let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
   return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
+}*/
 
 
 // MENU OWNER BY DEV.CRISS
