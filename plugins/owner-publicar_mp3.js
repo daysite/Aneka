@@ -32,8 +32,8 @@ const handler = async (m, { conn, usedPrefix, command }) => {
   await conn.reply(m.chat, '*✅ Audio publicado en el canal*', m);
 };
 
-handler.help = ['publicar2'];
-handler.command = ['publicar2', 'publicarmp3', 'publimp3'];
+handler.help = ['post2'];
+handler.command = ['publicar2', 'send2', 'post2'];
 handler.rowner = true;
 
 export default handler;
