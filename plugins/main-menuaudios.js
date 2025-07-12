@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🧇 Usuarios regs: 
 🥞 Usuarios totales:
 \n`,
-    header: category => `⌥   𑁯ᰍ   ͘  *`𝖮ɯ𝗇𝖾𝗋`*    ̣  あ  ☕  ੭`,
+    header: category => `⌥   𑁯ᰍ   ͘  *\`𝖮ɯ𝗇𝖾𝗋\`*    ̣  あ  ☕  ੭`,
     body: cmd => `${xowner} ${cmd}`,
     footer: '',
     after: ''
