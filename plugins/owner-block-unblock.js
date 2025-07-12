@@ -29,6 +29,8 @@ const handler = async (m, { text, conn, usedPrefix, command }) => {
   }
 };
 
+handler.help = ['block', 'unblock'];
+handler.tags = ['owner'];
 handler.command = ['block', 'unblock'];
 handler.rowner = true;
 
