@@ -78,15 +78,15 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   let defaultMenu = {
     before: `
 ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
-🌺 ׅ  *¡Hola! ¿Cómo estás?*  ৎ୭
+🌴 ׅ  *¡Hola! ¿Cómo estás?*  ৎ୭
 ׅ ෫${usertag}  ಒ
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎*Bienvenido* ‎ ‎  ‎ ‎✿̮    ׅ  *al*   ୂ
 ⿻     *𝖬𝖾𝗇𝗎*    ෨    *𝖫𝗈𝗀𝗈𝗌*    𑇙ᰍ
 
 *📆 Fecha:* ${date} ${hour}
 `,
-    header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ☕  ੭`,
-    body: cmd => `${xowner} ${cmd}`,
+    header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ${xlogos}  ੭`,
+    body: cmd => `${xlogos} ${cmd}`,
     footer: `> ${club}`
   }
 
@@ -114,7 +114,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   ].join('\n')
 //--------< 🌹FUNTION🌹 >---------
 
-  await m.react('🤴🏻')
+  await m.react('🌴')
   await conn.sendMessage(m.chat, {
     image: { url: imgPath },
     caption: text,
@@ -122,7 +122,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   }, { quoted: m })
 }
 
-handler.help = ['menuowner']
+handler.help = ['menulogos']
 handler.tags = ['main']
 handler.command = ['menulogos']
 
