@@ -90,7 +90,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ☕  ੭`,
     body: cmd => `${xowner} ${cmd}`,
     footer: '',
-    after: ''
+    after: club
   }
 
   let help = Object.values(global.plugins)
