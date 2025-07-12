@@ -7,7 +7,7 @@ conn.reply(m.chat, `*${xowner} Shadow Ultra se desactivó para este chat.*`, m)
 handler.help = ['banchat']
 handler.tags = ['owner']
 handler.command = /^banchat|desactivar|banearchat$/i
-handler.admin = true;
-//handler.rowner = true
+//handler.admin = true;
+handler.rowner = true
 
 export default handler
