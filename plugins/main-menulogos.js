@@ -83,8 +83,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎*Bienvenido* ‎ ‎  ‎ ‎✿̮    ׅ  *al*   ୂ
 ⿻     *𝖬𝖾𝗇𝗎*    ෨    *𝖫𝗈𝗀𝗈𝗌*    𑇙ᰍ
 
-*📆 Fecha:* ${date} 
-*⏰ Hora:* ${hora}
+> \`\`\`${date} || ${hora}\`\`\`
 `,
     header: category => `⌥   𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ${xlogos}  ੭`,
     body: cmd => `${xlogos} ${cmd}`,
