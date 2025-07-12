@@ -1,13 +1,14 @@
 let handler = async (m, { conn, usedPrefix: _p }) => {
-  let tag = '@' + m.sender.split('@')[0]
-  let name = conn.getName(m.sender)
-  let imgPath = './src/catalogo.jpg'
 
-  const defaultMenu = {
+  let usertag = '@' + m.sender.split('@')[0]
+  let imgPath = './src/catalogo.jpg'
+  let tags = { owner: 'Owner' }
+
+  const defauldMenu = {
     before: () => `
 ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
 🌺 ׅ  ¡Hola! ¿Como estás?  ৎ୭
-ׅ ෫${tag}  ಒ
+ׅ ෫${usertag}  ಒ
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎Bienvenido ‎ ‎  ‎ ‎✿̮    ׅ  al   ୂ
 ⿻     𝖬𝖾𝗇𝗎    ෨    𝖮𝗐𝗇𝖾𝗋    𑇙ᰍ
 
@@ -25,8 +26,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     after: ''
   }
 
-  let tags = { owner: 'Owner' }
-
   let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => ({
     help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
     tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
@@ -38,7 +37,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   }
 
   let text = [
-    defaultMenu.before(name, readMore),
+    defaultMenu.before(),
     ...Object.keys(tags).map(tagKey => {
       return defaultMenu.header(tags[tagKey]) + '\n' + [
         ...groups[tagKey].map(plugin =>
@@ -60,8 +59,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   }, { quoted: m })
 }
 
-handler.help = ['menueconomia']
-handler.tags = ['rpg']
-handler.command = ['menuowner', 'menueco', 'menueconomia']
+handler.command = ['menuowner']
 
 export default handler
