@@ -72,12 +72,11 @@ export default handler;*/
 
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let usertag = '@' + m.sender.split('@')[0]
-  let imgPath = './src/catalogo.jpg'
+  const vid = 'https://files.catbox.moe/3i7ldi.mp4'
   let tags = { logos: 'Logos' }
 
   let defaultMenu = {
-    before: `
-ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
+    before: `ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
 🌴 ׅ  *¡Hola! ¿Cómo estás?*  ৎ୭
 ׅ ෫${usertag}  ಒ
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎*Bienvenido* ‎ ‎  ‎ ‎✿̮    ׅ  *al*   ୂ
@@ -116,10 +115,11 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   await m.react('🌴')
   await conn.sendMessage(m.chat, {
-    image: { url: imgPath },
+    video: { url: vid },
     caption: text,
     mentions: [m.sender]
-  }, { quoted: m })
+    gifPlayback: true
+  }, { quoted: fkontak })
 }
 
 handler.help = ['menulogos']
@@ -127,11 +127,3 @@ handler.tags = ['main']
 handler.command = ['menulogos']
 
 export default handler
-
-function clockString(ms) {
-  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
-  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
-
