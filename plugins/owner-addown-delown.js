@@ -34,7 +34,7 @@ const handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
 
 handler.help = ['addowner', 'delowner'];
-handler.tags = ['marker'];
+handler.tags = ['owner'];
 handler.command = ['addowner', 'delowner'];
 handler.rowner = true;
 
