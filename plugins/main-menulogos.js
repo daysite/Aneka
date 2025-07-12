@@ -15,8 +15,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 `,
     header: category => `╭──•  𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ${xlogos}  ੭`,
     body: cmd => `│${xlogos} ${cmd}`,
-    footer: '',
-    after: `> ${club}`
+    footer: '╰──•',
+    after: `\n> ${club}`
   }
 
 //--------< 🌹FUNTION🌹 >---------
