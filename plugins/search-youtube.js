@@ -61,8 +61,8 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
   conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
 };
 
-handler.help = ['yts <texto>'];
-handler.tags = ['buscador'];
+handler.help = ['yts'];
+handler.tags = ['searcha'];
 handler.command = /^(yts|ytsearch)$/i;
 
 export default handler;
