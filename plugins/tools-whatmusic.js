@@ -25,7 +25,7 @@ if (!media) throw '*✖️ No se pudo descargar el archivo de audio/video.*'
 
 let dur = (q.seconds || 5)
 if (dur < 5) return m.reply('*⚠️ El audio/video debe durar al menos 5 segundos.*')
-if (dur > 20) return m.reply('*⚠️ El archivo que carga es demasiado grande. Sugerimos que lo recorte a 10–20 segundos. Esa duración es suficiente para identificar la música.*')
+if (dur > 30) return m.reply('*⚠️ El archivo que carga es demasiado grande. Sugerimos que lo recorte a 10–30 segundos. Esa duración es suficiente para identificar la música.*')
 
 let ext = mime.split('/')[1]  
 if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp')  
