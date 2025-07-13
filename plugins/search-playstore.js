@@ -27,7 +27,8 @@ let handler = async (m, { conn, text }) => {
   ).join("\n\n");
   conn.reply(m.chat, res, m, opt); 
 };
-handler.help = ['playstoresearch *<texto>*']; 
-handler.tags = ['buscador'];
+
+handler.help = ['playstoresearch']; 
+handler.tags = ['search'];
 handler.command = /^(playstoresearch|pssearch)$/i; 
 export default handler;
