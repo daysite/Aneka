@@ -17,9 +17,9 @@ const handler = async (m, { conn }) => {
   await conn.sendFile(m.chat, apiUrl, 'gay.png', '*🏳️‍🌈 Miren a este gay 🏳️‍🌈*', m);
 };
 
-handler.help = ['gay'];
+handler.help = ['profilegay'];
 handler.tags = ['marker'];
-handler.command = /^(gay2|gayp)$/i;
+handler.command = /^(gay2|gayp|pfpgay|profilegay)$/i;
 handler.group = true;
 
 export default handler;
