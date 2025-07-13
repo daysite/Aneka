@@ -36,7 +36,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
   }
 }
 
-handler.tags = ['nsfw']
+handler.tags = ['search']
 handler.help = ['pornhubsearch']
 handler.command = ['phsearch', 'pornhubsearch']
 
