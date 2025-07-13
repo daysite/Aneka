@@ -40,7 +40,7 @@ let handler = async (m, { conn, args }) => {
 };
 
 handler.help = ['pfp'];
-handler.tags = ['marker'];
+handler.tags = ['maker'];
 handler.command = ['pfp'];
 
 export default handler;
