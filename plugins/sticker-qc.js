@@ -20,7 +20,7 @@ const buffer = Buffer.from(json.data.result.image, 'base64');
 let stiker = await sticker(buffer, false, global.packname, global.author);
 if (stiker) return conn.sendFile(m.chat, stiker, 'error.webp', '', m);
 }
-handler.help = ['qc *<txt>*'];
+handler.help = ['qc'];
 handler.tags = ['sticker'];
 handler.command = /^(qc)$/i;
 
