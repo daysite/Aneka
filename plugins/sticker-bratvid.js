@@ -26,7 +26,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   }
 }
 
-handler.help = ['bratvid <texto>']
+handler.help = ['bratvid']
 handler.command = ['bratvid', 'bratv']
 handler.tags = ['sticker']
 
