@@ -16,7 +16,7 @@ user.description = text;
 return conn.reply(m.chat, `*${xreg} Se ha establecido tu descripcion.*\n\n> ${user.description}`, m);
 };
 
-handler.help = ['setdescription <establece tu descripción>']
+handler.help = ['setdesc']
 handler.tags = ['rg']
 handler.command = ['setdescription', 'setdesc']
 export default handler;
