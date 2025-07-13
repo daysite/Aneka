@@ -9,7 +9,7 @@ let handler = async (m, { text, conn, usedPrefix, command, args }) => {
     if (!data.success) return m.reply('No se pudo obtener los datos del usuario.');
 
     let res = data.result;
-    let caption = `\`\`\`乂 STALKER - TIKTOK\`\`\`\n\n` +
+    let caption = `\`\`\`乂 STALKER - PINTEREST\`\`\`\n\n` +
       `• *ID:* ${res.id}\n` +
       `• *Usuario:* ${res.username}\n` +
       `• *Nombre:* ${res.full_name}\n` +
