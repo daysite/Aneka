@@ -4,7 +4,7 @@ import cheerio from 'cheerio';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
-        return conn.reply(m.chat, `*🍟 Ingresa un texto* *• Ejemplo :* ${usedPrefix + command} *Izumikzx*`, m, fake);
+        return conn.reply(m.chat, `*🍟 Ingresa un texto* *• Ejemplo :* ${usedPrefix + command} *Izumikzx*`, m, rcanal);
     }
 
     m.reply("Creando su Logo Porfavor Espere 🍟... ");
