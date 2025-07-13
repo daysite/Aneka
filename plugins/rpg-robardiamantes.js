@@ -24,7 +24,7 @@ return;
   conn.reply(m.chat, `*💎 Le robaste \`${rob} Diamantes\` a* *@${who.split`@`[0]}*`, m, {mentions: [who]});
   global.db.data.users[m.sender].lastrob2 = new Date * 1;
 };
-handler.help = ['rob'];
+handler.help = ['robar2'];
 handler.tags = ['rpg'];
 handler.command = ['robar2', 'steal', 'rob2', 'robardiamantes'];
 handler.group = true
