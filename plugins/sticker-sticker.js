@@ -1,4 +1,5 @@
-/*import { sticker } from '../lib/sticker.js'
+/*
+import { sticker } from '../lib/sticker.js'
 import uploadFile from '../lib/uploadFile.js'
 import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
@@ -15,7 +16,7 @@ let handler = async (m, { conn, args }) => {
       if (!media) return m.reply(mensajeError)
 
       try {
-        stiker = await sticker(media, false, global.packname, global.author)
+        stiker = await sticker(media, false, global.packN, global.authN)
       } catch (e) {
         console.error('❌ Error al generar sticker directo:', e)
         let url
@@ -74,7 +75,7 @@ let handler = async (m, { conn, args }) => {
   try {
     if (mime.startsWith('image/') || mime.startsWith('video/') || mime === 'image/webp') {
       let media = await q.download?.()
-      if (!media) return m.reply(mensajeError)
+      if (!media) return conn.reply(m.chat, mensajeError, m)
 
       try {
         stiker = await sticker(media, false, global.packN, global.authN)
@@ -87,17 +88,17 @@ let handler = async (m, { conn, args }) => {
         else if (mime.startsWith('video/')) url = await uploadFile(media)
 
         if (!url || typeof url !== 'string' || !isValidUrl(url)) {
-          return m.reply('❌ No se pudo obtener una URL válida del archivo.')
+          return conn.reply(m.chat, '❌ No se pudo obtener una URL válida del archivo.', m)
         }
 
         stiker = await sticker(false, url, global.packN, global.authN)
       }
 
     } else if (args[0]) {
-      if (!isValidUrl(args[0])) return m.reply('❌ La *URL* es inválida.')
+      if (!isValidUrl(args[0])) return conn.reply(m.chat, '❌ La *URL* es inválida.', m)
       stiker = await sticker(false, args[0], global.packN, global.authN)
     } else {
-      return m.reply(mensajeError)
+      return conn.reply(m.chat, mensajeError, m)
     }
 
   } catch (e) {
@@ -108,7 +109,7 @@ let handler = async (m, { conn, args }) => {
   if (stiker && Buffer.isBuffer(stiker)) {
     await conn.sendFile(m.chat, stiker, 'sticker.webp', '', m)
   } else {
-    m.reply('❌ No se pudo generar el sticker. Asegúrate de que el archivo sea válido.')
+    conn.reply(m.chat, '❌ No se pudo generar el sticker. Asegúrate de que el archivo sea válido.', m)
   }
 }
 
