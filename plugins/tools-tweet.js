@@ -1,3 +1,62 @@
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+    if (!text) return m.reply(
+        `*${xtools} Por favor, ingresa el texto para crear un post de tweet.*
+> *\`Uso:\`* ${usedPrefix + command} texto | usuario | nombre | likes | citas | retweets | cliente | perfilURL | imagenURL`
+    )
+
+    const parts = text.split('|').map(part => part.trim())
+    const [tweet, username, name, likes = '5000', quotes = '200', retweets = '1000', client = 'Twitter for Android', profile, tweet_image] = parts
+
+    if (!tweet || !username) {
+        return m.reply(`*${xtools} Ingresa al menos el texto del tweet y el usuario.*
+> *\`Ejemplo:\`* ${usedPrefix + command} Hello World | shadow.xyz`)
+    }
+
+    const usernames = username.replace(/\s/g, '').replace(/^@/, '')
+    const profiles = profile?.trim() || await (async () => {
+        try {
+            return await conn.profilePictureUrl(m.sender, "image")
+        } catch {
+            return 'https://files.catbox.moe/nwvkbt.png'
+        }
+    })()
+
+    const displayName = name || m.pushName || "No Name"
+
+    const PARAMS = new URLSearchParams({
+        profile: profiles,
+        name: displayName,
+        username: usernames,
+        tweet: tweet,
+        image: tweet_image || '',
+        theme: 'dark',
+        retweets,
+        quotes,
+        likes,
+        client
+    })
+
+    try {
+        await conn.sendMessage(m.chat, { react: { text: "🔎", key: m.key } })
+        await conn.sendMessage(m.chat, {
+            image: { url: `https://api.siputzx.my.id/api/m/tweet?${PARAMS.toString()}` },
+            caption: ''
+        }, { quoted: m })
+    } catch (err) {
+        console.error('Error:', err)
+        m.reply('*Error en la API*')
+    }
+}
+
+handler.command = ['tweetpost']
+handler.tags = ['tools']
+handler.help = ['tweetpost']
+export default handler
+
+
+
+
+
 
 let handler = async (m, { conn, usedPrefix, command, text}) => {
     if (!text) return m.reply(`*${xtools} Por favor, ingresa el texto para crear un post de tweet.*
