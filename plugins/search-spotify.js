@@ -73,7 +73,7 @@ await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
 console.error(error)
 }}
 
-handler.help = ["spotifysearch *<texto>*"]
+handler.help = ["spotifysearch"]
 handler.tags = ["search"]
 handler.command = /^(spotifysearch|spsearch|spotifys)$/i
 
