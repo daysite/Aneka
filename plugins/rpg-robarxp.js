@@ -17,7 +17,7 @@ const handler = async (m, {conn, usedPrefix, command}) => {
 };
 handler.help = ['robar'];
 handler.tags = ['rpg'];
-handler.command = ['robar', 'rob', 'robarxp'];
+handler.command = ['robar', 'rob', 'robarxp', 'steal'];
 handler.group = true;
 export default handler;
 function msToTime(duration) {
