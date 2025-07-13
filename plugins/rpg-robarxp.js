@@ -15,7 +15,7 @@ const handler = async (m, {conn, usedPrefix, command}) => {
   m.reply(`*🏦 Robaste \`${rob} Xp\` a* *@${who.split`@`[0]}*`, null, {mentions: [who]});
   global.db.data.users[m.sender].lastrob = new Date * 1;
 };
-handler.help = ['rob'];
+handler.help = ['robar'];
 handler.tags = ['rpg'];
 handler.command = ['robar', 'rob', 'robarxp'];
 handler.group = true;
