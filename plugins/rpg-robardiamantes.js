@@ -26,7 +26,7 @@ return;
 };
 handler.help = ['robar2'];
 handler.tags = ['rpg'];
-handler.command = ['robar2', 'steal', 'rob2', 'robardiamantes'];
+handler.command = ['robar2', 'steal2', 'rob2', 'robardiamantes'];
 handler.group = true
 export default handler;
 function msToTime(duration) {
