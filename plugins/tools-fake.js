@@ -16,7 +16,7 @@ contextInfo: {
 mentionedJid: conn.parseMention(real.join(sp).trim())
 }})}
 handler.help = ['fake']
-handler.tags = ['herramientas']
+handler.tags = ['tools']
 handler.command = /^(fake)$/
 
 export default handler
