@@ -53,11 +53,11 @@ let handler = async (m, { conn, usedPrefix, command, text}) => {
         conn.sendMessage(m.chat, { image: { url: `https://api.siputzx.my.id/api/m/tweet?${PARAMS.toString()}` }, caption: '' }, { quoted: m })
     } catch (err) {
         console.error('Error:', err)
-        m.reply('Error en la api')
+        m.reply('*Error en la api*')
     }
 }
 
-handler.command = ["tweet"]
-handler.tags = ["tools"]
-handler.help = [`tweet texto | usuario | [nombre] | [likes] | [txt citado] | [retweets] | [cliente] | [perfil_url] | [tweet_img_url]`]
+handler.command = ['tweetpost']
+handler.tags = ['tools']
+handler.help = ['tweetpost']
 export default handler
