@@ -6,7 +6,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*`, m, rcanal)
     }
 
-    await m.react('☁️')
+    await m.react('⚡')
 
     const url = `https://api.nekorinn.my.id/maker/brat-v2?text=${encodeURIComponent(text)}`
     const stiker = await sticker(null, url, packname, author)
@@ -22,7 +22,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 }
 
-handler.help = ['brat <texto>']
+handler.help = ['brat']
 handler.tags = ['sticker']
 handler.command = /^brat$/i
 
