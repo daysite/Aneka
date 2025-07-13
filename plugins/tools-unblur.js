@@ -32,7 +32,7 @@ let handler = async (m, { conn, args }) => {
   }
 };
 
-handler.help = ['unblur', 'unblur mild'];
+handler.help = ['unblur'];
 handler.tags = ['tools'];
 handler.command = ['unblur'];
 
