@@ -38,5 +38,6 @@ var handler = async (m, { usedPrefix, command }) => {
 handler.command = ['rev', 'syntaxerr', 'revisar', 'revision', 'revicion'];
 handler.help = ['rev'];
 handler.tags = ['owner'];
+handler.owner = true;
 
 export default handler;
