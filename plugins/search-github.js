@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 let handler = async(m, { conn, text, usedPrefix, command }) => {
 
-if (!text) return m.reply(`*${xsearch} Ingrese el nombre del repositorio o el del usuario.*`);
+if (!text) return m.reply(`*${xsearch} Ingrese el nombre del repositorio para buscar.*`);
 
 try {
 let api = `https://dark-core-api.vercel.app/api/search/github?key=api&text=${text}`;
