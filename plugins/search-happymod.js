@@ -1,7 +1,7 @@
 /* Happy Mod Search By WillZek 
 - https://github.com/WillZek
 */
-
+/*
 // 👽 𝗛𝗔𝗣𝗣𝗬𝗠𝗢𝗗 - 𝗦𝗘𝗔𝗥𝗖𝗛
 
 import fetch from 'node-fetch';
@@ -40,3 +40,4 @@ handler.tags = ['search'];
 handler.command = ['happymodsearch', 'hmsearch', 'hpmsearch'];
 
 export default handler;
+*/
