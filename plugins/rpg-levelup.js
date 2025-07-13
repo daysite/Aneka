@@ -66,13 +66,13 @@ if (user.level >= MAX_LEVEL) {
       const levelUpImage = await levelup(levelUpMessage, user.level);
       conn.sendFile(m.chat, levelUpImage, 'Menu.jpg', levelUpDetails, m);
     } catch (e) {
-      conn.sendMessage(m.chat, {text: levelUpDetails, mentions: [m.sender]}, {quoted: m});
+      conn.sendMessage(m.chat, {text: levelUpDetails, mentions: [m.sender]}, {quoted: fkontak});
     }
   }
 };
 handler.help = ['levelup'];
 handler.tags = ['xp'];
-handler.command = ['nivel', 'lvl', 'levelup', 'level'];
+handler.command = ['nivel', 'lvl', 'levelup', 'level', 'nvl'];
 handler.register = true;
 handler.group = true;
 export default handler;
