@@ -50,7 +50,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
 
 handler.command = ['xnxxsearch', 'xnxxs'];
 handler.help = ['xnxxsearch'];
-handler.tags = ['buscador'];
-handler.register = true;
+handler.tags = ['search'];
+handler.register = false;
 
 export default handler;
