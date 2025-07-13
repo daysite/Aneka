@@ -1,8 +1,7 @@
 let handler = async (m, { conn, usedPrefix, command, text }) => {
     if (!text) return m.reply(
         `*${xtools} Por favor, ingresa el texto para crear un post de tweet.*
-> *\`Uso:\`* ${usedPrefix + command} texto | usuario | nombre | likes | citas | retweets | cliente | perfilURL | imagenURL
-> *\`Ejemplo:\`* ${usedPrefix + command} Hello World | shadow.xyz | Shadow Ultra | 1000 | 500 | 100 | Twitter for Android`
+> *\`Uso:\`* ${usedPrefix + command} texto | usuario | nombre | likes | citas | retweets | cliente | perfilURL | imagenURL`
     )
 
     const parts = text.split('|').map(part => part.trim())
