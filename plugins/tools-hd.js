@@ -38,7 +38,7 @@ const handler = async (m, { conn }) => {
   }
 }
 
-handler.help = ['upscale']
+handler.help = ['hd', 'remini', 'upscale']
 handler.tags = ['tools']
 handler.command = ['hd', 'remini', 'upscale']
 
