@@ -26,7 +26,7 @@ if (!text) return conn.reply(m.chat, `*${xsticker} Por favor, proporciona un tex
     const packName = detailJson.data.name
     const authorName = detailJson.data.author?.name || 'unknown'
 
-    m.reply(`*🐈 Enviando \`${detailJson.data.stickers.length}\` stickers.*`)
+    m.reply(`*${xsticker} Enviando \`${detailJson.data.stickers.length}\` stickers.*`)
 
     let maxSend = 10
     for (let i = 0; i < Math.min(detailJson.data.stickers.length, maxSend); i++) {
