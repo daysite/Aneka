@@ -73,6 +73,8 @@ catch (e) { console.error('Error eliminando archivo temporal:', e) }
 }
 }
 
+handler.help = ['whatmusic']
+handler.tags = ['tools']
 handler.command = ['quemusica', 'quemusicaes', 'whatmusic']
 export default handler
 
