@@ -62,7 +62,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 };
 
 handler.help = ['yts'];
-handler.tags = ['searcha'];
+handler.tags = ['search'];
 handler.command = /^(yts|ytsearch)$/i;
 
 export default handler;
