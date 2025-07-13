@@ -47,7 +47,7 @@ const ddownr = {
           return response.data.download_url;
         }
         if (Date.now() - start > timeout) throw new Error('⏱ Tiempo de espera agotado.');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 15000));
       }
     } catch (error) {
       throw error;
@@ -85,17 +85,11 @@ const handler = async (m, { conn, text, command }) => {
     if (downloadUrl) {
       const cleanTitle = title.replace(/[^\w\s-]/gi, '').trim().slice(0, 50).replace(/\s+/g, '_');
       const fileName = `${cleanTitle}.${format}`;
-/*
-      await conn.sendMessage(m.chat, {
-        document: { url: downloadUrl },
-        mimetype: 'audio/mpeg',
-        ptt: false;
-      }, { quoted: m });*/
 
 await conn.sendMessage(m.chat, {
   audio: { url: downloadUrl },
   mimetype: 'audio/mpeg',
-  ptt: false // true si quieres que sea nota de voz
+  ptt: false
 }, { quoted: m });
 
     } else {
