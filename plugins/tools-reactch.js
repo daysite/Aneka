@@ -33,6 +33,6 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 
 handler.command = ['reactch', 'rch']
 handler.tags = ['tools']
-handler.help = ['reactch <link>|<texto>']
+handler.help = ['reactch']
 
 export default handler
