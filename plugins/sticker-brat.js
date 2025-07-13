@@ -61,15 +61,15 @@ export default handler;*/
 import fetch from 'node-fetch'
 import { Sticker } from 'wa-sticker-formatter'
 
-let handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply(`Ejemplo: .${command} Gatitos`)
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) return m.reply(`*${xsticker} Por favor, proporciona un texto para buscar stickers en la API*\n> *\`Ejemplo:\`* ${usedPrefix + command} Gatitos`)
 
   try {
     const searchRes = await fetch(`https://zenzxz.dpdns.org/search/stickerlysearch?query=${encodeURIComponent(text)}`)
     const searchJson = await searchRes.json()
 
     if (!searchJson.status || !Array.isArray(searchJson.data) || searchJson.data.length === 0) {
-      return m.reply('No hay stickers aquí')
+      return m.reply('*⚠️ No hay ningún esticker con ese nombre.*')
     }
 
     const pick = searchJson.data[Math.floor(Math.random() * searchJson.data.length)]
@@ -79,13 +79,13 @@ let handler = async (m, { conn, text, command }) => {
     const detailJson = await detailRes.json()
 
     if (!detailJson.status || !detailJson.data || !Array.isArray(detailJson.data.stickers) || detailJson.data.stickers.length === 0) {
-      return m.reply('Error al tomar los stickers')
+      return m.reply('*✖️ Error al tomar los stickers*')
     }
 
     const packName = detailJson.data.name
     const authorName = detailJson.data.author?.name || 'unknown'
 
-    m.reply(`encontre ${detailJson.data.stickers.length} stiker/s`)
+    m.reply(`*🐈 Enviando \`${detailJson.data.stickers.length}\` stickers.*`)
 
     let maxSend = 10
     for (let i = 0; i < Math.min(detailJson.data.stickers.length, maxSend); i++) {
