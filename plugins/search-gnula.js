@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+/*import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
 if (!text) return m.reply(`*${xsearch} Por favor, ingrese el nombre de una pelicula*\n> *\`Ejemplo:\`* ${usedPrefix + command} Venom 3 The last Dance`)
@@ -24,4 +24,4 @@ handler.help = ['cuevana'];
 handler.tag = ['buscador'];
 handler.command = /^(cuevana|cuevanasearch|gnula)$/i
 
-export default handler
+export default handler*/
