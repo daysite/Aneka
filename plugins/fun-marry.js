@@ -36,51 +36,51 @@ const handler = async (m, { conn, command }) => {
 
             if (!proposee) {
                 if (userIsMarried(proposer)) {
-                    return await conn.reply(m.chat, `${xfun} Ya estás casado con *${conn.getName(marriages[proposer])}*\nUsa *#divorce* para terminar el matrimonio.`, m);
+                    return await conn.reply(m.chat, `*${xfun} Ya estás casado con \`${conn.getName(marriages[proposer])}\`*\n> *Usa *#divorce* para terminar el matrimonio.*`, m);
                 } else {
-                    throw new Error('Debes mencionar o responder a alguien para proponer matrimonio.\n> Ejemplo: *#marry @usuario*');
+                    throw new Error(`*${xfun} Debes mencionar o responder a alguien para proponer matrimonio.`*);
                 }
             }
 
-            if (proposer === proposee) throw new Error('No puedes casarte contigo mismo.');
-            if (userIsMarried(proposer)) throw new Error(`Ya estás casado con *${conn.getName(marriages[proposer])}*.`);
-            if (userIsMarried(proposee)) throw new Error(`${conn.getName(proposee)} ya está casado con *${conn.getName(marriages[proposee])}*.`);
-            if (proposals[proposer]) throw new Error('Ya hiciste una propuesta. Espera a que te respondan.');
-            if (confirmation[proposee]) throw new Error(`${conn.getName(proposee)} ya tiene una propuesta pendiente.`);
-            if (proposals[proposee] === proposer) throw new Error(`${conn.getName(proposee)} ya te propuso matrimonio. Responde su propuesta primero.`);
+            if (proposer === proposee) throw new Error('*⚠️ No puedes casarte contigo mismo.*');
+            if (userIsMarried(proposer)) throw new Error(`*⚠️ Ya estás casado con \`${conn.getName(marriages[proposer])}\`.*`);
+            if (userIsMarried(proposee)) throw new Error(`⚠️ *\`${conn.getName(proposee)}\` ya está casado con \`${conn.getName(marriages[proposee])}\`*.`);
+            if (proposals[proposer]) throw new Error('*💍 Ya hiciste una propuesta. Espera a que te respondan.*');
+            if (confirmation[proposee]) throw new Error(`*\`${conn.getName(proposee)}\` ya tiene una propuesta pendiente.*`);
+            if (proposals[proposee] === proposer) throw new Error(`*\`${conn.getName(proposee)}\` ya te propuso matrimonio. Responde su propuesta primero.*`);
 
             proposals[proposer] = proposee;
 
             const proposerName = conn.getName(proposer);
             const proposeeName = conn.getName(proposee);
-            const confirmationMessage = `💍 *Propuesta de Matrimonio*\n\n${proposerName} quiere casarse contigo, ${proposeeName}. ¿Aceptas?\n\n✐ Responde:\n> *Si* para aceptar\n> *No* para rechazar`;
+            const confirmationMessage = `*💍 Propuesta de Matrimonio*\n\n*\`${proposerName}\` quiere casarse contigo, \`${proposeeName}\`. ¿Aceptas?*\n\n✐ *Responde:*\n> *Si* para aceptar\n> *No* para rechazar`;
             await conn.reply(m.chat, confirmationMessage, m, { mentions: [proposee, proposer] });
 
             confirmation[proposee] = {
                 proposer,
                 timeout: setTimeout(() => {
-                    conn.sendMessage(m.chat, { text: '⏰ Tiempo agotado. La propuesta de matrimonio fue cancelada.' }, { quoted: m });
+                    conn.sendMessage(m.chat, { text: '*⏰ Tiempo agotado. La propuesta de matrimonio fue cancelada.*' }, { quoted: m });
                     delete confirmation[proposee];
                     delete proposals[proposer];
                 }, 60000)
             };
 
         } else if (isDivorce) {
-            if (!userIsMarried(sender)) throw new Error('No estás casado con nadie.');
+            if (!userIsMarried(sender)) throw new Error('*⚠️ No estás casado con nadie.*');
 
             const partner = marriages[sender];
             delete marriages[sender];
             delete marriages[partner];
             saveMarriages();
 
-            await conn.reply(m.chat, `💔 ${conn.getName(sender)} y ${conn.getName(partner)} se han divorciado.`, m);
+            await conn.reply(m.chat, `*💔 \`${conn.getName(sender)}\` y \`${conn.getName(partner)}\` se han divorciado.*`, m);
 
         } else if (isPartner) {
-            if (!userIsMarried(sender)) throw new Error('No estás casado con nadie.');
-            return await conn.reply(m.chat, `💞 Estás casado con *${conn.getName(marriages[sender])}*`, m);
+            if (!userIsMarried(sender)) throw new Error('*⚠️ No estás casado con nadie.*');
+            return await conn.reply(m.chat, `*💞 Estás casado con \`${conn.getName(marriages[sender])}\`*`, m);
         }
     } catch (error) {
-        await conn.reply(m.chat, `《✧》 ${error.message}`, m);
+        await conn.reply(m.chat, `${error.message}`, m);
     }
 };
 
@@ -95,7 +95,7 @@ handler.before = async (m) => {
         clearTimeout(timeout);
         delete confirmation[m.sender];
         delete proposals[proposer];
-        return conn.sendMessage(m.chat, { text: '💔 Han rechazado tu propuesta de matrimonio.' }, { quoted: m });
+        return conn.sendMessage(m.chat, { text: '*💔 Han rechazado tu propuesta de matrimonio.*' }, { quoted: m });
     }
 
     if (/^si$/i.test(m.text)) {
@@ -115,7 +115,7 @@ handler.before = async (m) => {
 };
 
 handler.tags = ['fun'];
-handler.help = ['marry @usuario', 'divorce', 'partner'];
+handler.help = ['marry', 'divorce', 'partner'];
 handler.command = ['marry', 'divorce', 'partner'];
 handler.group = true;
 
