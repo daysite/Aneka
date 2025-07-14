@@ -112,8 +112,8 @@ let handler = async (m, { conn, usedPrefix, args, isAdmin, isROwner }) => {
   }, { quoted: m });
 };
 
-handler.help = ['setprimary <@bot>'];
-handler.tags = ['group'];
+handler.help = ['setprimary'];
+handler.tags = ['jadibot'];
 handler.command = ['setprimary'];
 handler.group = true;
 // Ya no se necesita `handler.admin = true` porque validamos manualmente
