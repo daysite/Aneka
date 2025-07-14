@@ -19,7 +19,7 @@ let handler = async (m, { conn, command, text }) => {
     conn.reply(m.chat, responseMessage, null, { mentions: [user] });
 }
 
-handler.help = ['penetrar @user'];
+handler.help = ['penetrar'];
 handler.tags = ['fun'];
 handler.command = ['penetrar', 'penetrado'];
 handler.group = true;
