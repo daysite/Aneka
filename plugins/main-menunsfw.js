@@ -8,7 +8,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     emox: 'Gifs'
   }
 
-
+  let emojis = {
+    nsfw: '',
+    emox: ''
+  }
 
   let defaultMenu = {
     before: `ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
