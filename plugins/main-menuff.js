@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 `,
 
     header: category => `╭──• ${category}`,
-    body: (cmd, emoji) => `│ ${xlistas} ${cmd}`,
+    body: cmd => `│ ${xlistas} ${cmd}`,
     footer: '╰──•',
     after: `> ${club}`
   }
