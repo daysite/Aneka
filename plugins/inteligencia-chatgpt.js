@@ -1,4 +1,4 @@
-
+/*
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
@@ -23,4 +23,4 @@ handler.help = ['chatgpt *<texto>*']
 handler.tags = ['ai']
 handler.command = ['chatgpt']
 
-export default handler
+export default handler*/
