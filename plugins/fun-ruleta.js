@@ -25,7 +25,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
   if (diamantes > 50) return conn.reply(m.chat, '*⚠️ La cantidad máxima de apuesta es de `50` diamantes', m)
 
-  if (!(color === 'black' || color === 'red')) return conn.reply(m.chat, '*⚠️ Debes apostar a un color válido: black o red.', m)
+  if (!(color === 'black' || color === 'red')) return conn.reply(m.chat, '*⚠️ Debes apostar a un color válido: black o red.*', m)
 
   if (diamantes > users.diamantes) return conn.reply(m.chat, "*⚠️ No tienes suficientes diamantes para realizar esta apuesta.*", m)
 
