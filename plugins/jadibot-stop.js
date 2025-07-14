@@ -34,7 +34,7 @@ let handler = async (m, { conn }) => {
 }
 
 handler.command = handler.help = ['stop', 'byebot']
-handler.tags = ['serbot']
+handler.tags = ['jadibot']
 handler.owner = true
 
 export default handler
