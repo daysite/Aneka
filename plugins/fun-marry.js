@@ -110,7 +110,7 @@ handler.before = async (m) => {
         conn.sendMessage(m.chat, {
             text: `✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩\n💍 *¡Boda Confirmada!*\n\n🎊 ${conn.getName(proposer)} y ${conn.getName(m.sender)} ahora están felizmente casados 💞\n\n¡Felicidades a la nueva pareja!\n✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩`,
             mentions: [proposer, m.sender]
-        }, { quoted: m });
+        }, { quoted: fkontak });
     }
 };
 
