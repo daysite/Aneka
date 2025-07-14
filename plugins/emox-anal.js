@@ -47,7 +47,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['anal/culiar @tag'];
+handler.help = ['anal'];
 handler.tags = ['emox'];
 handler.command = ['anal','culiar'];
 handler.group = true;
