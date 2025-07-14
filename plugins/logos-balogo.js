@@ -7,7 +7,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
   }, { quoted: m });
 };
 
-handler.help = ['balogo <txt1> <txt2>'];
+handler.help = ['balogo'];
 handler.command = ['balogo'];
 handler.tags = ['logos']
 
