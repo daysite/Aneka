@@ -48,7 +48,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
 // Función para guardar los usuarios muteados en archivo
 function guardarMuteos() {
-  fs.writeFileSync('./mute-users.json', JSON.stringify([...mutedUsers]));
+  fs.writeFileSync('./muted-users.json', JSON.stringify([...mutedUsers]));
 }
 
 handler.before = async (m, { conn }) => {
