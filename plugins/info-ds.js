@@ -37,7 +37,7 @@ await conn.reply(m.chat, '*👋🏻 ¡Hola Soy \`ShadowUltra\` Sigue el Canal!*'
 }
 
 }
-handler.help = ['ds', 'fixmsgespera']
+handler.help = ['fixmsgespera']
 handler.tags = ['info']
 handler.command = /^(fixmsgespera|ds)$/i
 
