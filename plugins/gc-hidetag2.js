@@ -45,7 +45,7 @@ const fkontak2 = {
     }
   }
 };
-handler.help = ['Aviso *<txt>*'];
+handler.help = ['Aviso'];
 handler.tags = ['gc'];
 handler.command = /^(viso)$/i;
 handler.customPrefix = /a|A/i;
