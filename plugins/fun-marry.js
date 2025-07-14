@@ -36,23 +36,24 @@ const handler = async (m, { conn, command }) => {
 
             if (!proposee) {
                 if (userIsMarried(proposer)) {
-                    return await conn.reply(m.chat, `*${xfun} Ya estás casado con \`${conn.getName(marriages[proposer])}\`*\n> *Usa *#divorce* para terminar el matrimonio.*`, m);
+                    const partnerName = await conn.getName(marriages[proposer]);
+                    return await conn.reply(m.chat, `*${xfun} Ya estás casado con \`${partnerName}\`*\n> *Usa *#divorce* para terminar el matrimonio.*`, m);
                 } else {
-                    throw new Error(`*${xfun} Debes mencionar o responder a alguien para proponer matrimonio.`*);
+                    throw new Error(`*${xfun} Debes mencionar o responder a alguien para proponer matrimonio.*`);
                 }
             }
 
             if (proposer === proposee) throw new Error('*⚠️ No puedes casarte contigo mismo.*');
-            if (userIsMarried(proposer)) throw new Error(`*⚠️ Ya estás casado con \`${conn.getName(marriages[proposer])}\`.*`);
-            if (userIsMarried(proposee)) throw new Error(`⚠️ *\`${conn.getName(proposee)}\` ya está casado con \`${conn.getName(marriages[proposee])}\`*.`);
+            if (userIsMarried(proposer)) throw new Error(`*⚠️ Ya estás casado con \`${await conn.getName(marriages[proposer])}\`.*`);
+            if (userIsMarried(proposee)) throw new Error(`⚠️ *\`${await conn.getName(proposee)}\` ya está casado con \`${await conn.getName(marriages[proposee])}\`*.`);
             if (proposals[proposer]) throw new Error('*💍 Ya hiciste una propuesta. Espera a que te respondan.*');
-            if (confirmation[proposee]) throw new Error(`*\`${conn.getName(proposee)}\` ya tiene una propuesta pendiente.*`);
-            if (proposals[proposee] === proposer) throw new Error(`*\`${conn.getName(proposee)}\` ya te propuso matrimonio. Responde su propuesta primero.*`);
+            if (confirmation[proposee]) throw new Error(`*\`${await conn.getName(proposee)}\` ya tiene una propuesta pendiente.*`);
+            if (proposals[proposee] === proposer) throw new Error(`*\`${await conn.getName(proposee)}\` ya te propuso matrimonio. Responde su propuesta primero.*`);
 
             proposals[proposer] = proposee;
 
-            const proposerName = conn.getName(proposer);
-            const proposeeName = conn.getName(proposee);
+            const proposerName = await conn.getName(proposer);
+            const proposeeName = await conn.getName(proposee);
             const confirmationMessage = `*💍 Propuesta de Matrimonio*\n\n*\`${proposerName}\` quiere casarse contigo, \`${proposeeName}\`. ¿Aceptas?*\n\n✐ *Responde:*\n> *Si* para aceptar\n> *No* para rechazar`;
             await conn.reply(m.chat, confirmationMessage, m, { mentions: [proposee, proposer] });
 
@@ -73,18 +74,19 @@ const handler = async (m, { conn, command }) => {
             delete marriages[partner];
             saveMarriages();
 
-            await conn.reply(m.chat, `*💔 \`${conn.getName(sender)}\` y \`${conn.getName(partner)}\` se han divorciado.*`, m);
+            await conn.reply(m.chat, `*💔 \`${await conn.getName(sender)}\` y \`${await conn.getName(partner)}\` se han divorciado.*`, m);
 
         } else if (isPartner) {
             if (!userIsMarried(sender)) throw new Error('*⚠️ No estás casado con nadie.*');
-            return await conn.reply(m.chat, `*💞 Estás casado con \`${conn.getName(marriages[sender])}\`*`, m);
+            return await conn.reply(m.chat, `*💞 Estás casado con \`${await conn.getName(marriages[sender])}\`*`, m);
         }
     } catch (error) {
         await conn.reply(m.chat, `${error.message}`, m);
     }
 };
 
-handler.before = async (m) => {
+// Se agregó conn al contexto
+handler.before = async (m, { conn }) => {
     if (m.isBaileys) return;
     if (!confirmation[m.sender]) return;
     if (!m.text) return;
@@ -107,8 +109,11 @@ handler.before = async (m) => {
         delete confirmation[m.sender];
         delete proposals[proposer];
 
+        const proposerName = await conn.getName(proposer);
+        const accepterName = await conn.getName(m.sender);
+
         conn.sendMessage(m.chat, {
-            text: `✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩\n💍 *¡Boda Confirmada!*\n\n🎊 ${conn.getName(proposer)} y ${conn.getName(m.sender)} ahora están felizmente casados 💞\n\n¡Felicidades a la nueva pareja!\n✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩`,
+            text: `✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩\n💍 *¡Boda Confirmada!*\n\n🎊 ${proposerName} y ${accepterName} ahora están felizmente casados 💞\n\n¡Felicidades a la nueva pareja!\n✩.･:｡≻───── ⋆♡⋆ ─────.•:｡✩`,
             mentions: [proposer, m.sender]
         }, { quoted: fkontak });
     }
