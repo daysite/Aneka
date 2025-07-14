@@ -66,7 +66,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 }
 
 handler.tags = ['main']
-handler.help = ['menunsfw']
+handler.help = ['menu18']
 handler.command = /^(menunsfw|comandosnsfw|menuhorny|hornymenu|labiblia|menu18|menu\+18|menucaliente|menuporno|pornomenu|menuxxx)$/i;
 handler.fail = null;
 
