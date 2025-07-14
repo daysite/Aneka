@@ -17,7 +17,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 *│ 😨 Miedo:* ${pickRandom(['6%','12%','20%','27%','35%','41%','49%','54%','60%','66%','73%','78%','84%','92%','93%','94%','96%','98,3%','99,7%','99,9%','1%','2,9%','0%','0,4%'])}
 *│ 🌟 Fama:* ${pickRandom(['6%','12%','20%','27%','35%','41%','49%','54%','60%','66%','73%','78%','84%','92%','93%','94%','96%','98,3%','99,7%','99,9%','1%','2,9%','0%','0,4%'])}
 *│ 🚻 Género:* ${pickRandom(['Hombre', 'Mujer', 'Homosexual', 'Bisexual', 'Pansexual', 'Feminista', 'Heterosexual', 'Macho alfa', 'Mujerzona', 'Marimacha', 'Palosexual', 'PlayStationSexual', 'Sr. Manuela', 'Pollosexual'])}
-*╰╼━━━━━━━━━━━━─⪩*
+*╰╼━━━━━━━━━━━─⪩*
 `
 conn.reply(m.chat, personalidad, fkontak, { mentions: conn.parseMention(personalidad) })
 }
