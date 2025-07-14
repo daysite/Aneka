@@ -37,9 +37,9 @@ const handler = async (m, { conn, command }) => {
             if (!proposee) {
                 if (userIsMarried(proposer)) {
                     const partnerName = await conn.getName(marriages[proposer]);
-                    return await conn.reply(m.chat, `*${xfun} Ya estás casado con \`${partnerName}\`*\n> *Usa *#divorce* para terminar el matrimonio.*`, m);
+                    return await conn.reply(m.chat, `*⚠️ Ya estás casado con \`${partnerName}\`*\n> *Usa *#divorce* para terminar el matrimonio.*`, m);
                 } else {
-                    throw new Error(`*${xfun} Debes mencionar o responder a alguien para proponer matrimonio.*`);
+                    throw new Error(`*💖 Por favor, menciona a la persona que deseas proponer matrimonio.*`);
                 }
             }
 
