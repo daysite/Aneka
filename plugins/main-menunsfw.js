@@ -5,8 +5,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    "nsfw": "Nsfw",
-    "emox": "Gifs"
+    "nsfw": "𑁯ᰍ    *`𝖭𝗌ẜɯ`*   ♨️   𐅹੭੭",
+    "emox": "𑁯ᰍ    *`𝖦ıẜ𝗌`*   🦑   𐅹੭੭"
   }
 
   let emojis = {
