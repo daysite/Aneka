@@ -5,7 +5,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const uptime = clockString(_uptime);
   let totalreg = Object.keys(global.db.data.users).length
   let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
-  let tags = { owner: `𑁯ᰍ    *``*   ${xowner}   𐅹੭੭` }
+  let tags = { owner: `𑁯ᰍ    *\`Oɯ𝗇ᧉꭇ\`*   ${xowner}   𐅹੭੭` }
 
   let defaultMenu = {
     before: `ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
@@ -22,9 +22,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🧇 Usuarios regs: ${rtotalreg}
 🥞 Usuarios totales: ${totalreg}
 `,
-    header: category => ``,
-    body: cmd => `${xowner} ${cmd}`,
-    footer: `> ${club}`
+    header: category => `╭──• `,
+    body: cmd => `│ ${xowner} ${cmd}`,
+    footer: '╰──•',
+    after: `> ${club}`
   }
 
 //--------< 🌹FUNTION🌹 >---------
