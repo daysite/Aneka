@@ -47,7 +47,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['footjob/pies @tag'];
+handler.help = ['footjob'];
 handler.tags = ['emox'];
 handler.command = ['footjob','pies'];
 handler.group = true;
