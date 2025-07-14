@@ -1,6 +1,6 @@
-/* 
-Created by Crxstian Escobar 🌙
-*/
+/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
+𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 const handler = async (m, {conn, usedPrefix, text}) => {
   if (isNaN(text) && !text.match(/@/g)) {
@@ -30,7 +30,7 @@ const handler = async (m, {conn, usedPrefix, text}) => {
   }
 };
 
-handler.help = ['*<@tag>*'].map((v) => 'demote ' + v);
+handler.help = ['demote'];
 handler.tags = ['gc'];
 handler.command = /^(demote|quitarpoder|quitaradmin|quitarpija|degradar|quitarteta|quitartt|quitartta)$/i;
 handler.group = true;
