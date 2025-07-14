@@ -55,7 +55,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['fuck2/coger2 @tag'];
+handler.help = ['fuck2'];
 handler.tags = ['emox'];
 handler.command = ['fuck2','coger2'];
 handler.group = true;
