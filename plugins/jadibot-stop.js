@@ -33,7 +33,8 @@ let handler = async (m, { conn }) => {
   }
 }
 
-handler.command = handler.help = ['stop', 'byebot']
+handler.command = ['stop', 'byebot']
+handler.help = ['stop']
 handler.tags = ['jadibot']
 handler.owner = true
 
