@@ -8,7 +8,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     emox: 'Gifs'
   }
 
-  let emojis = {
+  let emojs = {
     nsfw: '🪼',
     emox: '🫦'
   }
@@ -22,8 +22,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
 > \`\`\`${date} || ${hora}\`\`\`
 `,
-    header: category => `╭──•  𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ${xnsfw}  ੭`,
-    body: cmd => `│${xnsfw} ${cmd}`,
+    header: category => `╭──•  𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  ${emojs}  ੭`,
+    body: cmd => `│${emojs} ${cmd}`,
     footer: '╰──•',
     after: `\n> ${club}`
   }
