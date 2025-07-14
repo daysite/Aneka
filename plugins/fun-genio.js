@@ -45,14 +45,14 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   ]
 
   const imagenes = [
-    'https://files.catbox.moe/49mw0z.jpg',
-    'https://files.catbox.moe/49mw0z.jpg',
+    'https://files.catbox.moe/m1bcoy.jpg',
+    'https://files.catbox.moe/mykbly.jpg',
   ]
 
   const respuesta = respuestas[Math.floor(Math.random() * respuestas.length)]
   const imagen = imagenes[Math.floor(Math.random() * imagenes.length)]
 
-  conn.sendMessage(m.chat, { image: { url: imagen }, caption: `🔮 *${respuesta}*` }, { quoted: m })
+  conn.sendMessage(m.chat, { image: { url: imagen }, caption: `🔮 *${respuesta}*` }, { quoted: fkontak })
 }
 
 handler.tags = ['fun']
