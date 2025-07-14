@@ -14,7 +14,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 > \`\`\`${date} || ${hora}\`\`\`
 `,
     header: category => `╭──• ${category}`,
-    body: cmd => `│${xlogos} ${cmd}`,
+    body: cmd => `│ ${xlogos} ${cmd}`,
     footer: '╰──•',
     after: `\n> ${club}`
   }
