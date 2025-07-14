@@ -22,7 +22,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🧇 Usuarios regs: ${rtotalreg}
 🥞 Usuarios totales: ${totalreg}
 `,
-    header: category => `╭──• `,
+    header: category => `╭──• ${category}`,
     body: cmd => `│ ${xowner} ${cmd}`,
     footer: '╰──•',
     after: `> ${club}`
