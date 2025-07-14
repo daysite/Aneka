@@ -5,7 +5,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    "ff": "𑁯ᰍ    *`𝖫ı𝗌ƚ𝖺𝗌`*   ${xlistas}   𐅹੭੭"
+    "ff": "𑁯ᰍ    *`𝖫ı𝗌ƚ𝖺𝗌`*   ${xlist}   𐅹੭੭"
   }
 
   let emojis = {
@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 `,
 
     header: category => `╭──• ${category}`,
-    body: cmd => `│ ${xlistas} ${cmd}`,
+    body: cmd => `│ ${xlist} ${cmd}`,
     footer: '╰──•',
     after: `> ${club}`
   }
