@@ -1,4 +1,6 @@
-//Codigo creado por Criss Escobar
+/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
+𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 const handler = async (m, { conn }) => {
 const taguser = '@' + m.sender.split('@s.whatsapp.net')[0];
@@ -18,5 +20,8 @@ text: `*${xinfo} ¡El poder está en tus manos!*\n*Bienvenido ${taguser}*\n\n*Es
 mentions: [m.sender]
 }, { quoted: fkontak });
 };
-handler.command = ['totalcomandos', 'comandostotales', 'totalf'];
+
+handler.help = ['totalf'];
+handler.tags = ['info'];
+handler.command = ['totalcomandos', 'comandostotales', 'totalf', 'totalfunciones'];
 export default handler;
