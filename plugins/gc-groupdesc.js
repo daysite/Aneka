@@ -14,8 +14,8 @@ const handler = async (m, { conn, args }) => {
   }
 };
 
-handler.help = ['groupdesc <texto>'];
-handler.tags = ['grupo'];
+handler.help = ['groupdesc'];
+handler.tags = ['gc'];
 handler.command = ['gcdesc', 'gpdesc', 'groupdesc'];
 handler.group = true;
 handler.admin = true;
