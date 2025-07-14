@@ -20,7 +20,7 @@ conn.sendMessage(m.chat, {
     }, { quoted: m });
 }
 
-handler.tag = ['emox'];
+handler.tags = ['nsfw'];
 handler.help = ['videoxxx'];
 handler.command = ['videoxxx', 'vxxx'];
 
