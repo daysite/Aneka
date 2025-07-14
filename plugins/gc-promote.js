@@ -25,7 +25,7 @@ const handler = async (m, {conn, usedPrefix, text}) => {
     conn.reply(m.chat, `*🌵 El usuario fue promovido.*`, m);
   }
 };
-handler.help = ['*<@tag>*'].map((v) => 'promote ' + v);
+handler.help = ['promote'];
 handler.tags = ['gc'];
 handler.command = /^(promote|promover|daradmin|darpoder|darpija|darteta|dartt|dartta)$/i;
 handler.group = true;
