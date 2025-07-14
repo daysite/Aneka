@@ -7,7 +7,7 @@ let handler = async (m, { conn }) => {
   }
 };
 handler.help = ['facto'];
-handler.tags = ['frases'];
+handler.tags = ['fun'];
 handler.command = ['facto']; 
 
 // Función para seleccion aleatoria
