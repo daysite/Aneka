@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+/*import fetch from 'node-fetch'
 
 var handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) return conn.reply(m.chat, `*${xia} Ingrese una petición para que Gemini lo responda.*`, m)
@@ -21,4 +21,4 @@ handler.command = ['gemini']
 handler.help = ['gemini']
 handler.tags = ['ai']
 
-export default handler
+export default handler*/
