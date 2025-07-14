@@ -88,7 +88,7 @@ const handler = async (m, { conn, command, text }) => {
     loading();    
 };
 
-handler.help = ['love <nombre>'];
+handler.help = ['love'];
 handler.tags = ['fun'];
 handler.command = /^(love|amor)$/i;
 export default handler;
