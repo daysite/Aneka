@@ -24,10 +24,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 > \`\`\`${date} || ${hora}\`\`\`
 `,
 
-    header: category => `╭──•  𑁯ᰍ   ͘  *\`${category}\`*    ̣  あ  💥  ੭`,
+    header: category => `╭──• ${category}`,
     body: (cmd, emoji) => `│${emoji} ${cmd}`,
-    footer: '╰──•',
-    after: `\n> ${club}`
+    footer: '╰──•\n',
+    after: `> ${club}`
   }
 
 // ---[ AGRUPACIÓN CMDS X TAGS ]---
