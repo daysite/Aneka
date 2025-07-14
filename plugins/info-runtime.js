@@ -9,8 +9,8 @@ let handler = async (m, { usedPrefix, command }) => {
   conn.reply(m.chat, runtime, m, rcanal)
 }
 
-handler.help = ['runtime']
-handler.tags = ['main']
+handler.help = ['uptime']
+handler.tags = ['info']
 handler.command = /^(uptime|runtime)$/i
 // handler.estrellas = 2
 
