@@ -17,7 +17,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         await conn.reply(m.chat, '*⚠️ Ocurrió un error al intentar cambiar los ajustes del grupo.*\nAsegúrate de que el bot sea administrador.', m)
     }
 }
-handler.help = ['group *<abrir/cerrar>*']
+handler.help = ['grupo abrir', 'grupo cerrar']
 handler.tags = ['gc']
 handler.command = ['group', 'grupo']
 handler.admin = true
