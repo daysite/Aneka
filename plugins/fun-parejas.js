@@ -34,19 +34,19 @@ function handler(m, {groupMetadata}) {
   m.reply(
     `*😍 Las 5 mejores parejas del grupo 😍*
     
-*\`1\`.- ${toM(a)} y ${toM(b)}*
+*\`1\`.-* *${toM(a)} y ${toM(b)}*
 > Esta pareja esta destinada a estar junta 💙
 
-*\`2\`.- ${toM(c)} y ${toM(d)}*
+*\`2\`.-* *${toM(c)} y ${toM(d)}*
 > Esta pareja son dos pequeños tortolitos enamorados ✨
 
-*\`3\`.- ${toM(e)} y ${toM(f)}*
+*\`3\`.-* *${toM(e)} y ${toM(f)}*
 > Ufff y que decir de esta pareja, ya hasta familia deberian tener 🤱🧑‍🍼
 
-*\`4\`.- ${toM(g)} y ${toM(h)}*
+*\`4\`.-* *${toM(g)} y ${toM(h)}*
 > Estos ya se casaron en secreto 💍
 
-*\`5\`.- ${toM(i)} y ${toM(j)}*
+*\`5\`.-* *${toM(i)} y ${toM(j)}*
 > Esta pareja se esta de luna de miel ✨🥵😍❤️*`,
     null,
     {
