@@ -25,16 +25,15 @@ let handler = async (m, { conn, usedPrefix, usedPrefix: _p, __dirname, text, com
 
 const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5fbi9s.mp4', 'https://files.catbox.moe/biggyj.mp4']
 
-
   let tags = {
-    "main": ""
-    "nsfw": "𑁯ᰍ    *`𝖭𝗌ẜɯ`*   ♨️   𐅹੭੭",
-    "emox": "𑁯ᰍ    *`𝖦ıẜ𝗌`*   🦑   𐅹੭੭"
+    "main": `𓂂𓏸  𐅹੭੭   *`Mᧉ𝗇𝗎𝗌`*  ${xmenu} ᩚ꤬ᰨᰍ`,
+    "info": "",
+    "jadibot": ""
   }
 
   let emojis = {
-    "nsfw": "♨️",
-    "emox": "🦑"
+    "main": `${xmenu}`,
+    "emox": "🙂"
   }
 
   let defaultMenu = {
