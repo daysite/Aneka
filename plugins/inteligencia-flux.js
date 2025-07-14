@@ -34,7 +34,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.help = ["flux *<texto>*"];
+handler.help = ["flux"];
 handler.tags = ["ai"];
 handler.command = ["flux"];
 
