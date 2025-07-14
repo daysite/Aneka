@@ -1,7 +1,7 @@
 
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let usertag = '@' + m.sender.split('@')[0]
-  const vid = ''
+  const vid = 'https://files.catbox.moe/39rx3n.mp4'
   let tags = { nsfw: 'Nsfw' }
 
   let defaultMenu = {
