@@ -23,7 +23,7 @@ const handler = async (m, { text, usedPrefix, command, quoted }) => {
   }
 };
 
-handler.help = ['cfrase <texto> | <linkimg>'];
+handler.help = ['cfrase'];
 handler.tags = ['tools'];
 handler.command = /^cfrase$/i;
 
