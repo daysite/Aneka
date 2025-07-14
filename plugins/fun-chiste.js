@@ -3,7 +3,7 @@
 let handler = async (m, { conn }) => {
   if (global.chiste && global.chiste.length > 0) {
     const chisteAleatorio = pickRandom(global.chiste);
-    conn.reply(m.chat, `*Chiste:* ${chisteAleatorio}`, m, rcanal);
+    conn.reply(m.chat, `🤓 *${chisteAleatorio}*`, m, rcanal);
   } else {
     conn.reply(m.chat, "*⚠️ No hay chistes disponibles.*", m);
   }
