@@ -49,7 +49,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['sexo/sex @tag'];
+handler.help = ['sex'];
 handler.tags = ['emox'];
 handler.command = ['sexo','sex'];
 handler.group = true;
