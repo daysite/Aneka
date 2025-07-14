@@ -1,113 +1,83 @@
-/*const defaultMenu = {
-  before: `💸 ¡Hola *%name*!, aquí está mi menú de economía:\n\n%readmore`,
-  header: '┏━━⪩「 *%category* 」⪨',
-  body: '┃ %cmd',
-  footer: '┗━━━━━━━━━━━━━━━⪩',
-  after: '',
+import fs from 'fs'
+import fetch from 'node-fetch'
+import { xpRange } from '../lib/levelling.js'
+import { promises } from 'fs'
+import { join } from 'path'
+
+let handler = async (m, { conn, usedPrefix, usedPrefix: _p, __dirname, text, command }) => {
+    try {
+    let { exp, diamantes, level, role } = global.db.data.users[m.sender]
+    let { min, xp, max } = xpRange(level, global.multiplier)
+    let name = await conn.getName(m.sender)
+    exp = exp || 'Desconocida';
+    role = role || 'Aldeano';
+
+    const taguser = '@' + m.sender.split('@s.whatsapp.net')[0];
+    const _uptime = process.uptime() * 1000;
+    const uptime = clockString(_uptime);
+
+    let totalreg = Object.keys(global.db.data.users).length
+    let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
+
+        await m.react('🌹')
+        let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
+        let perfil = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://files.catbox.moe/ninsr8.jpg')
+
+const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5fbi9s.mp4', 'https://files.catbox.moe/biggyj.mp4']
+
+        let menu = `
+ㅤㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ㅤㅤ𑁯🤍ᰍㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
+೯ ׅ 👤 ¡Hᴏʟᴀ! ¿Cᴏᴍᴏ Esᴛᴀ́s? ׄ ᦡᦡ
+ㅤ꒰͜͡${taguser}
+ㅤㅤ♡𑂳ᩙㅤ ּ ${saludo} ׄ ㅤタス
+
+*🧇 Activo:* ${uptime}
+*👥 Usuarios:* ${totalreg}
+*🆙 Versión:* 3.0.0
+
+*💎 Gemas:* ${diamantes}
+*🍸 Exp:* ${exp}
+*🫖 Nivel:* ${level}
+*🍢 Rango:* ${role}
+${readMore}
+ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
+
+
+
+        await conn.sendMessage(m.chat, {
+            video: { url: vid.getRandom() }, // Vid
+            caption: menu,
+            contextInfo: {
+                mentionedJid: [m.sender],
+                isForwarded: true,
+                forwardingScore: 999,
+                externalAdReply: {
+                    title: '⏤͟͞ू⃪ ፝͜⁞Sʜᴀᴅᴏᴡ✰⃔࿐\nNᴜᴇᴠᴀ Vᴇʀsɪᴏɴ Uʟᴛʀᴀ 🌤️',
+                    thumbnailUrl: perfil,
+                    mediaType: 1,
+                    renderLargerThumbnail: false,
+                },
+            },
+            gifPlayback: true,
+            gifAttribution: 0
+        }, { quoted: null })
+    } catch (e) {
+        await m.reply(`*✖️ Ocurrió un error al enviar el menú.*\n\n${e}`)
+    }
 }
 
-let handler = async (m, { conn, usedPrefix: _p }) => {
-  let name = await conn.getName(m.sender)
-  let tag = `@${m.sender.split('@')[0]}`
-  let tags = { rpg: 'Economía' }
-  let imgPath = './src/catalogo.jpg'
+handler.help = ['menuff'];
+handler.tags = ['main'];
+handler.command = /^(menu|menú|memu|memú|help|info|comandos|2help|menu1.2|ayuda|commands|commandos|cmd)$/i;
+handler.fail = null;
 
-  let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => ({
-    help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
-    tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-  }))
+export default handler;
 
-  let groups = {}
-  for (let tag in tags) {
-    groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
-  }
-
-  const more = String.fromCharCode(8206)
-  const readMore = more.repeat(4001)
-
-  let text = [
-    defaultMenu.before,
-    ...Object.keys(tags).map(tag => {
-      return defaultMenu.header.replace(/%category/g, tags[tag]) + '\n' + [
-        ...groups[tag].map(plugin =>
-          plugin.help.map(cmd =>
-            defaultMenu.body.replace(/%cmd/g, _p + cmd)
-          ).join('\n')
-        ),
-        defaultMenu.footer
-      ].join('\n')
-    }),
-    defaultMenu.after
-  ].join('\n')
-
-  text = text.replace(/%name/g, name).replace(/%tag/g, tag).replace(/%readmore/g, readMore)
-
-  await m.react('💸')
-  await conn.sendMessage(m.chat, {
-    image: { url: imgPath },
-    caption: text,
-    mentions: [m.sender]
-  }, { quoted: m })
+const more = String.fromCharCode(8206)
+const readMore = more.repeat(4001)
+function clockString(ms) {
+  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
+  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
+  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
+  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
 }
-
-handler.help = ['menueconomia']
-handler.tags = ['rpg']
-handler.command = ['menue', 'menueco', 'menueconomia']
-
-export default handler*/
-/*
-const defaultMenu = {
-  before: (name, readMore) => `💸 ¡Hola *${name}*, aquí está mi menú de economía:\n\n${readMore}`,
-  header: category => `┏━━⪩「 *${category}* 」⪨`,
-  body: cmd => `┃ ${cmd}`,
-  footer: '┗━━━━━━━━━━━━━━━⪩',
-  after: ''
-}
-
-let handler = async (m, { conn, usedPrefix: _p }) => {
-  let name = await conn.getName(m.sender)
-  let tag = `@${m.sender.split('@')[0]}`
-  let tags = { owner: 'Owner' }
-  let imgPath = './src/catalogo.jpg'
-
-  let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => ({
-    help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
-    tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-  }))
-
-  let groups = {}
-  for (let tag in tags) {
-    groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
-  }
-
-  const more = String.fromCharCode(8206)
-  const readMore = more.repeat(4001)
-
-  let text = [
-    defaultMenu.before(name, readMore),
-    ...Object.keys(tags).map(tagKey => {
-      return defaultMenu.header(tags[tagKey]) + '\n' + [
-        ...groups[tagKey].map(plugin =>
-          plugin.help.map(cmd =>
-            defaultMenu.body(_p + cmd)
-          ).join('\n')
-        ),
-        defaultMenu.footer
-      ].join('\n')
-    }),
-    defaultMenu.after
-  ].join('\n')
-
-  await m.react('💸')
-  await conn.sendMessage(m.chat, {
-    image: { url: imgPath },
-    caption: text,
-    mentions: [m.sender]
-  }, { quoted: m })
-}
-
-handler.help = ['menueconomia']
-handler.tags = ['rpg']
-handler.command = ['menue', 'menueco', 'menueconomia']
-
-export default handler*/
