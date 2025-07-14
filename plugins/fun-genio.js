@@ -56,7 +56,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 }
 
 handler.tags = ['fun']
-handler.help = ['8ball *<pregunta>*']
+handler.help = ['genio']
 handler.command = ['akinator', 'genio']
 
 export default handler
