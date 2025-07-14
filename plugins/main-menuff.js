@@ -54,7 +54,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     defaultMenu.after
   ].join('\n')
 
-  await m.react('🔥')
+  await m.react('🎮')
   await conn.sendMessage(m.chat, {
     video: { url: vid },
     caption: text,
@@ -64,8 +64,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 }
 
 handler.tags = ['main']
-handler.help = ['menu18']
-handler.command = /^(menunsfw|comandosnsfw|menuhorny|hornymenu|labiblia|menu18|menu\+18|menucaliente|menuporno|pornomenu|menuxxx)$/i;
+handler.help = ['menufrefire']
+handler.command = /^(menuff|menufreefire|ff|ffcomandos|comandosff|comandosfreefire|freefire|freefir|freefiri)$/i;
 handler.fail = null;
 
 export default handler
