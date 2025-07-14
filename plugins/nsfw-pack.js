@@ -30,6 +30,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     );
 };
 
+handler.tags = ['nsfw'];
+handler.help = ['pack'];
 handler.command = ['pack'];
 
 export default handler;
