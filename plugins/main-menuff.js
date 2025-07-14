@@ -5,7 +5,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    "ff": `𑁯ᰍ    *\`𝖫ı𝗌ƚ𝖺𝗌\`*   ${xlist}   𐅹੭੭`
+    "ff": `𑁯ᰍ    *\`𝖥𝗋𝖾𝖾 𝖥𝗂𝗋𝖾\`*   🍰   𐅹੭੭`
   }
 
   let emojis = {
@@ -14,7 +14,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   let defaultMenu = {
     before: `ㅤᨦ۪۪۪۪ׄ᷼ㅤ֢ㅤׄㅤׅ֟፝ㅤ⋱ㅤ⁝ㅤ⋰ㅤׅ፝֟ㅤׄㅤ֢ㅤ۪۪۪۪ׄ᷼ഒ
-🍰 ׅ  *¡Hola! ¿Cómo estás?*  ৎ୭
+🎮 ׅ  *¡Hola! ¿Cómo estás?*  ৎ୭
 ׅ ෫${usertag}  ಒ
 ‎ ‎ ‎ ‎౨ৎ  ‎ ‎ ‎ ‎*Bienvenido* ‎ ‎  ‎ ‎✿̮    ׅ  *al*   ୂ
 ⿻     *𝖬𝖾𝗇𝗎*    ෨    *𝖥𝗋𝖾𝖾 𝖥𝗂𝗋𝖾*    𑇙ᰍ
@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 `,
 
     header: category => `╭──• ${category}`,
-    body: cmd => `│ ${xlist} ${cmd}`,
+    body: cmd => `│ 🍰 ${cmd}`,
     footer: '╰──•',
     after: `> ${club}`
   }
