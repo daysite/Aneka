@@ -15,7 +15,7 @@ const oi = `*\`AVISO:\`* ${pesan}`;
   teks += `> ${club}`;
   conn.sendMessage(m.chat, {text: teks, mentions: participants.map((a) => a.id)} );
 };
-handler.help = ['todos *<txt>*'];
+handler.help = ['todos'];
 handler.tags = ['gc'];
 handler.command = /^(tagall|t|invocar|marcar|todos|invocación)$/i;
 handler.admin = true;
