@@ -27,7 +27,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
-handler.help = ['reportar'];
+handler.help = ['report'];
 handler.tags = ['info'];
 handler.command = /^(reporte|report|reportar|bug|error)$/i;
 
