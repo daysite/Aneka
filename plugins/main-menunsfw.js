@@ -4,13 +4,13 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    nsfw: 'Nsfw',
-    emox: 'Gifs'
+    "nsfw:" "Nsfw",
+    "emox:" "Gifs"
   }
 
   let emojis = {
-    nsfw: '🪼',
-    emox: '🫦'
+    "nsfw:" "🪼",
+    "emox:" "🫦"
   }
 
   let defaultMenu = {
@@ -37,7 +37,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags]
     }))
   let groups = {}
-  for (let tag in tags) {
+  for (let tag in emojis) {
     groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
   }
   let text = [
