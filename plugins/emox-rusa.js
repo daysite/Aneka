@@ -48,7 +48,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['boobjob/rusa @tag'];
+handler.help = ['rusa'];
 handler.tags = ['emox'];
 handler.command = ['boobjob','rusa'];
 handler.group = true;
