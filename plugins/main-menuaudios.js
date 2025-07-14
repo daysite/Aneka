@@ -17,8 +17,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 🌴 Nombre: ${botname}
 ☕ Creador: Dev.Criss 🇦🇱
 📚 Librería: Baileys
-⏰ Uptime: ${uptime}
 🚀 Type: NodeJs
+⏰ Uptime: ${uptime}
 🧇 Usuarios regs: ${rtotalreg}
 🥞 Usuarios totales: ${totalreg}
 `,
