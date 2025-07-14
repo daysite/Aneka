@@ -13,23 +13,23 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
   cooldowns[m.sender] = Date.now()
 
-  if (!text) return conn.reply(m.chat, `*🍂 Debes ingresar una cantidad de Diamantes 💎 y apostar a un color, por ejemplo: ${usedPrefix + command} 20 black*`, m, rcanal)
+  if (!text) return conn.reply(m.chat, `*${xrpg} Debes ingresar una cantidad de Diamantes y apostar a un color*\n> *\`Ejemplo:\`* ${usedPrefix + command} 20 black`, m)
 
   let args = text.trim().split(" ")
-  if (args.length !== 2) return conn.reply(m.chat, `*🍂 Formato incorrecto. Debes ingresar una cantidad de Diamantes 💎 y apostar a un color, por ejemplo: ${usedPrefix + command} 20 black*`, m, rcanal)
+  if (args.length !== 2) return conn.reply(m.chat, `*${xrpg} Debes ingresar una cantidad de Diamantes y apostar a un color*\n> *\`Ejemplo:\`* ${usedPrefix + command} 20 black`, m)
 
   let diamantes = parseInt(args[0])
   let color = args[1].toLowerCase()
 
-  if (isNaN(diamantes) || diamantes <= 0) return conn.reply(m.chat, `🍂 Por favor, ingresa una cantidad válida para la apuesta.`, m, rcanal)
+  if (isNaN(diamantes) || diamantes <= 0) return conn.reply(m.chat, `*${xrpg} Por favor, ingresa una cantidad válida para la apuesta.*`, m)
 
-  if (diamantes > 50) return conn.reply(m.chat, "🍂 La cantidad máxima de apuesta es de 50 Diamantes 💎", m, rcanal)
+  if (diamantes > 50) return conn.reply(m.chat, '*⚠️ La cantidad máxima de apuesta es de `50` diamantes', m)
 
-  if (!(color === 'black' || color === 'red')) return conn.reply(m.chat, "🍂 Debes apostar a un color válido: *black* o *red*.", m, rcanal)
+  if (!(color === 'black' || color === 'red')) return conn.reply(m.chat, '*⚠️ Debes apostar a un color válido: black o red.', m)
 
-  if (diamantes > users.diamantes) return conn.reply(m.chat, "🍂 No tienes suficientes Diamantes 💎 para realizar esa apuesta.", m, rcanal)
+  if (diamantes > users.diamantes) return conn.reply(m.chat, "*⚠️ No tienes suficientes diamantes para realizar esta apuesta.*", m)
 
-  await conn.reply(m.chat, `🍂 Apostaste ${diamantes} Diamantes 💎 al color ${color}. Espera *⏱ 10 segundos* para conocer el resultado.`, m, rcanal)
+  await conn.reply(m.chat, `*${xrpg} Apostaste \`${diamantes}\` diamantes al color \`\`\`${color}\`\`\`\n*Espera \`10\` segundos para conocer el resultado.`, m)
 
   setTimeout(() => {
     let result = Math.random()
@@ -43,10 +43,10 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
     if (win) {
       users.diamantes += diamantes
-      conn.reply(m.chat, `🍂 ¡Ganaste! Obtuviste ${diamantes} *Diamantes 💎* \nTotal: ${users.diamantes} *Diamantes 💎*`, m, rcanal)
+      conn.reply(m.chat, `*🎉 ¡Ganaste! Obtuviste \`${diamantes}\` diamantes.*\n*Total:* \`${users.diamantes}\` diamantes*`, m)
     } else {
       users.diamantes -= diamantes
-      conn.reply(m.chat, `🍂 Perdiste. Se restaron ${diamantes} *Diamantes 💎*\nTotal: ${users.diamantes} *Diamantes 💎*.`, m, rcanal)
+      conn.reply(m.chat, `*😹 Perdiste. Se te restaron \`${diamantes}\` diamantes*\n*Total:* \`${users.diamantes}\` Diamantes.`, m)
     }
 
 
