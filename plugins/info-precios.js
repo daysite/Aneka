@@ -6,5 +6,8 @@ text: `🍒 ¡Bienvenido! ${taguser}\n\n¿Quieres dominar WhatsApp con el bot m�
 mentions: [m.sender]
 }, { quoted: fkontak });
 };
-handler.command = ['precios', 'comprar', 'adquirir'];
+
+handler.help = ['preciosbot'];
+handler.tags = ['info'];
+handler.command = ['precios', 'comprar', 'adquirir', 'preciosbot'];
 export default handler;
