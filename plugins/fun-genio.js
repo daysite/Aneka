@@ -1,5 +1,5 @@
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  if (!text) return conn.reply(m.chat, `*${xfun} Por favor, ingresa la pregunta*\n> *\`Ejemplo:\`* ${usedPrefix + command} La admin es virgen?`, m, rcanal)
+  if (!text) return conn.reply(m.chat, `*${xfun} Por favor, ingresa la pregunta*\n> *\`Ejemplo:\`* ${usedPrefix + command} La admin es virgen?`, m)
 
   const respuestas = [
     'Sí.',
