@@ -49,7 +49,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 }
 
 handler.command = ['tweetpost', 'twp']
-handler.tags = ['marker']
+handler.tags = ['maker']
 handler.help = ['tweetpost']
 export default handler
 
