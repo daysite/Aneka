@@ -891,9 +891,9 @@ const questions = [
     }
 ];
 
-let triviaSessions = new Map();
+const handler = async (m, { conn, command, args, usedPrefix }) => {
 
-const triviaHandler = async (m, { conn, command, args, usedPrefix }) => {
+let triviaSessions = new Map();
     if (args.length === 0) {
         // Seleccionar pregunta aleatoria
         let randomIndex = Math.floor(Math.random() * questions.length);
@@ -973,8 +973,8 @@ ${questionData.question}
     }
 };
 
-triviaHandler.help = ['trivia'];
-triviaHandler.tags = ['game'];
-triviaHandler.command = /^(trivia)$/i;
+handler.help = ['trivia'];
+handler.tags = ['game'];
+handler.command = /^(trivia)$/i;
 
-export default triviaHandler;
+export default handler;
