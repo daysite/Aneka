@@ -14,7 +14,7 @@ ${listAdmin}
 > ✿ Este comando solo puede ser ejecutado si hay algún problema en el grupo o con el bot.`.trim();
   conn.sendFile(m.chat, pp, 'error.jpg', text, m, false, {mentions: [...groupAdmins.map((v) => v.id), owner]});
 };
-handler.help = ['admins *<texto>*'];
+handler.help = ['admins'];
 handler.tags = ['gc'];
 handler.customPrefix = /a|@|./i;
 handler.command = /^(admins|@admins|dmins)$/i;
