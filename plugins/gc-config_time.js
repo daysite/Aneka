@@ -38,7 +38,7 @@ ${usedPrefix + command} *close 1*
     }, timeoutset);
   }
 };
-handler.help = ['grouptime *<open/close>* *<num>*'];
+handler.help = ['grouptime'];
 handler.tags = ['gc'];
 handler.command = /^(grouptime|gctime)$/i;
 handler.botAdmin = true;
