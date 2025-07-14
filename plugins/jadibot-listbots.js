@@ -63,5 +63,5 @@ ${message || '*No hay Subs activos.*'}`.trim()
 
 handler.command = ['listjadibot', 'bots', 'subs']
 handler.help = ['bots']
-handler.tags = ['serbot']
+handler.tags = ['jadibot']
 export default handler
