@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix, usedPrefix: _p, __dirname, text, com
     let totalreg = Object.keys(global.db.data.users).length
     let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
 
-        await m.react('🌹')
+        await m.react('⚡')
         let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
         let perfil = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://files.catbox.moe/ninsr8.jpg')
 
@@ -54,9 +54,9 @@ ${readMore}
 ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
 `,
 
-    header: category => `╭──• ${category}`,
-    body: (cmd, emoji) => `│ ${emoji} ${cmd}`,
-    footer: '╰──•',
+    header: category => ` ${category}`,
+    body: (cmd, emoji) => `ര ׄ ${emoji}˚ ${cmd}`,
+    footer: '',
     after: `> ${club}`
   }
 
@@ -109,9 +109,9 @@ ${readMore}
     }
 }
 
-handler.help = ['menuff'];
+handler.help = ['menu'];
 handler.tags = ['main'];
-handler.command = /^(vxvx)$/i;
+handler.command = /^(vx)$/i;
 handler.fail = null;
 
 export default handler;
