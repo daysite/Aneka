@@ -59,7 +59,7 @@ let handler = async (m, { conn, text, args, groupMetadata }) => {
     return conn.reply(m.chat, `*${xgc} Opción no válida*.\n*Utiliza:*\n\`list\` para ver miembros inactivos\n\`kick\` para eliminarlos.`, m)
 }
 
-handler.help = ['inactivos']
+handler.help = ['inactivos list', 'inactivos kick']
 handler.tags = ['gc']
 handler.command = /^(inactivos)$/i
 handler.group = true
