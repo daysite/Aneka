@@ -53,7 +53,7 @@ shadowJadiBot(shadowJBOptions)
 global.db.data.users[m.sender].Subs = new Date * 1
 } 
 handler.help = ['qr', 'code']
-handler.tags = ['serbot']
+handler.tags = ['jadibot']
 handler.command = ['qr', 'code']
 export default handler 
 
