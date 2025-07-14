@@ -974,7 +974,7 @@ ${questionData.question}
 };
 
 triviaHandler.help = ['trivia'];
-triviaHandler.tags = ['fun'];
+triviaHandler.tags = ['game'];
 triviaHandler.command = /^(trivia)$/i;
 
 export default triviaHandler;
