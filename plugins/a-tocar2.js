@@ -89,7 +89,7 @@ ${readMore}
 
         await conn.sendMessage(m.chat, {
             video: { url: vid.getRandom() }, // Vid
-            caption: menu,
+            caption: defaultMenu,
             contextInfo: {
                 mentionedJid: [m.sender],
                 isForwarded: true,
