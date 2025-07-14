@@ -8,7 +8,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     emox: 'Gifs'
   }
 
-  let emojs = {
+  let emojis = {
     nsfw: '🪼',
     emox: '🫦'
   }
