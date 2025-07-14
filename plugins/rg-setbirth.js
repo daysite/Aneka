@@ -36,7 +36,7 @@ user.birth = birth;
 return conn.reply(m.chat, `*✅ Se ha establecido tu fecha de nacimiento como:* \`${user.birth}\``, m);
 };
 
-handler.help = ['setbirth <establece tu cumpleaños>']
+handler.help = ['setbirth']
 handler.tags = ['rg']
 handler.command = ['setbirth', 'setcumpleaños']
 export default handler;
