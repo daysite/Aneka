@@ -30,8 +30,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.help = ['polli', 'aiimg'].map(c => c + ' <texto>');
-handler.tags = ['ia', 'herramientas'];
-handler.command = /^polli|aiimg$/i;
+handler.help = ['polli');
+handler.tags = ['ia'];
+handler.command = /^polli|aiimg|pollinations$/i;
 
 export default handler;
