@@ -28,7 +28,7 @@ m.reply(`*🌵 El participante @${user.split('@')[0]} fue eliminado.*`, m.chat, 
 })
 }
 
-handler.help = ['kick *<@tag>*']
+handler.help = ['kick']
 handler.tags = ['gc']
 handler.command = ['kick', 'expulsar', 'ban', 'rip', 'sacar', 'remove'] 
 handler.admin = true
