@@ -27,6 +27,7 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
 
 
   let tags = {
+    "main": ""
     "nsfw": "𑁯ᰍ    *`𝖭𝗌ẜɯ`*   ♨️   𐅹੭੭",
     "emox": "𑁯ᰍ    *`𝖦ıẜ𝗌`*   🦑   𐅹੭੭"
   }
