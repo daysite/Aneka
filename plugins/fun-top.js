@@ -32,7 +32,7 @@ let top = `*${x} Top 10 ${text} ${x}*
 *10. ${user(j)}*`
 m.reply(top, null, { mentions: [a, b, c, d, e, f, g, h, i, j]})
 }
-handler.help = ['top *<texto>*']
+handler.help = ['top']
 handler.command = ['top']
 handler.tags = ['fun']
 handler.group = true
