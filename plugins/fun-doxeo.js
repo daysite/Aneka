@@ -1,5 +1,6 @@
-// HECHO POR DEV.CRISS_VX
-// DEJAR LOS CRÉDITOS MALDITAS ESCORIAS
+/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
+𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 import fetch from 'node-fetch';
 import PhoneNumber from 'awesome-phonenumber';
