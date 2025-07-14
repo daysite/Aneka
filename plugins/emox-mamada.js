@@ -50,7 +50,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 }
 
-handler.help = ['blowjob'];
+handler.help = ['blowjob', 'mamada'];
 handler.tags = ['emox'];
 handler.command = ['blowjob','bj','mamada'];
 handler.group = true;
