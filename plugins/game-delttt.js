@@ -5,6 +5,9 @@ const handler = async (m, {conn, usedPrefix, command}) => {
   delete conn.game[room.id];
   await m.reply('*✅ Se eliminó la sala del juego de tres en raya.*');
 };
+
+handler.help = ['delttt'];
+handler.tags = ['game'];
 handler.command = /^(delttt|deltt|delxo|deltictactoe)$/i;
 handler.fail = null;
 export default handler;
