@@ -67,7 +67,7 @@ let handler = async (m, { conn, text }) => {
     const caption = `\`\`\`◜ TikTok - Download ◞\`\`\`
 
 📖 𝖣𝖾𝗌𝖼𝗋𝗂𝗉𝖼𝗂𝗈́𝗇:
-> ${ttwm.title || 'Sin descripción'}
+> ${ttwm.title || 'Sin descripción 🍰'}
 
 ▶️ ${ttwm.play_count || 0} | ❤️ ${ttwm.digg_count || 0} | 💬 ${ttwm.comment_count || 0}`
 /*
