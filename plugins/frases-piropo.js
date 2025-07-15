@@ -1,5 +1,5 @@
 const handler = async (m, {conn, text}) => {
-  m.reply(`*╔═══════════════════════════*\n➢ *"${pickRandom(global.piropo)}"*\n*╚═══════════════════════════*`);
+  await conn.reply(m.chat, `*╔═══════════════════════════*\n➢ *"${pickRandom(global.piropo)}"*\n*╚═══════════════════════════*`, m, rcanal);
 };
 handler.tags = ['frases'];
 handler.command = ['piropo'];
