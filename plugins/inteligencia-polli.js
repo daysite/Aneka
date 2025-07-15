@@ -30,7 +30,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.help = ['polli');
+handler.help = ['polli'];
 handler.tags = ['ia'];
 handler.command = /^polli|aiimg|pollinations$/i;
 
