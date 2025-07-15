@@ -45,7 +45,7 @@ let handler = async (m, { conn, text }) => {
       contextInfo: {
         externalAdReply: {
           title: video.title,
-          body: '```◜Ytmp3v2 - Download◞```',
+          body: '◜ Ytmp3v2 - Download ◞',
           thumbnailUrl: video.thumbnail,
           mediaType: 2,
           mediaUrl: video.url,
