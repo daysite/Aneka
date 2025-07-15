@@ -40,9 +40,9 @@ var handler = async (m, { conn, args }) => {
     }
 };
 
-handler.help = ['tiktok2'];
+handler.help = ['tiktokv2'];
 handler.tags = ['download'];
-handler.command = /^(tt2|tiktok2|tk2|tiktokdl2|ttdl2)$/i;
+handler.command = /^(tt2|tiktok2|tk2|tiktokdl2|ttdl2|tiktokv2|ttv2|tkv2)$/i;
 
 export default handler;
 
