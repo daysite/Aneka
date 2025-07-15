@@ -57,7 +57,7 @@ import axios from "axios"
 let handler = async (m, { conn, text }) => {
   const tiktokRegex = /(?:http(?:s)?:\/\/)?(?:www\.)?(?:vt|vm|tiktok)\.com\/[^\s]+/i
   if (!tiktokRegex.test(text)) {
-    throw m.reply(`⚠️ Ingresa el enlace de TikTok.\nEjemplo: ${m.prefix + m.command} https://vt.tiktok.com/xxxx`)
+   await conn reply(m.chat, `${xdownload} Por favor, ingresa el enlace de tiktok.`, m)
   }
 
   try {
@@ -67,15 +67,9 @@ let handler = async (m, { conn, text }) => {
     const caption = `\`\`\`◜ TikTok - Download ◞\`\`\`
 
 📖 𝖣𝖾𝗌𝖼𝗋𝗂𝗉𝖼𝗂𝗈́𝗇:
-> ${ttwm.title || 'Sin descripción 🍰'}
+> ${ttwm.title || 'Sin descripción'}
 
-▶️ ${ttwm.play_count || 0} | ❤️ ${ttwm.digg_count || 0} | 💬 ${ttwm.comment_count || 0}`
-
-    /*await conn.sendMessage(m.chat, {
-      image: { url: ttwm.author?.avatar },
-      caption
-    }, { quoted: m })*/
-    await m.reply(caption)
+▶️${ttwm.play_count || 0} | ❤️${ttwm.digg_count || 0} | 💬${ttwm.comment_count || 0}`
 
     if (ttwm.images && ttwm.images.length > 0) {
       const cards = await Promise.all(
