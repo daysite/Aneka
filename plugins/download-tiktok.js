@@ -70,11 +70,12 @@ let handler = async (m, { conn, text }) => {
 > ${ttwm.title || 'Sin descripción'}
 
 ▶️ ${ttwm.play_count || 0} | ❤️ ${ttwm.digg_count || 0} | 💬 ${ttwm.comment_count || 0}`
-
+/*
     await conn.sendMessage(m.chat, {
       image: { url: ttwm.author?.avatar },
       caption
-    }, { quoted: m })
+    }, { quoted: m })*/
+    await m.reply(caption)
 
     if (ttwm.images && ttwm.images.length > 0) {
       const cards = await Promise.all(
