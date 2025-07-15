@@ -1,6 +1,9 @@
 const handler = async (m, {conn, text}) => {
+
   await conn.reply(m.chat, `*╔═══════════════════════════*\n➢ *"${pickRandom(global.piropo)}"*\n*╚═══════════════════════════*`, m, rcanal);
 };
+
+handler.help = ['piropo'];
 handler.tags = ['frases'];
 handler.command = ['piropo'];
 export default handler;
