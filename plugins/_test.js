@@ -48,8 +48,8 @@ let handler = async (m, { conn, text }) => {
                 forwardingScore: 999,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                  newsletterJid: "120363348355703366@newsletter",
-                  newsletterName: "⟬㋠⟭ 𝚱 𝐖𝚯𝐑𝐋𝐃 - 𝐃𝚵 𝐋𝐔 𝐗𝚵 ↦ 𝚻𝚵公𝕸『🔆』",
+                  newsletterJid: channelRD.id,
+                  newsletterName: channelRD.name,
                   serverMessageId: 143
                 }
               }
