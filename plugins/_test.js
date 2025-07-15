@@ -53,18 +53,12 @@ let handler = async (m, {
         if (hasTiktokLink) {
             try {
                 const ttwm = await tikwm(text);
-                let caption = `🔥 \`[ Downloader TikTok ]\` 💙
-📙Titulo: ${ttwm.title || ''}
-🗾Region: ${ttwm.region || ''}
-🆔Id: ${ttwm.id || ''}
-🧩Tipo: ${ttwm.images ? 'image' : 'video' || ''}
+                let caption = `\`\`\`◜TiTok - Download◞\`\`\`
 
-🧾Cubta
-🔖Nombre: @${ttwm.author.nickname || ''}
-👤Usuario: @${ttwm.author.unique_id || ''}
-🆔Id: @${ttwm.author.id || ''}
+📖 𝖣𝖾𝗌𝖼𝗋𝗂𝗉꯭𝖼𝗂𝗈́𝗇:
+> ${ttwm.title || 'Sin Descripción'}
 
-▶️${ttwm.play_count || ''} | 💙${ttwm.digg_count || ''} | 💬${ttwm.comment_count || ''}`;
+▶️${ttwm.play_count || ''} | ❤️${ttwm.digg_count || ''} | 💬${ttwm.comment_count || ''}`;
 
                 await conn.sendMessage(m.chat, {
                     image: {
