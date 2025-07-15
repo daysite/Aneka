@@ -1,4 +1,4 @@
-/*
+
 import fetch from "node-fetch";
 import yts from "yt-search";
 
@@ -81,4 +81,4 @@ handler.command = ['ytmp3doc'];
 handler.help = ['ytmp3doc'];
 handler.tags = ['descargas'];
 
-export default handler;*/
+export default handler;
