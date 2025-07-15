@@ -58,7 +58,7 @@ let handler = async (m, { conn, text }) => {
   const tiktokRegex = /(?:http(?:s)?:\/\/)?(?:www\.)?(?:vt|vm|tiktok)\.com\/[^\s]+/i
 
   if (!tiktokRegex.test(text)) {
-   await conn.reply(m.chat, `${xdownload} Por favor, ingresa el enlace de tiktok.`, m)
+   return await m.reply(`${xdownload} Por favor, ingresa el enlace de tiktok.`)
   }
 
   try {
