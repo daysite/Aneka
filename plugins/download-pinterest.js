@@ -50,8 +50,8 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.help = ['pinterestdl', 'pindl'];
+handler.help = ['pindl'];
 handler.command = ['pinterestdl', 'pindl'];
-handler.tags = ['downloader'];
+handler.tags = ['download'];
 
 export default handler;
