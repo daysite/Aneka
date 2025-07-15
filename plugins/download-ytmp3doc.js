@@ -1,4 +1,3 @@
-
 import fetch from "node-fetch";
 import yts from "yt-search";
 
@@ -21,12 +20,11 @@ const fetchWithRetries = async (url, maxRetries = 2) => {
   throw new Error("No se pudo obtener la música después de varios intentos.");
 };
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-
- try {
-  if (!text || !text.trim()) {
-    return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un título o URL de YouTube.*`, m);
-  }
+let handler = async (m, { conn, text }) => {
+  try {
+    if (!text || !text.trim()) {
+      return conn.reply(m.chat, `*🔊 Por favor, ingresa un título o URL de YouTube.*`, m);
+    }
 
     await conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
 
@@ -35,48 +33,38 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!video || !video.url) throw new Error("No se encontraron resultados válidos.");
 
     const apiUrl = `${getApiUrl()}?url=${encodeURIComponent(video.url)}`;
-    const apiData = await fetchWithRetries(apiUrl);*/
-/*
+    const apiData = await fetchWithRetries(apiUrl);
+
+    if (!apiData?.download?.url) throw new Error("No se pudo obtener el enlace de descarga.");
+
     const audioMessage = {
-      document: { url: apiData.download.url },
+      audio: { url: apiData.download.url },
       mimetype: "audio/mpeg",
+      ptt: false,
       fileName: `${video.title}.mp3`,
-      caption: `\`\`\`◜YouTube - MP3◞\`\`\`\n\n*${video.title}*`,
-    };*/
-/*
-const audioMessage = {
-  audio: { url: apiData.download.url },
-  mimetype: "audio/mpeg",
-  ptt: false, // pon true si quieres que se envíe como nota de voz
-  fileName: `${video.title}.mp3`,
-  contextInfo: {
-    externalAdReply: {
-      title: video.title,
-      body: 'YouTube - MP3',
-      thumbnailUrl: video.thumbnail,
-      mediaType: 2,
-      mediaUrl: video.url,
-      sourceUrl: video.url,
-      showAdAttribution: true,
-    },
-  },
-};
+      contextInfo: {
+        externalAdReply: {
+          title: video.title,
+          body: 'YouTube - MP3',
+          thumbnailUrl: video.thumbnail,
+          mediaType: 2,
+          mediaUrl: video.url,
+          sourceUrl: video.url,
+          showAdAttribution: true,
+        },
+      },
+    };
 
     await conn.sendMessage(m.chat, audioMessage, { quoted: m });
-
-    // Reaccionar al mensaje original con ✅
     await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
 
   } catch (error) {
-    console.error("Error:", error);
-
-    // Reaccionar al mensaje original con ❌
+    console.error("Error:", error.stack || error);
     await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
-    await conn.reply(m.chat, `No se pudo obtener el audio. Intenta con otro título o más tarde.`, m);
+    await conn.reply(m.chat, `❌ No se pudo obtener el audio.\n\nIntenta con otro título o más tarde.`, m);
   }
 };
 
-// Comando
 handler.command = ['ytmp3doc'];
 handler.help = ['ytmp3doc'];
 handler.tags = ['descargas'];
