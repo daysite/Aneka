@@ -6,6 +6,7 @@ let handler = async (m, { conn, text }) => {
   if (!tiktokRegex.test(text)) return m.reply(`${xdownload} Por favor, ingresa el enlace de tiktok.`)
 
   try {
+    await m.react('⌛')
     const data = await tikwm(text)
     if (!data) throw 'No se pudo obtener información del video.'
 
@@ -60,16 +61,19 @@ let handler = async (m, { conn, text }) => {
       }, { quoted: m })
 
       await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
-      return // <-- DETIENE la ejecución aquí si son imágenes
+      await m.react('✅')
+      return 
     }
 
     // Si no es slideshow, enviar video
     const { data: video } = await axios.get(data.play, { responseType: 'arraybuffer' })
     await conn.sendFile(m.chat, Buffer.from(video), null, caption, m)
+    await m.react('✅')
 
   } catch (e) {
     console.error('Error TikTok Handler:', e)
-    m.reply('❌ Error al procesar el video. Puede haber muchas solicitudes o el enlace es inválido.')
+    await m.react('✖️')
+    m.reply('*✖️ Error al procesar el video. Puede haber muchas solicitudes o el enlace es inválido.*')
   }
 }
 
