@@ -21,7 +21,7 @@ let handler = async (m, { conn, text }) => {
 
 ▶️${data.play_count || 0} | ❤️${data.digg_count || 0} | 💬${data.comment_count || 0}`
 
-    // Verifica si es un slideshow (imágenes)
+    // que sad con las img 🫨
     if (data.images?.length) {
       const cards = await Promise.all(data.images.map(async (url, i) => {
         const media = await baileys.prepareWAMessageMedia({ image: { url } }, { upload: conn.waUploadToServer })
@@ -69,13 +69,13 @@ let handler = async (m, { conn, text }) => {
       return 
     }
 
-    // Si no es slideshow, enviar video
+    // vid pe causa gaa
     const { data: video } = await axios.get(data.play, { responseType: 'arraybuffer' })
     await conn.sendFile(m.chat, Buffer.from(video), null, caption, m)
     await m.react('✅')
 
   } catch (e) {
-    console.error('Error TikTok Handler:', e)
+    console.error('😨 Error TikTok Handler:', e)
     await m.react('✖️')
     m.reply('*✖️ Error al procesar el video. Puede haber muchas solicitudes o el enlace es inválido.*')
   }
