@@ -75,7 +75,7 @@ let handler = async (m, { conn, text }) => {
 
 handler.help = ['tesp']
 handler.tags = ['downloader']
-handler.command = ['testk']
+handler.command = ['tesp']
 
 export default handler
 
