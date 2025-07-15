@@ -31,9 +31,9 @@ conn.sendFile(m.chat, await (await fetch(json.url)).buffer(), `${json.title}.mp4
   }
 };
 
-handler.help = ['ytmp4doc'];
-handler.command = ['ytmp4doc'];
-handler.tags = ['dl'];
+handler.help = ['ytmp4'];
+handler.command = ['ytmp4'];
+handler.tags = ['download'];
 
 export default handler;
 
