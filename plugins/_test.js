@@ -3,7 +3,7 @@ import axios from "axios"
 
 let handler = async (m, { conn, text }) => {
   const tiktokRegex = /(?:http(?:s)?:\/\/)?(?:www\.)?(?:vt|vm|tiktok)\.com\/[^\s]+/i
-  if (!tiktokRegex.test(text)) return m.reply(`${xdownload} Por favor, ingresa el enlace de tiktok.\Maria is?`)
+  if (!tiktokRegex.test(text)) return m.reply(`${xdownload} Por favor, ingresa el enlace de tiktok.`)
 
   try {
     const data = await tikwm(text)
@@ -16,6 +16,7 @@ let handler = async (m, { conn, text }) => {
 
 ▶️${data.play_count || 0} | ❤️${data.digg_count || 0} | 💬${data.comment_count || 0}`
 
+    // Verifica si es un slideshow (imágenes)
     if (data.images?.length) {
       const cards = await Promise.all(data.images.map(async (url, i) => {
         const media = await baileys.prepareWAMessageMedia({ image: { url } }, { upload: conn.waUploadToServer })
@@ -58,9 +59,11 @@ let handler = async (m, { conn, text }) => {
         }
       }, { quoted: m })
 
-      return await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
+      await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
+      return // <-- DETIENE la ejecución aquí si son imágenes
     }
 
+    // Si no es slideshow, enviar video
     const { data: video } = await axios.get(data.play, { responseType: 'arraybuffer' })
     await conn.sendFile(m.chat, Buffer.from(video), null, caption, m)
 
@@ -70,7 +73,7 @@ let handler = async (m, { conn, text }) => {
   }
 }
 
-handler.help = ['tiktok', 'ttdl', 'tt', 'tiktokdl']
+handler.help = ['tesp']
 handler.tags = ['downloader']
 handler.command = ['testk']
 
