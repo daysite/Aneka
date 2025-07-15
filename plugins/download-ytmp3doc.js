@@ -66,7 +66,7 @@ let handler = async (m, { conn, text }) => {
 };
 
 handler.command = ['ytmp3v2'];
-handler.help = ['ytmp3v2'];
+handler.help = ['ytmp3v2', 'ytmp32'];
 handler.tags = ['download'];
 
 export default handler;
