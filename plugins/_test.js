@@ -41,8 +41,8 @@ let handler = async (m, { conn, text }) => {
               deviceListMetadataVersion: 2
             },
             interactiveMessage: {
-              body: { text: wm },
-              footer: { text: "TikTok Downloader" },
+              body: { text: "Tiktok - Download" },
+              footer: { text: club },
               header: { hasMediaAttachment: false },
               carouselMessage: { cards },
               contextInfo: {
