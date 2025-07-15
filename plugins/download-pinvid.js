@@ -12,7 +12,7 @@ await conn.sendMessage(m.chat, { video: { url: gyh.data.result }, caption: '\`\`
 await m.react('✅');
 }
 handler.help = ['pinvid *<link>*']
-handler.tags = ['descargas']
+handler.tags = ['download']
 handler.command = ['pinvideo', 'pinvid']
 
 export default handler
