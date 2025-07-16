@@ -58,7 +58,7 @@ let emojis = {
   converter: xconverter,
   tools: xtools,
   gc: xgc,
-  efects: xefects,
+  efectos: xefects,
   fun: xfun,
   game: xgame,
   anime: xanime,
