@@ -27,12 +27,12 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
 
   let tags = {
     "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus} ᩚ꤬ᰨᰍ`,
-    "info": "maria"
+    "info": "MARIA"
   }
 
   let emojis = {
-    "main": `${xmenus}`,
-    "info": "🙂"
+    "main": xmenus,
+    "info": "🍁"
   }
 
   let defaultMenu = {
