@@ -27,8 +27,8 @@ const handler = async (m, { conn, usedPrefix, command }) => {
   });
 };
 
-handler.help = ['ptt'];
+handler.help = ['toptt'];
 handler.command = ['ptt', 'toptt', 'toopus'];
-handler.group = false;
+handler.tags = ['converter'];
 
 export default handler;
