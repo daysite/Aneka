@@ -28,7 +28,7 @@ import { igdl } from "ruhend-scraper"
 
 let handler = async (m, { args, conn }) => {
   if (!args[0]) {
-    return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un link de Instagram.*`, m)
+    return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un link de Instagram*`, m)
   }
   try {
     await m.react('⏳️')
