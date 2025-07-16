@@ -38,8 +38,8 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     }
 
     let tags = {
-      "main": 'Menú Principal',
-      "info": 'Información',
+      "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus}ᩚ꤬ᰨᰍ`,
+      "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo}ᩚ꤬ᰨᰍ`,
     }
 
     let defaultMenu = {
