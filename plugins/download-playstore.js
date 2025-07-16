@@ -5,7 +5,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
 
     if (!args[0]) {
         console.log('Argumento vacío, enviando mensaje de ayuda');
-        return conn.reply(m.chat, `*${xdownload} Ingresa un enlace de descarga de la PlayStore.*\n*> *\`Ejemplo:\`* ${prefix}playstore https://play.google.com/store/apps/details?id=com.whatsapp`, m);
+        return conn.reply(m.chat, `*${xdownload} Ingresa un enlace de descarga de la PlayStore.*\n> *\`Ejemplo:\`* ${prefix}playstore https://play.google.com/store/apps/details?id=com.whatsapp`, m);
     }
 
     m.react('⌛');
@@ -38,7 +38,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
     conn.sendFile(m.chat, link, `${h}.apk`, ``, m, false, { mimetype: 'application/vnd.android.package-archive', asDocument: true });
     m.react('✅️');
 
-    conn.reply(m.chat, `*🚀 Se esta enviando \`${h}\` Aguarde un momento*`, m);
+    conn.reply(m.chat, `*🚀 Se esta enviando \`${h}\` Aguarde un momento*`, fkontak);
 }
 
 handler.help = ['playstore']; 
