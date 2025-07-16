@@ -32,7 +32,7 @@ let handler = async (m, { conn, args, command }) => {
   }
 }
 
-handler.help = ['ssweb <url>']
+handler.help = ['ssweb']
 handler.tags = ['tools']
 handler.command = ['ssweb', 'ss', 'ssw']
 
