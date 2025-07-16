@@ -30,7 +30,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
       'https://files.catbox.moe/5fbi9s.mp4',
       'https://files.catbox.moe/biggyj.mp4'
     ]
-
+/*
     let emojis = {
       "main": xmenus,
       "info": xinfo,
@@ -42,6 +42,66 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
       "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo}ᩚ꤬ᰨᰍ`,
       "jadibot": `𓂂𓏸  𐅹੭੭   *\`𝖩⍺𝖽ı-ᗷᨣƚ𝗌\`*  ${xjadi}ᩚ꤬ᰨᰍ`,
     }
+*/
+
+let tags = {};
+let emojis = {
+  main: xmenus,
+  info: xinfo,
+  jadibot: xjadi,
+  config: xconfig,
+  download: xdownload,
+  search: xsearch,
+  ia: xia,
+  ff: xff,
+  frases: xfrases,
+  converter: xconverter,
+  tools: xtools,
+  gc: xgc,
+  efects: xefects,
+  fun: xfun,
+  game: xgame,
+  anime: xanime,
+  logos: xlogos,
+  maker: xmaker,
+  emox: xemox,
+  nsfw: xnsfw,
+  sticker: xsticker,
+  rpg: xrpg,
+  reg: xreg,
+  owner: xowner
+};
+
+const tagTitles = {
+  main: "Mᧉ𝗇𝗎𝗌",
+  info: "𝖨𝗇ẜᨣ",
+  jadibot: "𝖩⍺𝖽ı-ᗷᨣƚ𝗌",
+  config: "𝖮𝗇-𝖮ẜẜ",
+  download: "𝖣ᨣ𝗐𝗇𝗅ᨣ⍺𝖽",
+  search: "𝖲ᧉ⍺ꭇ𝖼𝗁",
+  ia: "𝖨𝗇ƚᧉ𝖨ı𝗀ᧉ𝗇𝖼ı𝖺𝗌",
+  ff: "𝖥𝗋ᧉᧉ 𝖥ı𝗋ᧉ",
+  frases: "𝖥𝗋⍺𝗌ᧉ𝗌",
+  converter: "𝖢ᨣ𝗇𝗏ᧉ𝗋ƚᧉ𝗋𝗌",
+  tools: "𝖳ᨣᨣ𝗅𝗌",
+  gc: "𝖦ꭇ𝗎𝗉ᨣ𝗌",
+  efects: "𝖤ẜᧉ𝖼ƚ𝗌",
+  fun: "𝖥𝗎𝗇",
+  game: "𝖩𝗎ᧉ𝗀ᨣ𝗌",
+  anime: "𝖠𝗇ı𝗆ᧉ",
+  logos: "𝖫ᨣ𝗀𑄙𝗌",
+  maker: "𝖬⍺𝗄ᧉ𝗋",
+  emox: "𝖦ıẜ𝗌-𝖭𝗌ẜɯ",
+  nsfw: "𝖭𝗌ẜɯ",
+  sticker: "𝖲ƚ𝗂𝖼𝗄ᧉꭇ",
+  rpg: "𝖱𝗉𝗀",
+  reg: "𝖱ᧉ𝗀ı𝗌𝗍𝗋ᨣ",
+  owner: "𝖮ɯ𝗇ᧉꭇ"
+};
+
+for (let key in emojis) {
+  tags[key] = `𓂂𓏸  𐅹੭੭   *\`${tagTitles[key]}\`*  ${emojis[key]}ᩚ꤬ᰨᰍ`;
+}
 
     let defaultMenu = {
 
