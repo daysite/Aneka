@@ -34,12 +34,20 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
     "search": ``,
     "ia": ``,
     "ff": ``,
-    "": ``,
-    "": ``,
-    "": ``,
-    "": ``,
-    "": ``,
-    "": ``,
+    "frases": ``,
+    "tools": ``,
+    "gc": ``,
+    "efects": ``,
+    "fun": ``,
+    "game": ``,
+    "anime": ``,
+    "logos": ``,
+    "maker": ``,
+    "emox": ``,
+    "sticker": ``,
+    "rpg": ``,
+    "reg": ``,
+    "owner": ``
   }
 
   let emojis = {
