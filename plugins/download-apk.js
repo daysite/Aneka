@@ -113,5 +113,7 @@ await m.react('📭');
   }
 };
 
+handler.help = ['apk'];
+handler.tags = ['download'];
 handler.command = /^(apk|apk_download)$/i;
 export default handler;
