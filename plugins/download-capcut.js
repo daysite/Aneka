@@ -33,7 +33,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 };
 
 handler.help = ["capcut"];
-handler.tags = ["descargas"];
+handler.tags = ["download"];
 handler.command = ["capcut", "capcutdl"];
 
 export default handler;
