@@ -82,7 +82,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
   await conn.reply(m.chat, `*🚀 Enviando \`${title}\`... Aguarde un momento*`, m);
 
   try {
-    await conn.sendFile(m.chat, link, `${title}.apk`, `📦 *${title}*`, m, false, {
+    await conn.sendFile(m.chat, link, `${title}.apk`, `> *${title}*`, m, false, {
       mimetype: 'application/vnd.android.package-archive',
       asDocument: true
     });
