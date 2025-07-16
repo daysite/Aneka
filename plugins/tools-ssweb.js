@@ -2,7 +2,7 @@
 
 import fetch from 'node-fetch'
 let handler = async (m, { conn, command, args }) => {
-if (!args[0]) return conn.reply(m.chat, *${xtools} Por favor, ingresa el Link de una página.*, m)
+if (!args[0]) return conn.reply(m.chat, `*${xtools} Por favor, ingresa el Link de una página.*`, m)
 try {
 await m.react('⌛')
 
