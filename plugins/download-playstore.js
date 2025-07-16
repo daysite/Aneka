@@ -101,7 +101,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
         });
 
         m.react('✅');
-        conn.reply(m.chat, `✅ *Se está enviando* \`${appName}\`\n📦 *Tamaño estimado: revisa después de recibir el archivo*`, m);
+        conn.reply(m.chat, `🚀 *Se está enviando* \`${appName}\` aguarda un momento`, m);
     } catch (err) {
         console.error(err);
         m.react('❌');
