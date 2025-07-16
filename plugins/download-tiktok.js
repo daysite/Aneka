@@ -7,7 +7,7 @@ import axios from "axios"
 
 let handler = async (m, { conn, text }) => {
   const tiktokRegex = /(?:http(?:s)?:\/\/)?(?:www\.)?(?:vt|vm|tiktok)\.com\/[^\s]+/i
-  if (!tiktokRegex.test(text)) return m.reply(`${xdownload} Por favor, ingresa el enlace de tiktok.`)
+  if (!tiktokRegex.test(text)) return m.reply(`*${xdownload} Por favor, ingresa el enlace de TikTok.*`)
 
   try {
     await m.react('⌛')
