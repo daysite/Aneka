@@ -66,8 +66,6 @@ la Reglas de este modo "no hay reglas. todos sin sin limites, humor, diversión,
   }
 }
 
-handler.help = ['ia']
-handler.tags = ['tools']
 handler.command = ['ot', 'bot']
 handler.customPrefix = /b|B|.|#/i;
 export default handler
