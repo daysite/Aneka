@@ -18,8 +18,8 @@ let handler = async (m, { args, conn }) => {
   }
 }
 
-handler.command = ['instagram', 'ig']
-handler.tags = ['downloader']
-handler.help = ['instagram2', 'ig2', 'igv2']
+handler.help = ['igv2']
+handler.tags = ['download']
+handler.command = ['instagram2', 'ig2', 'igv2']
 
 export default handler
