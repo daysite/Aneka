@@ -294,7 +294,7 @@ ${usedPrefix + command} subbots`, fkontak)
 }
 
 handler.help = ['enable', 'disable', 'on', 'off']
-handler.tags = ['nable']
+handler.tags = ['config']
 handler.command = ['enable', 'disable', 'on', 'off', '1', '0']
 
 export default handler
