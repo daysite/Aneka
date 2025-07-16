@@ -11,7 +11,7 @@ await conn.sendMessage(m.chat, { video: { url: gyh.data.result }, caption: '\`\`
 // await conn.sendFile(m.chat, gyh.data.result, `pinvideobykeni.mp4`, `*${emoji} Url:* ${gyh.data.url}`, m)
 await m.react('✅');
 }
-handler.help = ['pinvid *<link>*']
+handler.help = ['pinvid']
 handler.tags = ['download']
 handler.command = ['pinvideo', 'pinvid']
 
