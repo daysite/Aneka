@@ -44,11 +44,12 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     }
 
     let defaultMenu = {
-      before: `
-⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ 𑁯🤍ᰍ ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
-👤 ¡Hola! ¿Cómo estás?
-꒰͜͡${taguser}
-♡ ${saludo} タス
+
+
+    before: `ㅤㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ㅤㅤ𑁯🤍ᰍㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
+೯ ׅ 👤 ¡Hᴏʟᴀ! ¿Cᴏᴍᴏ Esᴛᴀ́s? ׄ ᦡᦡ
+ㅤ꒰͜͡${taguser}
+ㅤㅤ♡𑂳ᩙㅤ ּ ${saludo} ׄ ㅤタス
 
 *🧇 Activo:* ${uptime}
 *👥 Usuarios:* ${totalreg}
@@ -59,15 +60,14 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
 *🫖 Nivel:* ${level}
 *🍢 Rango:* ${role}
 ${readMore}
+ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
+`,
 
-乂 *Lista de comandos* 乂
-`.trim(),
-
-      header: category => `${category}`,
-      body: (cmd, emoji) => `${emoji} ${cmd}`,
+      header: category => ` ${category}`,
+      body: (cmd, emoji) => `ര ׄ ${emoji}˚ ${cmd}`,
       footer: '',
-      after: `\n> ${club}`
-    }
+      after: `> ${club}`
+  }
 
     let help = Object.values(global.plugins)
       .filter(plugin => !plugin.disabled)
