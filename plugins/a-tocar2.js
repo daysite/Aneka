@@ -26,8 +26,8 @@ let handler = async (m, { conn, usedPrefix, usedPrefix: _p, __dirname, text, com
 const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5fbi9s.mp4', 'https://files.catbox.moe/biggyj.mp4']
 
   let tags = {
-    "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus} ᩚ꤬ᰨᰍ`,
-    "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo} ᩚ꤬ᰨᰍ`,
+    "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus}ᩚ꤬ᰨᰍ`,
+    "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${info}ᩚ꤬ᰨᰍ`,
     "": ``,
   }
 
