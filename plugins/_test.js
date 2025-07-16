@@ -31,10 +31,9 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
       'https://files.catbox.moe/biggyj.mp4'
     ]
 
-    // Emojis por categoría
     let emojis = {
-      "main": '🌷',
-      "info": '📖',
+      "main": xmenus,
+      "info": xinfo,
       // Puedes agregar más según tus categorías
     }
 
