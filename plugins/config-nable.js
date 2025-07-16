@@ -293,8 +293,8 @@ ${usedPrefix + command} subbots`, fkontak)
   conn.reply(m.chat, `☕ 𝖫𝖺 𝗈𝗉𝖼𝗂𝗈́𝗇 *${type}* 𝗌𝖾 *${isEnable ? 'activó' : 'desactivó'}* ${isAll ? '𝗉𝖺𝗋𝖺 𝖾𝗌𝗍𝖾 𝖡𝗈𝗍' : isUser ? '' : '𝗉𝖺𝗋𝖺 𝖾𝗌𝗍𝖾 𝖢𝗁𝖺𝗍'}`, fkontak)
 }
 
-handler.help = ['enable', 'disable']
-handler.tags = ['nable', 'owner']
+handler.help = ['enable', 'disable', 'on', 'off']
+handler.tags = ['nable']
 handler.command = ['enable', 'disable', 'on', 'off', '1', '0']
 
 export default handler
