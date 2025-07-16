@@ -10,7 +10,7 @@ let ss = await (await fetch(https://image.thum.io/get/fullpage/${args[0]})).buff
 conn.sendFile(m.chat, ss, 'error.png', args[0], fkontak)
 await m.react('✅')
 } catch {
-return conn.reply(m.chat, '⚠️ Ocurrió un error.', m)
+return conn.reply(m.chat, '*✖️ Ocurrió un error.*', m)
 await m.react(error)}}
 
 handler.help = ['ssweb']
