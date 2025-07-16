@@ -47,7 +47,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 }
 
 handler.help = ['luminai']
-handler.tags = ['ai']
+handler.tags = ['ia']
 handler.command = ['luminai', 'ia', 'ai']
 export default handler
 
