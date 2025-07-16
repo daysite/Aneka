@@ -61,7 +61,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
     packageName = new URL(url).searchParams.get("id");
     if (!packageName) throw new Error();
   } catch {
-    return conn.reply(m.chat, `❌ *URL inválida.* Asegúrate de que sea un enlace directo a una app de la Play Store.`, m);
+    return conn.reply(m.chat, `✖️ *URL inválida.* Asegúrate de que sea un enlace directo a una app de la Play Store.`, m);
   }
 
   let info;
@@ -69,17 +69,17 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
     info = await gplay.app({ appId: packageName });
   } catch (error) {
     console.error(error);
-    return conn.reply(m.chat, `❌ *No se pudo encontrar la aplicación.* Verifica que el enlace sea correcto.`, m);
+    return conn.reply(m.chat, `✖️ *No se pudo encontrar la aplicación.* Verifica que el enlace sea correcto.`, m);
   }
 
   if (!info.free) {
-    return conn.reply(m.chat, `❌ *La aplicación no es gratuita y no se puede descargar por este medio.*`, m);
+    return conn.reply(m.chat, `✖️ *La aplicación no es gratuita y no se puede descargar por este medio.*`, m);
   }
 
   const title = info.title;
   const link = `https://d.apkpure.com/b/APK/${info.appId}?version=latest`;
 
-  await conn.reply(m.chat, `*🚀 Enviando \`${title}\`... Aguarde un momento*`, m);
+  await conn.reply(m.chat, `*🚀 Se está enviando \`${title}\`... Aguarde un momento*`, m);
 
   try {
     await conn.sendFile(m.chat, link, `${title}.apk`, `> *${title}*`, m, false, {
@@ -89,8 +89,8 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
     m.react('✅');
   } catch (e) {
     console.error(e);
-    conn.reply(m.chat, `❌ *Error al intentar enviar el archivo APK.*`, m);
-    m.react('❌');
+    conn.reply(m.chat, `✖️ *Error al intentar enviar el archivo APK.*`, m);
+    m.react('✖️');
   }
 };
 
