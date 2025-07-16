@@ -1,25 +1,36 @@
 import fetch from 'node-fetch'
+
 let handler = async (m, { conn, command, args }) => {
-if (!args[0]) return conn.reply(m.chat, `*${xtools} Por favor, ingresa el Link de una página.*`, m)
-try {
-await m.react('⌛')
-/*
-conn.reply(m.chat, '🍭 Buscando su información....', m, {
-contextInfo: { externalAdReply :{ mediaUrl: null, mediaType: 1, showAdAttribution: true,
-title: packname,
-body: dev,
-previewType: 0, thumbnail: icons, 
-sourceUrl: channel }}})
-*/
+  if (!args[0]) {
+    return conn.reply(m.chat, `*${xtools} Por favor, ingresa el link de una página.*`, m)
+  }
 
-let ss = await (await fetch(`https://image.thum.io/get/fullpage/${args[0]}`)).buffer()
-conn.sendFile(m.chat, ss, 'error.png', args[0], fkontak)
-await m.react('✅')
-} catch {
-return conn.reply(m.chat, '*⚠️ Ocurrió un error.*', m)
-await m.react(error)}}
+  try {
+    await m.react('⌛')
 
-handler.help = ['ssweb']
+    // Validación básica de URL
+    const url = args[0].trim()
+    if (!/^https?:\/\//i.test(url)) {
+      return conn.reply(m.chat, '*⚠️ El enlace debe empezar con https://*', m)
+    }
+
+    const ssUrl = `https://image.thum.io/get/fullpage/${encodeURIComponent(url)}`
+    const response = await fetch(ssUrl)
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+    const image = await response.buffer()
+    await conn.sendFile(m.chat, image, 'screenshot.png', url, fkontak)
+
+    await m.react('✅')
+  } catch (e) {
+    console.error('[❌ ERROR EN SSWEB]', e)
+    await m.react('⚠️')
+    return conn.reply(m.chat, '*⚠️ Ocurrió un error al generar la captura.*', m)
+  }
+}
+
+handler.help = ['ssweb <url>']
 handler.tags = ['tools']
 handler.command = ['ssweb', 'ss', 'ssw']
 export default handler
