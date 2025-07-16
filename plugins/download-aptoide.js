@@ -39,6 +39,8 @@ const handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
   }
 };
 
+handler.help = ['aptoide'];
+handler.tags = ['download'];
 handler.command = /^(apkmod|modapk|aptoide|aptoidedl)$/i;
 
 export default handler;
