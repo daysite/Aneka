@@ -30,19 +30,6 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
       'https://files.catbox.moe/5fbi9s.mp4',
       'https://files.catbox.moe/biggyj.mp4'
     ]
-/*
-    let emojis = {
-      "main": xmenus,
-      "info": xinfo,
-      "jadibot": xjadi,
-    }
-
-    let tags = {
-      "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus}ᩚ꤬ᰨᰍ`,
-      "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo}ᩚ꤬ᰨᰍ`,
-      "jadibot": `𓂂𓏸  𐅹੭੭   *\`𝖩⍺𝖽ı-ᗷᨣƚ𝗌\`*  ${xjadi}ᩚ꤬ᰨᰍ`,
-    }
-*/
 
 let tags = {};
 let emojis = {
