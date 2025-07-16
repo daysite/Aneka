@@ -21,7 +21,7 @@ let handler = async (m, { conn, args }) => {
     } else if (m.mentionedJid?.[0]) {
         who = m.mentionedJid[0];
     } else {
-        return m.reply(`*${xsticker} Debes responder a un mensaje, etiquetar a un usuario o ingresar un número válido.*`);
+        return m.reply(`*${xmaker} Debes responder a un mensaje, etiquetar a un usuario o ingresar un número válido.*`);
     }
 
     let name;
