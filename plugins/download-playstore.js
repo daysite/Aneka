@@ -38,7 +38,7 @@ let handler = async (m, { conn, args, usedPrefix: prefix, command }) => {
     conn.sendFile(m.chat, link, `${h}.apk`, ``, m, false, { mimetype: 'application/vnd.android.package-archive', asDocument: true });
     m.react('✅️');
 
-    conn.reply(m.chat, `*🚀 Se esta enviando \`${h}\` Aguarde un momento*`, fkontak);
+    conn.reply(m.chat, `*🚀 Se esta enviando \`${h}\` Aguarde un momento*`, m);
 }
 
 handler.help = ['playstore']; 
