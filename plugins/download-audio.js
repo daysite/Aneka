@@ -58,7 +58,7 @@ const ddownr = {
 const handler = async (m, { conn, text, command }) => {
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, `${xdownload} Por favor, ingresa el nombre del audio a descargar.`, m);
+      return conn.reply(m.chat, `*${xdownload} Por favor, ingresa el nombre del audio a descargar.*`, m);
     }
 
     conn.reply(m.chat, `*🔍 Buscando ${text}...*`, fkontak);
