@@ -1,5 +1,4 @@
 
-
 import syntaxerror from 'syntax-error'
 import { format } from 'util'
 import { fileURLToPath } from 'url'
@@ -39,10 +38,10 @@ let handler = async (m, _2) => {
     m.exp = old
   }
 }
-handler.help = ['× ', '=× ']
+handler.help = ['=× ']
 handler.customPrefix = /^=?× /
 handler.command = /(?:)/i
-
+handler.tags = ['owner']
 handler.rowner = false
 
 export default handler
