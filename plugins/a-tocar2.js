@@ -111,10 +111,13 @@ ${readMore}
       tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags]
     }))
 
-  let groups = {}
+const plugins = global.plugins || {};
+const groups = Object.values(plugins).flatMap(plugin => plugin.tags || []);
+
+  /*let groups = {}
   for (let tag in emojis) {
     groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
-  }
+  }*/
 
 // ---[ CONTRUCCIÓN DEL TXT ]---
   let text = [
