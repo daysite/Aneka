@@ -55,7 +55,7 @@ let emojis = {
   nsfw: xnsfw,
   sticker: xsticker,
   rpg: xrpg,
-  reg: xreg,
+  rg: xreg,
   owner: xowner
 };
 
@@ -82,7 +82,7 @@ const tagTitles = {
   nsfw: "𝖭𝗌ẜɯ",
   sticker: "𝖲ƚ𝗂𝖼𝗄ᧉꭇ",
   rpg: "𝖱𝗉𝗀",
-  reg: "𝖱ᧉ𝗀ı𝗌𝗍𝗋ᨣ",
+  rg: "𝖱ᧉ𝗀ı𝗌𝗍𝗋ᨣ",
   owner: "𝖮ɯ𝗇ᧉꭇ"
 };
 
