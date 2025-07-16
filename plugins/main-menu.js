@@ -9,7 +9,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     let { min, xp, max } = xpRange(level, global.multiplier)
     let name = await conn.getName(m.sender)
 
-    exp = exp || 'Desconocida'
+    exp = exp || '0'
     role = role || 'Aldeano'
 
     const taguser = '@' + m.sender.split('@s.whatsapp.net')[0]
