@@ -18,7 +18,7 @@ const handler = async (m, { conn }) => {
 };
 
 handler.help = ['profilegay'];
-handler.tags = ['marker'];
+handler.tags = ['maker'];
 handler.command = /^(gay2|gayp|pfpgay|profilegay)$/i;
 handler.group = true;
 
