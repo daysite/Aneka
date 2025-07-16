@@ -117,7 +117,7 @@ const groups = Object.values(plugins).flatMap(plugin => plugin.tags || []);
   /*let groups = {}
   for (let tag in emojis) {
     groups[tag] = help.filter(plugin => plugin.tags.includes(tag))
-  }*/
+  }
 
 // ---[ CONTRUCCIÓN DEL TXT ]---
   let text = [
@@ -130,7 +130,26 @@ const groups = Object.values(plugins).flatMap(plugin => plugin.tags || []);
       ].join('\n')
     ),
     defaultMenu.after
-  ].join('\n')
+  ].join('\n')*/
+
+let groups = {}
+for (let tag in emojis) {
+  groups[tag] = help.filter(plugin => Array.isArray(plugin.tags) && plugin.tags.includes(tag)) || []
+}
+
+let text = [
+  defaultMenu.before,
+  ...Object.keys(tags).map(tag =>
+    [
+      defaultMenu.header(tags[tag]),
+      (groups[tag] || []).flatMap(plugin =>
+        plugin.help.map(cmd => defaultMenu.body(_p + cmd, emojis[tag]))
+      ).join('\n'),
+      defaultMenu.footer
+    ].join('\n')
+  ),
+  defaultMenu.after
+].join('\n')
 
         await conn.sendMessage(m.chat, {
             video: { url: vid.getRandom() }, // Vid
