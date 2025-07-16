@@ -31,71 +31,24 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
       'https://files.catbox.moe/biggyj.mp4'
     ]
 
+    // Emojis por categoría
+    let emojis = {
+      "main": '🌷',
+      "info": 'ℹ️',
+      // Puedes agregar más según tus categorías
+    }
 
-
-  }
-
-  let emojis = {
-    "main": xmenus,
-    "info": xinfo,
-    "jadibot": xjadi,
-    "config": xconfig,
-    "download": xdownload,
-    "search": xsearch,
-    "ia": xia,
-    "ff": xff,
-    "frases": xfrases,
-    "converter": xconverter,
-    "tools": xtools,
-    "gc": xgc,
-    "efects": xefects,
-    "fun": xfun,
-    "game": xgame,
-    "logos": xlogos,
-    "maker": xmaker,
-    "emox": xemox,
-    "nsfw": xnsfw,
-    "sticker": xsticker,
-    "rpg": xrpg,
-    "reg": xreg,
-    "owner": xowner,
-  }
-
-
-  let tags = {
-    "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus}ᩚ꤬ᰨᰍ`,
-    "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo}ᩚ꤬ᰨᰍ`,
-    "jadibot": `𓂂𓏸  𐅹੭੭   *\`𝖩⍺𝖽ı-ᗷᨣƚ𝗌\`*  ${xjadi}ᩚ꤬ᰨᰍ`,
-    "config": `𓂂𓏸  𐅹੭੭   *\`𝖮𝗇-𝖮ẜẜ\`*  ${xconfig}ᩚ꤬ᰨᰍ`,
-    "download": `𓂂𓏸  𐅹੭੭   *\`𝖣ᨣ𝗐𝗇𝗅ᨣ⍺𝖽\`* ${xdownload}ᩚ꤬ᰨᰍ`,
-    "search": `𓂂𓏸  𐅹੭੭   *\`𝖲ᧉ⍺ꭇ𝖼𝗁\`*  ${xsearch}ᩚ꤬ᰨᰍ`,
-    "ia": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ƚᧉ𝖨ı𝗀ᧉ𝗇𝖼ı𝖺𝗌\`*  ${xia}ᩚ꤬ᰨᰍ`,
-    "ff": `𓂂𓏸  𐅹੭੭   *\`𝖥𝗋ᧉᧉ 𝖥ı𝗋ᧉ\`*  ${xff}ᩚ꤬ᰨᰍ`,
-    "frases": `𓂂𓏸  𐅹੭੭   *\`𝖥𝗋⍺𝗌ᧉ𝗌\`* ${xfrases}ᩚ꤬ᰨᰍ`,
-    "converter": `𓂂𓏸  𐅹੭੭   *\`𝖢ᨣ𝗇𝗏ᧉ𝗋ƚᧉ𝗋𝗌\`*  ${xconverter}ᩚ꤬ᰨᰍ`,
-    "tools": `𓂂𓏸  𐅹੭੭   *\`𝖳ᨣᨣ𝗅𝗌\`*  ${xtools}ᩚ꤬ᰨᰍ`,
-    "gc": `𓂂𓏸  𐅹੭੭   *\`𝖦ꭇ𝗎𝗉ᨣ𝗌\`*  ${xgc}ᩚ꤬ᰨᰍ`,
-    "efects": `𓂂𓏸  𐅹੭੭   *\`𝖤ẜᧉ𝖼ƚ𝗌\`*  ${xefects}ᩚ꤬ᰨᰍ`,
-    "fun": `𓂂𓏸  𐅹੭੭   *\`𝖥𝗎𝗇\`*  ${xfun}ᩚ꤬ᰨᰍ`,
-    "game": `𓂂𓏸  𐅹੭੭   *\`𝖩𝗎ᧉ𝗀ᨣ𝗌\`*  ${xgame}ᩚ꤬ᰨᰍ`,
-    "anime": `𓂂𓏸  𐅹੭੭   *\`𝖠𝗇ı𝗆ᧉ\`*  ${xanime}ᩚ꤬ᰨᰍ`,
-    "logos": `𓂂𓏸  𐅹੭੭   *\`𝖫ᨣ𝗀𑄙𝗌\`*  ${xlogos}ᩚ꤬ᰨᰍ`,
-    "maker": `𓂂𓏸  𐅹੭੭   *\`𝖬⍺𝗄ᧉ𝗋\`*  ${xmaker}ᩚ꤬ᰨᰍ`,
-    "emox": `𓂂𓏸  𐅹੭੭   *\`𝖦ıẜ𝗌-𝖭𝗌ẜɯ\`*  ${xemox}ᩚ꤬ᰨᰍ`,
-    "nsfw": `𓂂𓏸  𐅹੭੭   *\`𝖭𝗌ẜɯ\`*  ${xnsfw}ᩚ꤬ᰨᰍ`,
-    "sticker": `𓂂𓏸  𐅹੭੭   *\`𝖲ƚ𝗂𝖼𝗄ᧉꭇ\`*  ${xsticker}ᩚ꤬ᰨᰍ`,
-    "rpg": `𓂂𓏸  𐅹੭੭   *\`𝖱𝗉𝗀\`*  ${xrpg}ᩚ꤬ᰨᰍ`,
-    "reg": `𓂂𓏸  𐅹੭੭   *\`𝖱ᧉ𝗀ı𝗌𝗍𝗋ᨣ\`*  ${xreg}ᩚ꤬ᰨᰍ`,
-    "owner": `𓂂𓏸  𐅹੭੭   *\`𝖮ɯ𝗇ᧉꭇ\`*  ${xowner}ᩚ꤬ᰨᰍ`,
-  }
-
-
+    let tags = {
+      "main": 'Menú Principal',
+      "info": 'Información',
+    }
 
     let defaultMenu = {
-      before: `ㅤㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ㅤㅤ𑁯🤍ᰍㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
-೯ ׅ 👤 ¡Hᴏʟᴀ! ¿Cᴏᴍᴏ Esᴛᴀ́s? ׄ ᦡᦡ
-ㅤ꒰͜͡${taguser}
-ㅤㅤ♡𑂳ᩙㅤ ּ ${saludo} ׄ ㅤタス
+      before: `
+⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ 𑁯🤍ᰍ ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
+👤 ¡Hola! ¿Cómo estás?
+꒰͜͡${taguser}
+♡ ${saludo} タス
 
 *🧇 Activo:* ${uptime}
 *👥 Usuarios:* ${totalreg}
@@ -106,10 +59,11 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
 *🫖 Nivel:* ${level}
 *🍢 Rango:* ${role}
 ${readMore}
-ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
-`.trim(),
 
-      header: category => `\n${category}`,
+乂 *Lista de comandos* 乂
+      `.trim(),
+
+      header: category => `\n「 ${category} 」\n`,
       body: (cmd, emoji) => `  ${emoji} ${cmd}`,
       footer: '',
       after: `\n> ${club}`
@@ -169,7 +123,7 @@ ${readMore}
 
 handler.help = ['menu']
 handler.tags = ['main']
-handler.command = ['tes']
+handler.command = ['menu', 'help', '?']
 
 export default handler
 
