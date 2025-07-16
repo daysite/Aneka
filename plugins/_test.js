@@ -18,9 +18,6 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
 
     let totalreg = Object.keys(global.db.data.users).length
     let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered).length
-
-    const saludo = 'Bienvenido 👋' // Puedes personalizar esto
-    const club = 'Shadow Club' // Texto decorativo
     const readMore = '\u200b'.repeat(850)
 
     await m.react('⚡')
