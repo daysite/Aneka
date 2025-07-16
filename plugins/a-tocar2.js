@@ -54,7 +54,28 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
 
   let emojis = {
     "main": xmenus,
-    "info": x,
+    "info": xinfo,
+    "jadibot": xjadi,
+    "config": xconfig,
+    "download": xdownload,
+    "search": xsearch,
+    "ia": xia,
+    "ff": xff,
+    "frases": xfrases,
+    "converter": xconverter,
+    "tools": xtools,
+    "gc": xgc,
+    "efects": xefects,
+    "fun": xfun,
+    "game": xgame,
+    "logos": xlogos,
+    "maker": xmaker,
+    "emox": xemox,
+    "nsfw": xnsfw,
+    "sticker": xsticker,
+    "rpg": xrpg,
+    "reg": xreg,
+    "owner": xowner
   }
 
   let defaultMenu = {
