@@ -27,12 +27,13 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
 
   let tags = {
     "main": `𓂂𓏸  𐅹੭੭   *\`Mᧉ𝗇𝗎𝗌\`*  ${xmenus} ᩚ꤬ᰨᰍ`,
-    "info": "MARIA"
+    "info": `𓂂𓏸  𐅹੭੭   *\`𝖨𝗇ẜᨣ\`*  ${xinfo} ᩚ꤬ᰨᰍ`,
+    "": ``,
   }
 
   let emojis = {
     "main": xmenus,
-    "info": "🍁"
+    "info": x,
   }
 
   let defaultMenu = {
@@ -108,8 +109,6 @@ ${readMore}
     }
 }
 
-handler.help = ['menu'];
-handler.tags = ['main'];
 handler.command = /^(vx)$/i;
 handler.fail = null;
 
