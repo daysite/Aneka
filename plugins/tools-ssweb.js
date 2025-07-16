@@ -25,8 +25,8 @@ let handler = async (m, { conn, command, args }) => {
     await m.react('✅')
   } catch (e) {
     console.error('[❌ ERROR EN SSWEB]', e)
-    await m.react('⚠️')
-    return conn.reply(m.chat, '*⚠️ Ocurrió un error al generar la captura.*', m)
+    await m.react('✖️')
+    return conn.reply(m.chat, '*✖️ Ocurrió un error al generar la captura.*', m)
   }
 }
 
