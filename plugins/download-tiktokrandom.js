@@ -17,7 +17,7 @@ let handler = async (m, { conn }) => {
 };
 
 handler.help = ['tiktokrandom'];
-handler.tags = ['descargas'];
+handler.tags = ['download'];
 handler.command = ['ttrandom', 'tiktokrandom', 'ttr'];
 
 export default handler;
