@@ -27,8 +27,8 @@ const vid = ['https://files.catbox.moe/39rx3n.mp4', 'https://files.catbox.moe/5f
 
 
 let emojis = {
-    "main": xmenus,
-    "info": xinfo
+    "main": `${xmenus}`,
+    "info": `${xinfo}`
 }
 
 let tags = {
