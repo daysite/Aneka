@@ -34,7 +34,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     // Emojis por categoría
     let emojis = {
       "main": '🌷',
-      "info": 'ℹ️',
+      "info": '📖',
       // Puedes agregar más según tus categorías
     }
 
