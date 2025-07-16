@@ -163,10 +163,7 @@ ${readMore}
     }
 }
 
-handler.help = ['menu']
-handler.tags = ['main']
-handler.command = ['menu', 'help', '?']
-
+handler.command = /^(menu|menú|memu|memú|help|info|comandos|2help|menu1.2|ayuda|commands|commandos|cmd)$/i;
 export default handler
 
 function clockString(ms) {
