@@ -17,7 +17,8 @@ let link = await catbox(media);
 
   await m.reply(caption);
 }
-handler.command = handler.help = ['tourl']
+handler.command = ['tourl']
+handler.help = ['tourl']
 handler.tags = ['tools']
 export default handler
 
