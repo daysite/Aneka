@@ -21,8 +21,8 @@ const handler = async (m, {conn, usedPrefix, command}) => {
   conn.sendMessage(m.chat, {audio: audio.data, mimetype: 'audio/mpeg'}, {quoted: fkontak});
 };
 
-handler.help = ['tomp3', 'toaudio'];
+handler.help = ['toaudio'];
 handler.command = ['tomp3', 'toaudio', 'toaud'];
-handler.group = false;
+handler.tags = ['coverter'];
 
 export default handler;
