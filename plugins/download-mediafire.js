@@ -86,8 +86,9 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
     }
 };
 
-handler.command = /^(mediafire)$/i;
-handler.register = true;
+handler.help = ['mediafire'];
+handler.tags = ['download'];
+handler.command = /^(mediafire|mf)$/i;
 handler.diamantes = 3;
 
 export default handler;
