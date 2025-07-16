@@ -142,30 +142,27 @@ ${readMore}
       defaultMenu.after
     ].join('\n')
 
-    await conn.sendMessage(m.chat, {
-      video: { url: vid[Math.floor(Math.random() * vid.length)] },
-      caption: menuText,
-      contextInfo: {
-        mentionedJid: [m.sender],
-        isForwarded: true,
-        forwardingScore: 999,
-        externalAdReply: {
-          title: '⏤͟͞ू⃪ ፝͜⁞ShadowBot Menú',
-          body: 'Sistema de comandos completo',
-          thumbnailUrl: perfil,
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          showAdAttribution: true,
-          mediaUrl: null,
-          sourceUrl: `https://github.com/ShadowBot-MDv3`
-        }
-      }
-    }, { quoted: m })
-
-  } catch (e) {
-    console.error(e)
-    await m.reply('⚠️ Error al generar el menú.')
-  }
+ 
+        await conn.sendMessage(m.chat, {
+            video: { url: vid.getRandom() }, // Vid
+            caption: text,
+            contextInfo: {
+                mentionedJid: [m.sender],
+                isForwarded: true,
+                forwardingScore: 999,
+                externalAdReply: {
+                    title: '⏤͟͞ू⃪ ፝͜⁞Sʜᴀᴅᴏᴡ✰⃔࿐\nNᴜᴇᴠᴀ Vᴇʀsɪᴏɴ Uʟᴛʀᴀ 🌤️',
+                    thumbnailUrl: perfil,
+                    mediaType: 1,
+                    renderLargerThumbnail: false,
+                },
+            },
+            gifPlayback: true,
+            gifAttribution: 0
+        }, { quoted: null })
+    } catch (e) {
+        await m.reply(`*✖️ Ocurrió un error al enviar el menú.*\n\n${e}`)
+    }
 }
 
 handler.help = ['menu']
