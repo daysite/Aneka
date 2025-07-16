@@ -1,6 +1,6 @@
 let handler = async (m, { conn, usedPrefix, command, text }) => {
     if (!text) return m.reply(
-        `*${xtools} Por favor, ingresa el texto para crear un post de tweet.*
+        `*${xmaker} Por favor, ingresa el texto para crear un post de tweet.*
 > *\`Uso:\`* ${usedPrefix + command} texto | usuario | nombre | likes | citas | retweets | cliente | perfilURL | imagenURL`
     )
 
