@@ -102,6 +102,6 @@ await conn.sendMessage(m.chat, {
 };
 
 handler.command = handler.help = ['audio'];
-handler.tags = ['downloader'];
+handler.tags = ['download'];
 
 export default handler;
