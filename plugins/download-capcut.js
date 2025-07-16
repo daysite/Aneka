@@ -32,7 +32,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     }
 };
 
-handler.help = ["capcut *<url>*"];
+handler.help = ["capcut"];
 handler.tags = ["descargas"];
 handler.command = ["capcut", "capcutdl"];
 
