@@ -61,10 +61,10 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
 ${readMore}
 
 乂 *Lista de comandos* 乂
-      `.trim(),
+`.trim(),
 
-      header: category => `\n「 ${category} 」\n`,
-      body: (cmd, emoji) => `  ${emoji} ${cmd}`,
+      header: category => `${category}`,
+      body: (cmd, emoji) => `${emoji} ${cmd}`,
       footer: '',
       after: `\n> ${club}`
     }
