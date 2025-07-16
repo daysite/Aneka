@@ -24,7 +24,7 @@ const handler = async (m, { text, usedPrefix, command, quoted }) => {
 };
 
 handler.help = ['cfrase'];
-handler.tags = ['tools'];
+handler.tags = ['maker'];
 handler.command = /^cfrase$/i;
 
 export default handler;
