@@ -32,7 +32,7 @@ const handler = async (m, { args, usedPrefix, command }) => {
   } catch (error) {
     try {
       // Intentar traducción con API secundaria si la primera falla
-      const res = await fetch(`https://api.lolhuman.xyz/api/translate/auto/${lang}?apikey=${lolkeysapi}&text=${encodeURIComponent(text)}`);
+      const res = await fetch(`https://api.lolhuman.xyz/api/translate/auto/${lang}?apikey=GataDiosV3&text=${encodeURIComponent(text)}`);
       if (!res.ok) throw new Error('Error en la API secundaria');
 
       const json = await res.json();
