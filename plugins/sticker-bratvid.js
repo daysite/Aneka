@@ -32,32 +32,37 @@ handler.tags = ['sticker']
 
 export default handler*/
 
+
 import { sticker } from '../lib/sticker.js'
 import axios from 'axios'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hello World`, m, rcanal)
+    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para crear tu sticker animado.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hola che`, m, rcanal)
   }
 
   m.react('⏳')
 
   try {
-    const api = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
-    const { data } = await axios.get(api)
-    
-    if (!data.status || !data.result) {
-      throw new Error(data.message || 'No se pudo generar el video.')
+    const apiURL = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
+    const { data } = await axios.get(apiURL)
+
+    // Verificamos si la respuesta fue exitosa
+    if (data.status !== true || !data.result) {
+      throw new Error(data.message || 'La API no devolvió un video.')
     }
 
-    const res = await axios.get(data.result, { responseType: 'arraybuffer' })
-    const contentType = res.headers['content-type']
-    if (!contentType || !contentType.startsWith('video/')) throw new Error('Respuesta no es un video válido.')
+    // Descargamos el video generado
+    const videoRes = await axios.get(data.result, { responseType: 'arraybuffer' })
+    const contentType = videoRes.headers['content-type']
+    if (!contentType || !contentType.startsWith('video/')) throw new Error('La respuesta no contiene un video válido.')
 
-    const bratSticker = await sticker(res.data, null, global.packname, global.author)
+    // Convertimos a sticker animado
+    const bratSticker = await sticker(videoRes.data, null, global.packname, global.author)
+
     await conn.sendMessage(m.chat, { sticker: bratSticker }, { quoted: m })
-
     m.react('✅')
+
   } catch (err) {
     console.error(err)
     m.react('✖️')
