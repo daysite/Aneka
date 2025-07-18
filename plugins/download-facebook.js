@@ -47,53 +47,54 @@ handler.command = /^(fb|facebook|fbdl)$/i;
 export default handler;                                                                                                                                                                                                                              
 */
 
-
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
 const handler = async (m, { text, conn, args, usedPrefix, command }) => {
   if (!args[0]) {
     return conn.reply(m.chat, `❗️ Ingresa el link del video de Facebook.\n\n📌 Ejemplo: *${usedPrefix + command} https://www.facebook.com/watch/?v=123456789*`, m);
   }
 
+  if (!/^https?:\/\/(www\.)?facebook\.com/.test(args[0])) {
+    return conn.reply(m.chat, '❗️ El enlace proporcionado no es válido. Asegúrate de que sea un enlace de Facebook.', m);
+  }
+
   await m.react('🕒');
 
-  let res, data, video;
+  let videoData;
   try {
-    let api = `https://apizell.web.id/download/facebook?url=${encodeURIComponent(args[0])}`;
-    res = await fetch(api);
-    let json = await res.json();
+    const api = `https://apizell.web.id/download/facebook?url=${encodeURIComponent(args[0])}`;
+    const res = await fetch(api);
+    const json = await res.json();
 
-    if (!json.success || !json.download || json.download.length === 0) {
+    if (!json.success || !Array.isArray(json.download) || json.download.length === 0) {
       return conn.reply(m.chat, '⚠️ No se encontraron resultados. Asegúrate de que el enlace sea público y válido.', m);
     }
 
-    // Buscar primero 720p y luego 360p
-    data = json.download.find(v => v.quality.includes('720')) || json.download.find(v => v.quality.includes('360'));
+    videoData = json.download
+      .sort((a, b) => parseInt(b.quality) - parseInt(a.quality))
+      .find(v => v.url);
 
-    if (!data) {
-      return conn.reply(m.chat, '⚠️ No se encontró una calidad de video adecuada (720p o 360p).', m);
+    if (!videoData) {
+      return conn.reply(m.chat, '⚠️ No se encontró una calidad de video adecuada.', m);
     }
-
-    video = data.url;
-
   } catch (error) {
-    console.error(error)
-    return conn.reply(m.chat, '❌ Error al procesar el video. Asegúrate de que el enlace sea correcto.', m);
+    console.error('[ERROR Facebook Downloader]:', error.message);
+    return conn.reply(m.chat, '❌ Ocurrió un error al intentar procesar el enlace. Intenta nuevamente más tarde.', m);
   }
 
   try {
     await conn.sendMessage(m.chat, {
-      video: { url: video },
-      caption: '✅ *Descarga exitosa de Facebook*\n\n🎬 Shadow Ultra Downloader',
+      video: { url: videoData.url },
+      caption: `✅ *Descarga completada*\n\n🔗 *Origen:* Facebook\n🎬 *Calidad:* ${videoData.quality}\n\nShadow Ultra Downloader`,
       fileName: 'facebook.mp4',
       mimetype: 'video/mp4'
     }, { quoted: m });
 
     await m.react('✅');
   } catch (e) {
-    console.error(e);
+    console.error('[ERROR Envío del video]:', e.message);
     await m.react('❌');
-    return conn.reply(m.chat, '⚠️ La URL del vídeo parece estar corrupta. Intenta con otro enlace.', m);
+    return conn.reply(m.chat, '⚠️ La URL del vídeo parece estar corrupta o no está disponible. Intenta con otro enlace.', m);
   }
 };
 
