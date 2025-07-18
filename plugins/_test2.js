@@ -94,3 +94,49 @@ handler.command = ['send2channel', 'enviarcanal', 'reenviar', 'publicar'];
 handler.rowner = true;
 
 export default handler;*/
+
+
+import fetch from 'node-fetch';
+
+const handler = async (m, { text, conn, command }) => {
+  if (!text) {
+    return m.reply(`⚠️ *Ejemplo de uso:*\n\n${command} 5154620086381074|04|2027|672`);
+  }
+
+  try {
+    const res = await fetch(`https://www.dark-yasiya-api.site/other/cc-check?cc=${encodeURIComponent(text)}`);
+    if (!res.ok) throw '❌ No se pudo obtener respuesta de la API';
+
+    const json = await res.json();
+    if (!json.result || !json.result.card) throw '❌ No se pudo analizar la respuesta';
+
+    const r = json.result;
+    const c = r.card;
+
+    const msg = `
+╭━━〔 *SHADOW CC CHECKER* 💳 〕━━⬣
+┃
+┃🔢 *Tarjeta:* ${c.card}
+┃🏦 *Banco:* ${c.bank}
+┃💳 *Tipo:* ${c.brand} - ${c.type.toUpperCase()} (${c.category})
+┃🌍 *País:* ${c.country.emoji} ${c.country.name} (${c.country.code})
+┃💸 *Moneda:* ${c.country.currency}
+┃📶 *Estado:* ${r.status === 'Live' ? '✅ LIVE' : '❌ DIE'}
+┃📜 *Mensaje:* ${r.message}
+┃
+╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
+
+    await m.reply(msg);
+  } catch (e) {
+    console.error(e);
+    await m.reply(`❌ *Ocurrió un error:* ${e}`);
+  }
+};
+
+export default handler;
+
+handler.command = ['checkcc', 'cccheck', 'verificarcc'];
+handler.help = ['checkcc <cc|mm|aaaa|cvv>'];
+handler.tags = ['tools'];
+//handler.premium = true;
+//handler.limit = true;
