@@ -33,24 +33,25 @@ handler.tags = ['sticker']
 export default handler*/
 
 
-
 import { sticker } from '../lib/sticker.js'
 import axios from 'axios'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hello Wordd`, m, rcanal)
+    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hello Word`, m, rcanal)
   }
 
   m.react('⏳')
 
   try {
-    // Nueva URL adaptada a la API de ZELL
     let url = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
     let res = await axios.get(url, { responseType: 'arraybuffer' })
+    let contentType = res.headers['content-type'] || ''
 
-    let contentType = res.headers['content-type']
-    if (!contentType || !contentType.startsWith('video/')) throw new Error('La API no devolvió un video válido.')
+    // ✅ Aceptar image/gif también
+    if (!['image/gif', 'video/mp4', 'application/octet-stream'].includes(contentType)) {
+      throw new Error(`Contenido inesperado: ${contentType}`)
+    }
 
     let bratSticker = await sticker(res.data, null, global.packname, global.author)
 
