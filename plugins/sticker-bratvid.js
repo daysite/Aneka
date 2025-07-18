@@ -1,4 +1,4 @@
-
+/*
 import { sticker } from '../lib/sticker.js'
 import axios from 'axios'
 
@@ -18,6 +18,45 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     let bratSticker = await sticker(res.data, null, global.packname, global.author)
 
     await conn.sendMessage(m.chat, { sticker: bratSticker }, { quoted: m })
+    m.react('✅')
+  } catch (err) {
+    console.error(err)
+    m.react('✖️')
+    m.reply(`✖️ Error: ${err.message}`)
+  }
+}
+
+handler.help = ['bratvid']
+handler.command = ['bratvid', 'bratv']
+handler.tags = ['sticker']
+
+export default handler*/
+
+import { sticker } from '../lib/sticker.js'
+import axios from 'axios'
+
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+  if (!text) {
+    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hello World`, m, rcanal)
+  }
+
+  m.react('⏳')
+
+  try {
+    const api = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
+    const { data } = await axios.get(api)
+    
+    if (!data.status || !data.result) {
+      throw new Error(data.message || 'No se pudo generar el video.')
+    }
+
+    const res = await axios.get(data.result, { responseType: 'arraybuffer' })
+    const contentType = res.headers['content-type']
+    if (!contentType || !contentType.startsWith('video/')) throw new Error('Respuesta no es un video válido.')
+
+    const bratSticker = await sticker(res.data, null, global.packname, global.author)
+    await conn.sendMessage(m.chat, { sticker: bratSticker }, { quoted: m })
+
     m.react('✅')
   } catch (err) {
     console.error(err)
