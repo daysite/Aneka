@@ -32,29 +32,29 @@ handler.tags = ['sticker']
 
 export default handler*/
 
+
+
 import { sticker } from '../lib/sticker.js'
 import axios from 'axios'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para crear tu sticker animado.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hola che`, m, rcanal)
+    return conn.reply(m.chat, `*${xsticker} Por favor, ingresa un texto para realizar tu sticker.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Hello Word`, m, rcanal)
   }
 
   m.react('⏳')
 
   try {
-    // No usamos axios.get() esperando JSON, porque esto devuelve VIDEO DIRECTO
-    const videoURL = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
-    const res = await axios.get(videoURL, { responseType: 'arraybuffer' })
+    // Nueva URL adaptada a la API de ZELL
+    let url = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
+    let res = await axios.get(url, { responseType: 'arraybuffer' })
 
-    const contentType = res.headers['content-type']
-    if (!contentType || !contentType.startsWith('video/')) {
-      throw new Error('La API no devolvió un video válido.')
-    }
+    let contentType = res.headers['content-type']
+    if (!contentType || !contentType.startsWith('video/')) throw new Error('La API no devolvió un video válido.')
 
-    const bratSticker = await sticker(res.data, null, global.packname, global.author)
+    let bratSticker = await sticker(res.data, null, global.packname, global.author)
+
     await conn.sendMessage(m.chat, { sticker: bratSticker }, { quoted: m })
-
     m.react('✅')
   } catch (err) {
     console.error(err)
