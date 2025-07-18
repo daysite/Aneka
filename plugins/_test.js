@@ -10,12 +10,19 @@ const handler = async (m, { text, command, usedPrefix }) => {
   const isNumbered = /^\d+\s*\|\s*/.test(text)
 
   const fetchFonts = async (inputText) => {
-    const res = await fetch(`${API_URL}?text=${encodeURIComponent(inputText)}`)
-    const json = await res.json()
-    if (!json.status || !Array.isArray(json.result) || json.result.length === 0) {
-      throw 'No se encontraron estilos para el texto ingresado.'
+    try {
+      const res = await fetch(`${API_URL}?text=${encodeURIComponent(inputText)}`)
+      if (!res.ok) throw new Error(`Error HTTP: ${res.status} ${res.statusText}`)
+      
+      const json = await res.json()
+      if (!json.status || !Array.isArray(json.result) || json.result.length === 0) {
+        throw new Error('La API no devolvió resultados válidos.')
+      }
+      return json.result
+    } catch (e) {
+      console.error('[FontAPI Error]', e)
+      throw 'Ocurrió un error al consultar los estilos. Asegúrate de usar un texto válido.'
     }
-    return json.result
   }
 
   if (isNumbered) {
