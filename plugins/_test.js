@@ -49,5 +49,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
   m.reply(`${salida}`)
 }
 
-handler.command = /^font$/i
+handler.help = ['font']
+handler.tags = ['tools']
+handler.command = /^font|fonts$/i
 export default handler
