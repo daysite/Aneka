@@ -46,9 +46,9 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   try {
     let url = `https://apizell.web.id/tools/bratanimate?q=${encodeURIComponent(text)}`
     let res = await axios.get(url, { responseType: 'arraybuffer' })
+
     let contentType = res.headers['content-type'] || ''
 
-    // ✅ Aceptar image/gif también
     if (!['image/gif', 'video/mp4', 'application/octet-stream'].includes(contentType)) {
       throw new Error(`Contenido inesperado: ${contentType}`)
     }
@@ -60,7 +60,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   } catch (err) {
     console.error(err)
     m.react('✖️')
-    m.reply(`✖️ Error: ${err.message}`)
+    m.reply(`*✖️ Error:* ${err.message}`)
   }
 }
 
