@@ -5,11 +5,10 @@ let handler = async (m, { text, command, usedPrefix }) => {
   const fontAPI = 'https://www.dark-yasiya-api.site/other/font?text='
   
   if (!input) {
-    // No se ingresó nada: mostrar lista de fuentes
     const res = await fetch(fontAPI + encodeURIComponent('Shadow Bot'))
     const json = await res.json()
 
-    if (!json.status || !json.result) throw '⚠️ Error al obtener las fuentes.'
+    if (!json.status || !json.result) throw '*✖️ Error al obtener las fuentes.*'
 
     const list = json.result.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
 
@@ -40,14 +39,14 @@ let handler = async (m, { text, command, usedPrefix }) => {
   if (!json.status || !json.result) throw '⚠️ No se pudo obtener la fuente.'
 
   if (index < 0 || index >= json.result.length) {
-    m.reply(`❌ *Número inválido.*\nSolo hay ${json.result.length} fuentes disponibles.`)
+    m.reply(`✖️ *Número inválido.*\nSolo hay ${json.result.length} fuentes disponibles.`)
     return
   }
 
   const fuente = json.result[index]
   const salida = fuente.result || '(vacío)'
 
-  m.reply(`🔤 *Texto en fuente "${fuente.name}":*\n${salida}`)
+  m.reply(`${salida}`)
 }
 
 handler.command = /^font$/i
