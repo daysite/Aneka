@@ -95,62 +95,43 @@ handler.rowner = true;
 
 export default handler;*/
 
+import fetch from 'node-fetch'
 
-import fetch from 'node-fetch';
+let handler = async (m, { conn, text, command }) => {
+  if (!text) throw `✧ Ingresa una tarjeta con este formato:\n\n${command} 5154620086381074|04|2027|672`
 
-const handler = async (m, { text, conn, command }) => {
-  if (!text) {
-    return m.reply(`⚠️ *Ejemplo de uso:*\n\n${command} 5154620086381074|04|2027|672`);
-  }
-
-  // Validar formato CC|MM|AAAA|CVV
-  const regex = /^(\d{13,19})\|(\d{2})\|(\d{4})\|(\d{3,4})$/;
-  if (!regex.test(text.trim())) {
-    return m.reply('❌ *Formato inválido.*\nAsegúrate de usar:\n\n`<número>|<mes>|<año>|<cvv>`\nEjemplo:\n5154620086381074|04|2027|672');
-  }
+  const api = `https://www.dark-yasiya-api.site/other/cc-check?cc=${encodeURIComponent(text)}`
+  m.reply('⏳ Verificando tarjeta, espera un momento...')
 
   try {
-    const apiUrl = `https://www.dark-yasiya-api.site/other/cc-check?cc=${encodeURIComponent(text)}`;
-    const res = await fetch(apiUrl);
+    const res = await fetch(api)
+    if (!res.ok) throw '❌ Error al conectar con la API.'
+    
+    const json = await res.json()
+    const card = json?.result?.card || {}
+    const result = json?.result || {}
 
-    if (!res.ok) {
-      throw new Error(`❌ Error al conectar con la API (Código ${res.status})`);
-    }
+    let msg = `╭━━━━[ 🔎 *CC Checker* ]━━━━⬣\n`
+    msg += `┃ ✦ *Estado:* ${result.status === 'Live' ? '✅ LIVE' : '❌ DIE'}\n`
+    msg += `┃ ✦ *Mensaje:* ${result.message || '-'}\n`
+    msg += `┃ ✦ *Tarjeta:* ${card.card || '-'}\n`
+    msg += `┃ ✦ *Tipo:* ${card.type || '-'}\n`
+    msg += `┃ ✦ *Marca:* ${card.brand || '-'}\n`
+    msg += `┃ ✦ *Categoría:* ${card.category || '-'}\n`
+    msg += `┃ ✦ *Banco:* ${card.bank || '-'}\n`
+    msg += `┃ ✦ *País:* ${card.country?.name || '-'} ${card.country?.emoji || ''}\n`
+    msg += `┃ ✦ *Moneda:* ${card.country?.currency || '-'}\n`
+    msg += `╰━━━━━━━━━━━━━━━━━━━━⬣`
 
-    const json = await res.json();
-
-    if (!json?.result?.card) {
-      throw new Error('❌ Respuesta inesperada de la API');
-    }
-
-    const { card: fullCard, bank, type, category, brand, country } = json.result.card;
-    const { status, message } = json.result;
-
-    const msg = `
-╭━━〔 *SHADOW CC CHECKER* 💳 〕━━⬣
-┃
-┃🔢 *Tarjeta:* ${fullCard}
-┃🏦 *Banco:* ${bank}
-┃💳 *Tipo:* ${brand} - ${type?.toUpperCase()} (${category})
-┃🌍 *País:* ${country?.emoji || ''} ${country?.name || 'Desconocido'} (${country?.code || '??'})
-┃💸 *Moneda:* ${country?.currency || 'N/A'}
-┃📶 *Estado:* ${status === 'Live' ? '✅ LIVE' : '❌ DIE'}
-┃📜 *Mensaje:* ${message}
-┃
-╰━━━━━━━━━━━━━━━━━━━━⬣`.trim();
-
-    await m.reply(msg);
-
+    m.reply(msg)
   } catch (e) {
-    console.error('[CHECKCC ERROR]', e);
-    await m.reply(`❌ *Ocurrió un error al verificar la tarjeta.*\n${e.message || e}`);
+    console.error(e)
+    throw '⚠️ Ocurrió un error al verificar la tarjeta.'
   }
-};
+}
 
-export default handler;
+handler.help = ['cccheck <cc|mm|yyyy|cvv>']
+handler.tags = ['tools']
+handler.command = /^cccheck|cc$/i
 
-handler.command = ['checkcc', 'cccheck', 'verificarcc'];
-handler.help = ['checkcc <cc|mm|aaaa|cvv>'];
-handler.tags = ['tools'];
-//handler.premium = true;
-//handler.limit = true;
+export default handler
