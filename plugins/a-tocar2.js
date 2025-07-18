@@ -25,7 +25,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     m.reply('❌ Ocurrió un error al generar el video. Intenta más tarde.')
   }
 }
-handler.command = ['brat']
+handler.command = ['brattv']
 handler.tags = ['video']
 handler.help = ['brat <texto>']
 //handler.register = true
