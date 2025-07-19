@@ -61,6 +61,6 @@ const handler = async (m, { conn, text, command }) => {
 
 handler.help = ['applemusic <texto>'];
 handler.tags = ['search'];
-handler.command = /^applemusic$/i;
+handler.command = /^apsearch$/i;
 
 export default handler;
