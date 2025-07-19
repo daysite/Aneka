@@ -7,31 +7,25 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!url.includes('music.apple.com')) throw '*[❗] El enlace debe ser válido de Apple Music.*'
 
   try {
+    await m.react('⏳') // Reacción de espera
+
     const res = await fetch(`https://delirius-apiofc.vercel.app/download/applemusicdl?url=${encodeURIComponent(url)}`)
     const json = await res.json()
 
-    if (!json.status || !json.data?.download) throw '*[❗] No se pudo obtener la descarga. Verifica el enlace.*'
+    if (!json.status || !json.data?.download) {
+      await m.react('❌') // Reacción de error
+      throw '*[❗] No se pudo obtener la descarga. Verifica el enlace.*'
+    }
 
-    const { name, image, artists, duration, download } = json.data
+    const { name, artists, download } = json.data
+    const filename = `${name} - ${artists}.mp3`.replace(/[\\/:*?"<>|]/g, '') // Limpia caracteres no válidos
 
-    const info = `
-╭━━〔 *🍏 APPLE MUSIC - SHADOW* 〕━━⬣
-┃🎵 *Título:* ${name}
-┃🧑‍🎤 *Artistas:* ${artists}
-┃⏱️ *Duración:* ${duration}
-┃📥 *Estado:* Enviando audio...
-╰━━━━━━━━━━━━━━━━━━⬣`.trim()
-
-    await conn.sendMessage(m.chat, {
-      image: { url: image },
-      caption: info,
-      headerType: 4
-    }, { quoted: m })
-
-    await conn.sendFile(m.chat, download, `${name}.mp3`, null, m)
+    await conn.sendFile(m.chat, download, filename, null, m, false)
+    await m.react('✅') // Reacción de éxito
 
   } catch (e) {
     console.error(e)
+    await m.react('❌') // Reacción de error
     throw '*[❗] Hubo un error al procesar la solicitud. Intenta de nuevo más tarde.*'
   }
 }
