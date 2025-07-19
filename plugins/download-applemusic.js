@@ -13,19 +13,24 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const json = await res.json()
 
     if (!json.status || !json.data?.download) {
-      await m.react('❌') // Reacción de error
+      await m.react('❌')
       throw '*[❗] No se pudo obtener la descarga. Verifica el enlace.*'
     }
 
     const { name, artists, download } = json.data
-    const filename = `${name} - ${artists}.mp3`.replace(/[\\/:*?"<>|]/g, '') // Limpia caracteres no válidos
+    const filename = `${name} - ${artists}.mp3`.replace(/[\\/:*?"<>|]/g, '')
 
-    await conn.sendFile(m.chat, download, filename, null, m, false)
-    await m.react('✅') // Reacción de éxito
+    await conn.sendMessage(m.chat, {
+      audio: { url: download },
+      mimetype: 'audio/mpeg',
+      fileName: filename,
+    }, { quoted: m })
+
+    await m.react('✅')
 
   } catch (e) {
     console.error(e)
-    await m.react('❌') // Reacción de error
+    await m.react('❌')
     throw '*[❗] Hubo un error al procesar la solicitud. Intenta de nuevo más tarde.*'
   }
 }
