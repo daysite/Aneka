@@ -1,4 +1,4 @@
-/*import fetch from 'node-fetch'
+import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
 if (!text) return m.reply(`Ingresa una petición`)
@@ -16,15 +16,16 @@ JT += `*Artista* : ${video.artists}\n`
 JT += `*Url* : ${video.url}\n`
 })
 
-await conn.sendFile(m.chat, json[0].image, 'hasumiBotFreeCodes.jpg', JT, m);
+await conn.sendFile(m.chat, json[0].image, 'catalogo.jpg', JT, m);
 } catch (error) {
 console.error(error)
 }}
 
 handler.command = /^(applemusicsearch|applemusic)$/i
 
-export default handler*/
+export default handler
 
+/*
 import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text, command }) => {
@@ -63,4 +64,4 @@ handler.help = ['applemusic <texto>'];
 handler.tags = ['search'];
 handler.command = /^apsearch$/i;
 
-export default handler;
+export default handler;*/
