@@ -37,4 +37,4 @@ handler.help = ['applemusic <texto>'];
 handler.tags = ['search'];
 handler.command = /^apsearch$/i;
 
-export default handler;*/
+export default handler;
