@@ -7,17 +7,17 @@ import fetch from 'node-fetch'
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text) {
-      throw `*[❗] Ingresa un nombre de usuario de Instagram.*\n\n> *Ejemplo:* ${usedPrefix + command} dev.criss_vx`
+      throw `*${xtools} Por favor, ingresa un nombre de usuario de Instagram.\n> *\`Ejemplo:\`* ${usedPrefix + command} dev.criss_vx`
     }
 
     await m.react('🔎')
 
     const res = await fetch(`https://api.vreden.my.id/api/igstalk?query=${encodeURIComponent(text)}`)
-    if (!res.ok) throw `🚫 Error al obtener datos del perfil. Código: ${res.status}`
+    if (!res.ok) throw `*✖️ Error al obtener datos del perfil. Código:* ${res.status}`
 
     const json = await res.json()
     const user = json?.result?.user
-    if (!user) throw `⚠️ No se encontró el usuario: *${text}*`
+    if (!user) throw `*⚠️ No se encontró el usuario: ${text}*`
 
     const {
       username, full_name, biography, external_url,
@@ -41,17 +41,18 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 *👥 Seguidores:* ${follower_count?.toLocaleString() || '-'}
 *📧 Siguiendo:* ${following_count?.toLocaleString() || '-'}
 *🔐 Cuenta:* ${is_private ? 'Sí 🔒' : 'No 🔓'}
-`.trim()
+
+${club}`.trim()
 
     await conn.sendFile(m.chat, img, 'perfil.jpg', info, m)
     await m.react('✅')
 
   } catch (e) {
     if (typeof e !== 'string') {
-      await m.react('❌')
+      await m.react('✖️')
       console.error('[IGSTALK]', e)
     }
-    throw typeof e === 'string' ? e : '❌ Ocurrió un error inesperado. Intenta nuevamente.'
+    throw typeof e === 'string' ? e : '*✖️ Ocurrió un error inesperado. Intenta nuevamente.*'
   }
 }
 
