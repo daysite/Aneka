@@ -34,13 +34,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 *👤 Usuario:* @${username}
 *🌴 Nombre:* ${full_name || '-'}
-*🍁 Posts:* ${media_count}
+*🍁 Publicaciones:* ${media_count}
 *📄 Biografía:* ${bio}
 *⛓️ Enlaces:* ${url}
 *🌵 Categoría:* ${category || 'No definida'}
 *👥 Seguidores:* ${follower_count?.toLocaleString() || '-'}
 *📧 Siguiendo:* ${following_count?.toLocaleString() || '-'}
-*🔐 Cuenta:* ${is_private ? 'Sí 🔒' : 'No 🔓'}
+*🔐 Cuenta Privada:* ${is_private ? 'Sí 🔒' : 'No 🔓'}
 
 > ${club}`.trim()
 
