@@ -1,14 +1,16 @@
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
-https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n */
 
 import fetch from 'node-fetch'
 
-let handler = async (m, { conn, args, text, usedPrefix, command }) => {
-  await m.react('🔎')
-
+let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
-    if (!text) throw `${xtools} Ingresa un nombre de usuario de Instagram.\n> *\`Ejemplo:\`* ${usedPrefix + command} dev.criss_vx`
+    if (!text) {
+      throw `*[❗] Ingresa un nombre de usuario de Instagram.*\n\n> *Ejemplo:* ${usedPrefix + command} dev.criss_vx`
+    }
+
+    await m.react('🔎')
 
     const res = await fetch(`https://api.vreden.my.id/api/igstalk?query=${encodeURIComponent(text)}`)
     if (!res.ok) throw `🚫 Error al obtener datos del perfil. Código: ${res.status}`
@@ -45,8 +47,10 @@ let handler = async (m, { conn, args, text, usedPrefix, command }) => {
     await m.react('✅')
 
   } catch (e) {
-    await m.react('❌')
-    console.error('[IGSTALK]', e)
+    if (typeof e !== 'string') {
+      await m.react('❌')
+      console.error('[IGSTALK]', e)
+    }
     throw typeof e === 'string' ? e : '❌ Ocurrió un error inesperado. Intenta nuevamente.'
   }
 }
