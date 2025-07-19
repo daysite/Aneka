@@ -7,7 +7,7 @@ import fetch from 'node-fetch'
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text) {
-      throw `*${xtools} Por favor, ingresa un nombre de usuario de Instagram.\n> *\`Ejemplo:\`* ${usedPrefix + command} dev.criss_vx`
+      throw `*${xtools} Por favor, ingresa un nombre de usuario de Instagram.*\n> *\`Ejemplo:\`* ${usedPrefix + command} dev.criss_vx`
     }
 
     await m.react('🔎')
@@ -42,7 +42,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 *📧 Siguiendo:* ${following_count?.toLocaleString() || '-'}
 *🔐 Cuenta:* ${is_private ? 'Sí 🔒' : 'No 🔓'}
 
-${club}`.trim()
+> ${club}`.trim()
 
     await conn.sendFile(m.chat, img, 'perfil.jpg', info, m)
     await m.react('✅')
