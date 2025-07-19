@@ -29,7 +29,7 @@ let handler = async (m, { conn, text, command }) => {
     m.reply(msg)
   } catch (e) {
     console.error(e)
-    throw *'⚠️ Ocurrió un error al verificar la tarjeta.*'
+    throw '*⚠️ Ocurrió un error al verificar la tarjeta.*'
   }
 }
 
