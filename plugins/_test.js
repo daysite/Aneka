@@ -15,7 +15,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
 
   if (!args.length) {
     return await conn.sendMessage(m.chat, {
-      text: `🌌 *Uso correcto:*\n${usedPrefix + command} <modelo?> <pregunta>\n\n📌 *Ejemplos:*\n${usedPrefix + command} claude ¿Qué es el amor?\n${usedPrefix + command} modelos\n\n🧠 *Modelos disponibles:* pulsa el botón.`,
+      text: `*${xia} Por favor, elige un modelo de Inteligencia Artificial que deseas usar.*\n> *\`Ejemplo:\`* ${usedPrefix + command} gemini ¡Hola!, ¿Que es la ilusión?`,
       buttons: [
         {
           buttonId: `${usedPrefix + command} modelos`,
@@ -23,7 +23,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
           type: 1
         }
       ],
-      footer: '',
+      footer: 'Click para ver los modelos disponibles',
       headerType: 1
     }, { quoted: m })
   }
