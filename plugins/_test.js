@@ -36,8 +36,8 @@ let handler = async (m, { text, conn, command }) => {
       if (presentation) respuesta += `🧾 *Presentación:* ${presentation}\n`;
       if (prescription) respuesta += `💊 *Receta:* ${prescription}\n`;
       if (shortDescription) respuesta += `📋 *Uso:* ${shortDescription}\n`;
-      if (image) respuesta += `🖼️ ${image}\n`;
-      respuesta += `🌐 https://inkafarma.pe/${url}\n\n`;
+      if (image) respuesta += `🌐 https://inkafarma.pe/${url}\n`;
+      respuesta += `🖼️ ${image}\n\n`;
     }
 
     await conn.reply(m.chat, respuesta.trim(), m);
