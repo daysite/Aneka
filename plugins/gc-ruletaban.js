@@ -21,11 +21,11 @@ let handler = async (m, { conn, participants }) => {
     tag = randomUser.id.split('@')[0]; 
   }
 
-  await conn.reply(m.chat, `*🍁 Selección Aleatoria:*\n${tag}\n*Serás Eliminado*`, m);
+  await conn.reply(m.chat, `*🔁 Ruleta aleatoria:*\n*\`${tag}\`\*n*Serás eliminado del grupo.*`, fkontak);
 
   try {
     await conn.groupParticipantsUpdate(m.chat, [randomUser.id], 'remove');
-    await conn.reply(m.chat, `*🌵 ${tag} fue eliminado con éxito.*`, m);
+    await conn.reply(m.chat, `*🌵 \`${tag}\` fue eliminado con éxito.*`, m);
     m.react('✅');
   } catch (e) {
     await conn.reply(m.chat, `*✖️ No se pudo eliminar a \`${tag}\`.`, m);
