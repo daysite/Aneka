@@ -54,6 +54,7 @@ handler.tags = ['tools']
 handler.command = /^font|fonts$/i
 export default handler*/
 
+
 import fetch from 'node-fetch'
 
 let handler = async (m, { text, command, usedPrefix }) => {
@@ -66,7 +67,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
 
     if (!contentType.includes('application/json')) {
       const textoPlano = await res.text()
-      throw `⚠️ El servidor respondió con un error:\n\n${textoPlano.slice(0, 200)}`
+      throw `*⚠️ El servidor respondió con un error:*\n\n${textoPlano.slice(0, 200)}`
     }
 
     return await res.json()
@@ -85,7 +86,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
     const match = input.match(/^(\d+)\s+(.+)/)
     if (!match) {
       const json = await obtenerFuentes('Shadow Bot')
-      if (!json.status || !json.result) throw '⚠️ Error al obtener las fuentes.'
+      if (!json.status || !json.result) throw '*⚠️ Error al obtener las fuentes.*'
 
       const list = json.result.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
       m.reply(`❌ *Formato incorrecto*\n\n✅ Usa el comando así:\n${usedPrefix + command} <número> <texto>\n\n🔤 *Lista de fuentes disponibles:*\n${list}`)
@@ -96,10 +97,10 @@ let handler = async (m, { text, command, usedPrefix }) => {
     const texto = match[2]
 
     const json = await obtenerFuentes(texto)
-    if (!json.status || !json.result) throw '⚠️ No se pudo obtener la fuente.'
+    if (!json.status || !json.result) throw '*⚠️ No se pudo obtener la fuente.*'
 
     if (index < 0 || index >= json.result.length) {
-      m.reply(`✖️ *Número inválido.*\nSolo hay ${json.result.length} fuentes disponibles.`)
+      m.reply(`✖️ *Número inválido.*\n*Solo hay ${json.result.length} fuentes disponibles.*`)
       return
     }
 
