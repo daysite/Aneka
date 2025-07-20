@@ -19,6 +19,7 @@ const handler = async (m, { args }) => {
     const message = `*Símbolos Encontrados*
 ✦ *Búsqueda:* ${json.data.query}
 ✦ *Total:* \`${json.data.total}\` símbolos
+✦ *Enviado:* \`15\` símbolos 
 
 ${randomSymbols.map((s, i) => `${s}`).join('\n')}
 `.trim();
