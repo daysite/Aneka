@@ -78,7 +78,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
       if (!json.status || !json.result) throw '*✖️ Error al obtener las fuentes.*'
 
       const list = json.result.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
-      m.reply(`🔤 *Lista de Fuentes Disponibles:*\n${list}`)
+      m.reply(`*Lista de Fuentes Disponibles:*\n${list}`)
       return
     }
 
