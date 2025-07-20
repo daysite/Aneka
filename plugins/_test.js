@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 let handler = async (m, { text, conn, args, command }) => {
-  if (!text) throw `${xtools} *Ejemplo de uso:*\n.inkafarma crema|;
+  if (!text) throw `${xtools} *Ejemplo de uso:*\n.inkafarma crema`;
 
   const url = `https://delirius-apiofc.vercel.app/search/inkafarma?query=${encodeURIComponent(text)}&limit=6`;
 
