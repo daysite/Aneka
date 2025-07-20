@@ -20,7 +20,7 @@ const handler = async (m, { args }) => {
 ✦ *Búsqueda:* ${json.data.query}
 ✦ *Total:* \`${json.data.total}\` símbolos
 
-${randomSymbols.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+${randomSymbols.map((s, i) => `${s}`).join('\n')}
 `.trim();
 
     await m.reply(message);
