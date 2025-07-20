@@ -19,14 +19,14 @@ const handler = async (m, { args }) => {
     const message = `*Símbolos Encontrados*
 ✦ *Búsqueda:* ${json.data.query}
 ✦ *Total:* \`${json.data.total}\` símbolos
-┃
+
 ${randomSymbols.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 `.trim();
 
     await m.reply(message);
   } catch (e) {
     console.error(e);
-    await m.reply('⚠️ No se pudieron obtener símbolos para esa búsqueda.');
+    await m.reply('*⚠️ No se pudieron obtener símbolos para esa búsqueda.*');
   }
 };
 
