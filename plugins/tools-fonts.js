@@ -121,7 +121,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
     if (!json.status || !json.result) throw '*⚠️ No se pudo obtener la fuente.*'
 
     if (index < 0 || index >= json.result.length) {
-      m.reply(`✖️ *Número inválido.*\n*Solo hay ${json.result.length} fuentes disponibles.*`)
+      m.reply(`✖️ *Número inválido. Solo hay \`${json.result.length}\` fuentes disponibles.*`)
       return
     }
 
