@@ -31,7 +31,7 @@ if (!globalThis.db.data.settings[conn.user.jid].jadibotmd) {
 return m.reply(`*☕ La función de subbots está desactivada.*`)
 }
 let time = global.db.data.users[m.sender].Subs + 120000
-if (new Date - global.db.data.users[m.sender].Subs < 120000) return conn.reply(m.chat, `${emojis} Debes esperar ${msToTime(time - new Date())} para volver a vincular un *Sub-Bot.*`, m)
+if (new Date - global.db.data.users[m.sender].Subs < 120000) return conn.reply(m.chat, `${emojis} Debes esperar ${msToTime(time - new Date())} para volver a vincular un *SubBot.*`, m)
 const subBots = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])]
 const subBotsCount = subBots.length
 if (subBotsCount === 20) {
