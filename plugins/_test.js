@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
-let handler = async (m, { text, conn, command }) => {
-  if (!text) return conn.reply(m.chat, `*${xtools} Por favor, ingresa un producto a buscar en Inkafarma.*\n> *\`Ejemplo:\`* .${command} crema nivea`, m);
+let handler = async (m, { text, conn, usedPrefix, command }) => {
+  if (!text) return conn.reply(m.chat, `*${xtools} Por favor, ingresa un producto a buscar en Inkafarma.*\n> *\`Ejemplo:\`* ${usedPrefix + command} crema nivea`, m);
 
   const url = `https://delirius-apiofc.vercel.app/search/inkafarma?query=${encodeURIComponent(text)}&limit=6`;
 
@@ -46,7 +46,7 @@ let productos = json.data.map(item => {
   }
 };
 
-handler.help = ['inkafarma <producto>'];
+handler.help = ['inkafarma'];
 handler.tags = ['search'];
 handler.command = /^inkafarma$/i;
 
