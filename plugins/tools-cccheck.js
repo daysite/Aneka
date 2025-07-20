@@ -16,9 +16,8 @@ let handler = async (m, { conn, text, command }) => {
 
     let msg = `*ゲ◜៹ Tools - CCChecker ៹◞ゲ*
 
-° *💚 Estado:*${result.status === 'Live' ? 'LIVE 🟢' : 'DIE 🔴'}
+° *💚 Estado:* ${result.status === 'Live' ? 'LIVE 🟢' : 'DIE 🔴'}
 ° *📧 Mensaje:* ${result.message || 'Ninguno'}
-° *🌵 Tipo:* ${card.card || 'Desconocido'}
 ° *🏷️ Marca:* ${card.brand || 'Desconocida'}
 ° *🪶 Categoría:* ${card.category || 'Indefinida'}
 ° *🏦 Banco:* ${card.bank || 'Desconocido'}
