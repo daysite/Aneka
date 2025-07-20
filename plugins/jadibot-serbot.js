@@ -18,7 +18,8 @@ let crm4 = "IF9hdXRvcmVzcG9uZGVyLmpzIGluZm8tYm90Lmpz"
 let drm1 = ""
 let drm2 = ""
 let rtx = "*Shadow Ultra*\n\n✐ Cσɳҽxισɳ SυႦ-Bσƚ Mσԃҽ QR\n\n✰ Con otro celular o en la PC escanea este QR para convertirte en un *Sub-Bot* Temporal.\n\n\`1\` » Haga clic en los tres puntos en la esquina superior derecha\n\n\`2\` » Toque dispositivos vinculados\n\n\`3\` » Escanee este codigo QR para iniciar sesion con el bot\n\n✧ ¡Este código QR expira en 45 segundos!."
-let rtx2 = "*Shadow  -  Bσƚ ↬ ✰⪜*\n\n✐ Cσɳҽxισɳ SυႦ-Bσƚ Mσԃҽ Cσԃҽ\n\n✰ Usa este Código para convertirte en un *Sub-Bot* Temporal.\n\n\`1\` » Haga clic en los tres puntos en la esquina superior derecha\n\n\`2\` » Toque dispositivos vinculados\n\n\`3\` » Selecciona Vincular con el número de teléfono\n\n\`4\` » Escriba el Código para iniciar sesion con el bot\n\n✧ No es recomendable usar tu cuenta principal."
+let rtx2 = `  ⋄  ㅤ̠𝖲𝗁𝖺𝖽𝗈𝗐 𝖴𝗅𝗍𝗋𝖺 - 𝖬𝖣 ㅤׄ͜✧ׅ͡ -\n         ︶ּ⏝ׅ︶ ౨ৎ ︶ׁׅ⏝ּ︶\n        ୨ৎㅤ \`𝖩𝖺𝖽ı-ᗷᨣƚ\` ㅤׅㅤ🪶\n\nㅤ۟ 🔐 ִ *𝖢𝗈́𝖽𝗂𝗀𝗈 𝖦𝖾𝗇𝖾𝗋𝖺𝖽𝗈*   ওㅤ۫   \n\`1\` ׁ  *𝖢𝗈𝗉𝗂𝖺 𝖾𝗅 𝖼𝗈́𝖽𝗂𝗀𝗈* 𝖽𝖾
+        𝗏𝗂𝗇𝖼𝗎𝗅𝖺𝖼𝗂𝗈́𝗇.\n\`2\` ׁ  *𝖧𝖺𝗀𝖺 𝖼𝗅𝗂𝖼𝗄* 𝖾𝗇 𝗅𝗈𝗌 𝟥 \n        𝗉𝗎𝗇𝗍𝗈𝗌 𝖽𝖾 𝗅𝖺 𝖾𝗌𝗊𝗎𝗂𝗇𝖺\n        𝗌𝗎𝗉𝖾𝗋𝗂𝗈𝗋.\n\`3\` ׁ  𝖳𝗈𝗊𝗎𝖾 *𝖽𝗂𝗌𝗉𝗈𝗌𝗂𝗍𝗂𝗏𝗈𝗌*\n        *𝗏𝗂𝗇𝖼𝗎𝗅𝖺𝖽𝗈𝗌.*\n\`4\` ׁ  𝖲𝖾𝗅𝖾𝖼𝖼𝗂𝗈𝗇𝖺 *𝗏𝗂𝗇𝖼𝗎𝗅𝖺𝗋*\m        *𝖼𝗈𝗇 𝗇𝗎́𝗆𝖾𝗋𝗈 𝖽𝖾 𝗍𝖾𝗅𝖾́𝖿𝗈𝗇𝗈*\n\`5\` ׁ  *𝖯𝖾𝗀𝖺 𝖾𝗅 𝖼𝗈́𝖽𝗂𝗀𝗈* 𝗒 𝗅𝗂𝗌𝗍𝗈.\n\n${club}`
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
