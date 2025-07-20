@@ -890,7 +890,7 @@ const questions = [
         answer: "B"
     }
 ];
-
+/*
 const handler = async (m, { conn, command, args, usedPrefix }) => {
 
 let triviaSessions = new Map();
@@ -971,6 +971,96 @@ ${questionData.question}
 
         triviaSessions.set(m.chat, { ...session, answered: true });
     }
+};
+
+handler.help = ['trivia'];
+handler.tags = ['game'];
+handler.command = /^(trivia)$/i;
+
+export default handler;*/
+
+const handler = async (m, { conn, command, args, usedPrefix }) => {
+  global.triviaSessions = global.triviaSessions || new Map();
+
+  if (args.length === 0) {
+    let randomIndex = Math.floor(Math.random() * questions.length);
+    let questionData = questions[randomIndex];
+
+    global.triviaSessions.set(m.chat, { index: randomIndex, answered: false });
+
+    const caption = `
+🎓 *Trivia de Cultura General*  
+${questionData.question}
+`.trim();
+
+    const templateButtons = [
+      {
+        index: 1,
+        quickReplyButton: {
+          displayText: `A) ${questionData.options[0]}`,
+          id: `${usedPrefix}trivia A`
+        }
+      },
+      {
+        index: 2,
+        quickReplyButton: {
+          displayText: `B) ${questionData.options[1]}`,
+          id: `${usedPrefix}trivia B`
+        }
+      },
+      {
+        index: 3,
+        quickReplyButton: {
+          displayText: `C) ${questionData.options[2]}`,
+          id: `${usedPrefix}trivia C`
+        }
+      }
+    ];
+
+    await conn.sendMessage(m.chat, {
+      text: caption,
+      footer: 'Selecciona una opción:',
+      templateButtons
+    }, { quoted: m });
+
+  } else {
+    let session = global.triviaSessions.get(m.chat);
+    if (!session || session.answered) {
+      return conn.reply(m.chat, `⚠️ Primero usa *${usedPrefix}trivia* para obtener una pregunta.`, m);
+    }
+
+    let userAnswer = args[0].toUpperCase();
+    let questionData = questions[session.index];
+    let correctAnswer = questionData.answer;
+
+    let result = userAnswer === correctAnswer
+      ? "🎉 ¡Respuesta correcta!"
+      : `❌ Incorrecto. La respuesta correcta era *${correctAnswer}) ${questionData.options[correctAnswer.charCodeAt(0) - 65]}*`;
+
+    const caption = `
+📌 *Tu respuesta:* ${userAnswer}  
+✅ *Solución:* ${correctAnswer}  
+🧠 *Resultado:* ${result}
+`.trim();
+
+    const templateButtons = [
+      {
+        index: 1,
+        quickReplyButton: {
+          displayText: "🔄 Nueva Pregunta",
+          id: `${usedPrefix}trivia`
+        }
+      }
+    ];
+
+    await conn.sendMessage(m.chat, {
+      text: caption,
+      footer: '¿Juegas otra ronda?',
+      templateButtons
+    }, { quoted: m });
+
+    global.triviaSessions.set(m.chat, { ...session, answered: true });
+  }
 };
 
 handler.help = ['trivia'];
