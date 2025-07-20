@@ -19,10 +19,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const resultados = json.data.slice(0, 10); // máx. 10 resultados
 
-    let txt = `*📰 Resultados para:* _${args.join(' ')}_\n\n`;
+    let txt = `\`\`\`乂 EL COMERCIO - SEARCH\`\`\`\n\n`;
     for (let i = 0; i < resultados.length; i++) {
       const { title, publish, url } = resultados[i];
-      txt += `*${i + 1}.* ${title}\n🗓️ ${publish}\n🔗 ${url}\n\n`;
+      txt += `*\`${i + 1}.\` ${title}*\n≡ *📆 \`Fecha:\` ${publish}\n${url}\n________________________`;
     }
 
     await m.reply(txt.trim());
@@ -35,6 +35,5 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 handler.help = ['elcomercio <texto>'];
 handler.tags = ['internet'];
 handler.command = ['elcomercio', 'comercio', 'noticia', 'news'];
-//handler.register = true;
 
 export default handler;
