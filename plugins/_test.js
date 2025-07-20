@@ -19,10 +19,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const resultados = json.data.slice(0, 10); // máx. 10 resultados
 
-    let txt = `\`\`\`乂 EL COMERCIO - SEARCH\`\`\`\n\n`;
+    let txt = `\`\`\`乂 EL COMERCIO - SEARCH\`\`\`\n`;
     for (let i = 0; i < resultados.length; i++) {
       const { title, publish, url } = resultados[i];
-      txt += `*\`${i + 1}.\` ${title}*\n≡ *📆 \`Fecha:\` ${publish}\n${url}\n________________________`;
+      txt += `*\`${i + 1}.\` ${title}*\n≡ *📆 \`Fecha:\` ${publish}\n${url}\n________________________\n`;
     }
 
     await m.reply(txt.trim());
