@@ -9,21 +9,18 @@ const handler = async (m, { args }) => {
     const json = await res.json();
     
     if (!json.status || !json.data?.symbols?.length) {
-      throw 'No se encontraron símbolos para esa búsqueda.';
+      throw '*⚠️ No se encontraron símbolos para esta búsqueda.*';
     }
 
     const symbols = json.data.symbols;
 
-    // Escoge 15 símbolos aleatorios
     const randomSymbols = symbols.sort(() => 0.5 - Math.random()).slice(0, 15);
 
-    const message = `
-╭━〔 *Símbolos Encontrados* 〕━⬣
-┃ ✦ Búsqueda: *${json.data.query}*
-┃ ✦ Total: *${json.data.total} símbolos*
+    const message = `*Símbolos Encontrados*
+✦ *Búsqueda:* ${json.data.query}
+✦ *Total:* \`${json.data.total}\` símbolos
 ┃
-${randomSymbols.map((s, i) => `┃ ${i + 1}. ${s}`).join('\n')}
-╰━━━━━━━━━━━━━━━━━━⬣
+${randomSymbols.map((s, i) => `${i + 1}. ${s}`).join('\n')}
 `.trim();
 
     await m.reply(message);
