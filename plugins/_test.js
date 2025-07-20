@@ -1,4 +1,3 @@
-// comandos/elcomercio.js
 import fetch from 'node-fetch';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -11,7 +10,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
   try {
     const res = await fetch(url);
-    if (!res.ok) throw `❌ Error al buscar resultados.`;
+    if (!res.ok) throw '❌ Error al buscar resultados.';
 
     const json = await res.json();
     if (!json.status || !json.data?.length) {
@@ -20,12 +19,11 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const resultados = json.data.slice(0, 10); // máx. 10 resultados
 
-    let txt = `╭━━━〔 *📰 Resultados para:* _${args.join(' ')}_ 〕━━⬣\n`;
+    let txt = `*📰 Resultados para:* _${args.join(' ')}_\n\n`;
     for (let i = 0; i < resultados.length; i++) {
       const { title, publish, url } = resultados[i];
-      txt += `┃ *${i + 1}.* ${title}\n┃ 🗓️ ${publish}\n┃ 🔗 ${url}\n┃\n`;
+      txt += `*${i + 1}.* ${title}\n🗓️ ${publish}\n🔗 ${url}\n\n`;
     }
-    txt += `╰━━━━━━〔 👁️‍🗨️ Shadow Noticias 〕━━━━⬣`;
 
     await m.reply(txt.trim());
   } catch (e) {
@@ -34,8 +32,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 };
 
-export const help = ['elcomercio <texto>'];
-export const tags = ['internet'];
-export const command = ['elcomercio', 'comercio', 'noticia', 'news'];
-export const register = true;
+handler.help = ['elcomercio <texto>'];
+handler.tags = ['internet'];
+handler.command = ['elcomercio', 'comercio', 'noticia', 'news'];
+handler.register = true;
+
 export default handler;
