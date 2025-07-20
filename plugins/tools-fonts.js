@@ -23,7 +23,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
       if (!json.status || !json.result) throw '*✖️ Error al obtener las fuentes.*'
 
       const list = json.result.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
-      m.reply(`*Por favor, ingresa un número de la fuente que deseas convertir el texto ingresado.*
+      m.reply(`${xtools} *Por favor, ingresa un número de la fuente que deseas convertir el texto ingresado.*
 > *\`Ejemplo:\`* ${usedPrefix + command} 28 Shadow Ultra
 
 📄 *Lista de fuentes disponibles:*
