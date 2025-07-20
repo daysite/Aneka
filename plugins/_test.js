@@ -35,6 +35,6 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 handler.help = ['elcomercio <texto>'];
 handler.tags = ['internet'];
 handler.command = ['elcomercio', 'comercio', 'noticia', 'news'];
-handler.register = true;
+//handler.register = true;
 
 export default handler;
