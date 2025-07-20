@@ -21,7 +21,7 @@ let handler = async (m, { conn, participants }) => {
     tag = randomUser.id.split('@')[0]; 
   }
 
-  await conn.reply(m.chat, `*🔁 Ruleta aleatoria:*\n*\`${tag}\`\*n*Serás eliminado del grupo.*`, fkontak);
+  await conn.reply(m.chat, `*🔁 Ruleta aleatoria:*\n*\`${tag}\`*\n*Serás eliminado del grupo.*`, fkontak);
 
   try {
     await conn.groupParticipantsUpdate(m.chat, [randomUser.id], 'remove');
