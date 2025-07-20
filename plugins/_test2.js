@@ -1,3 +1,44 @@
+import fetch from 'node-fetch'
+
+const handler = async (m, { conn, text, command }) => {
+  if (!text) throw `🔍 Escribe el nombre de una película para buscar.\n\nEjemplo:\n*.${command} Aquella Navidad*`
+
+  try {
+    const url = `https://www.cinecalidad.ec/api/search?q=${encodeURIComponent(text)}`
+    const res = await fetch(url)
+    if (!res.ok) throw '❌ No se pudo acceder a la API de búsqueda.'
+
+    const json = await res.json()
+    if (!json.status || !json.data || json.data.length === 0) throw '⚠️ No se encontraron resultados para tu búsqueda.'
+
+    const data = json.data
+    const portada = data[0]?.image || null // Imagen de la primera peli
+
+    let texto = `🎬 *Resultados para:* _${text}_\n\n`
+    for (const [i, peli] of data.entries()) {
+      texto += `*${i + 1}.* 🎞️ *${peli.title}*\n⭐ *Rating:* ${peli.rating}\n📚 *Géneros:* ${peli.genres}\n🔗 ${peli.link}\n\n`
+    }
+
+    if (portada) {
+      await conn.sendMessage(m.chat, {
+        image: { url: portada },
+        caption: texto.trim()
+      }, { quoted: m })
+    } else {
+      m.reply(texto.trim())
+    }
+  } catch (err) {
+    console.error(err)
+    m.reply('❌ Error al buscar la película.')
+  }
+}
+
+handler.command = ['pelicula', 'cine', 'buscarpeli']
+handler.help = ['pelicula <nombre>']
+handler.tags = ['pelis']
+export default handler
+
+
 /*const handler = async (m, { conn, text }) => {
   if (!text) throw '*[❗] Ingresa el mensaje a enviar con la ubicación*';
 
