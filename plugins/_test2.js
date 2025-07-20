@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const handler = async (m, { args }) => {
-  const query = args.length ? args.join(" ") : "aesthetic name symbols";
+  const query = args.length ? args.join(" ") : "Aesthetic name symbols";
 
   try {
     const res = await fetch(`https://delirius-apiofc.vercel.app/tools/symbols?query=${encodeURIComponent(query)}`);
@@ -19,7 +19,7 @@ const handler = async (m, { args }) => {
     const message = `
 \`\`\`乂 SIMBOLOS - SEARCH\`\`\`
 
-° ${json.data.query}
+° *${json.data.query}*
 
 ${randomSymbols.map((s, i) => `${s}`).join('\n')}
 
