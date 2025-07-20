@@ -39,7 +39,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
   }
 
   if (!models[modeloElegido]) {
-    return m.reply(`✖️ *Modelo desconocido:* "${modeloElegido}"\n\nEscribe:\n${usedPrefix + command} modelos\npara ver la lista de modelos disponibles.`)
+    return m.reply(`✖️ *Modelo desconocido:* "${modeloElegido}"\n*Escriba \`${usedPrefix + command} modelos\` para ver la lista de modelos disponibles.`)
   }
 
   const modelo = models[modeloElegido]
@@ -66,10 +66,10 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
     if (data?.text) {
       return m.reply(`🤖 *Modelo:* ${modeloElegido} (${modelo})\n\n${data.text}`)
     } else {
-      return m.reply('❌ La IA no devolvió ninguna respuesta.')
+      return m.reply('*⚠️ La inteligencia no devolvió ninguna respuesta.*')
     }
   } catch (e) {
-    return m.reply(`🚫 Error:\n${e.response?.data || e.message}`)
+    return m.reply(`*✖️ Error:*\n${e.response?.data || e.message}`)
   }
 }
 
