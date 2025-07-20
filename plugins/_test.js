@@ -19,7 +19,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
       buttons: [
         {
           buttonId: `${usedPrefix + command} modelos`,
-          buttonText: { displayText: '📚 Ver modelos' },
+          buttonText: { displayText: '📚 𝖵𝖾𝗋 𝗆𝗈𝖽𝖾𝗅𝗈𝗌' },
           type: 1
         }
       ],
@@ -35,11 +35,11 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([alias, id]) => `🔹 *${alias}* → ${id}`)
       .join('\n')
-    return m.reply(`📚 *Modelos disponibles:*\n\n${lista}`)
+    return m.reply(`${xia} *Modelos disponibles:*\n\n${lista}`)
   }
 
   if (!models[modeloElegido]) {
-    return m.reply(`❌ *Modelo desconocido:* "${modeloElegido}"\n\nEscribe:\n${usedPrefix + command} modelos\npara ver la lista de modelos disponibles.`)
+    return m.reply(`✖️ *Modelo desconocido:* "${modeloElegido}"\n\nEscribe:\n${usedPrefix + command} modelos\npara ver la lista de modelos disponibles.`)
   }
 
   const modelo = models[modeloElegido]
@@ -73,8 +73,8 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
   }
 }
 
-handler.help = ['openai']
+handler.help = ['ai']
 handler.tags = ['ia']
-handler.command = ['openai']
+handler.command = ['ia', 'ai']
 
 export default handler
