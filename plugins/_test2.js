@@ -1,41 +1,60 @@
 import fetch from 'node-fetch'
 
-const handler = async (m, { conn, text, command }) => {
-  if (!text) throw `🔍 Escribe el nombre de una película para buscar.\n\nEjemplo:\n*.${command} Aquella Navidad*`
+let handler = async (m, { text, conn, usedPrefix, command }) => {
+  if (!text) throw `🎬 *Ingresa el nombre de una película para buscarla*\n\n📌 *Ejemplo:* ${usedPrefix + command} navidad`
 
   try {
-    const url = `https://www.cinecalidad.ec/api/search?q=${encodeURIComponent(text)}`
-    const res = await fetch(url)
-    if (!res.ok) throw '❌ No se pudo acceder a la API de búsqueda.'
-
+    const res = await fetch('https://www.cinecalidad.ec/api/peliculas/navidad') // Usa aquí el endpoint real si es diferente
     const json = await res.json()
-    if (!json.status || !json.data || json.data.length === 0) throw '⚠️ No se encontraron resultados para tu búsqueda.'
+    if (!json.status || !json.data) throw '❌ No se pudo obtener información de la API.'
 
-    const data = json.data
-    const portada = data[0]?.image || null // Imagen de la primera peli
+    const resultados = json.data.filter(p => p.title.toLowerCase().includes(text.toLowerCase()))
+    if (!resultados.length) throw `😕 *No se encontraron películas con:* ${text}`
 
-    let texto = `🎬 *Resultados para:* _${text}_\n\n`
-    for (const [i, peli] of data.entries()) {
-      texto += `*${i + 1}.* 🎞️ *${peli.title}*\n⭐ *Rating:* ${peli.rating}\n📚 *Géneros:* ${peli.genres}\n🔗 ${peli.link}\n\n`
-    }
+    // Si hay solo 1 resultado, muestra directamente la info con imagen
+    if (resultados.length === 1) {
+      const movie = resultados[0]
+      let info = `🎬 *${movie.title}*\n\n`
+      info += `📝 *Sinopsis:* ${movie.synopsis || 'Sin descripción'}\n`
+      info += `🎭 *Géneros:* ${movie.genres}\n`
+      info += `⭐ *Rating:* ${movie.rating}\n`
+      info += `🔗 *Enlace:* ${movie.link}`
 
-    if (portada) {
       await conn.sendMessage(m.chat, {
-        image: { url: portada },
-        caption: texto.trim()
+        image: { url: movie.image },
+        caption: info,
       }, { quoted: m })
-    } else {
-      m.reply(texto.trim())
+      return
     }
-  } catch (err) {
-    console.error(err)
-    m.reply('❌ Error al buscar la película.')
+
+    // Si hay más de 1 resultado, envía lista con botones
+    let listSections = [{
+      title: `🎬 Resultados para: ${text}`,
+      rows: resultados.map(p => ({
+        title: `${p.title} (${p.rating}⭐)`,
+        description: p.genres,
+        rowId: `${usedPrefix + command} ${p.title}`
+      }))
+    }]
+
+    await conn.sendMessage(m.chat, {
+      text: `📽️ *Películas encontradas (${resultados.length})*\nSelecciona una para ver más info.`,
+      footer: 'CineCalidad 🎅 Shadow Bot',
+      title: '🎄 Resultados de búsqueda',
+      buttonText: 'Ver lista',
+      sections: listSections
+    }, { quoted: m })
+
+  } catch (e) {
+    console.error(e)
+    throw '❌ Ocurrió un error al buscar la película.'
   }
 }
 
-handler.command = ['pelicula', 'cine', 'buscarpeli']
-handler.help = ['pelicula <nombre>']
-handler.tags = ['pelis']
+handler.help = ['cine <nombre>']
+handler.tags = ['search']
+handler.command = /^cine|buscar|movie$/i
+
 export default handler
 
 
