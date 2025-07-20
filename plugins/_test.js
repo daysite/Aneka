@@ -66,7 +66,7 @@ let handler = async (m, { text, conn, command }) => {
     const json = await res.json();
     if (!json.status || !json.data || json.data.length === 0)
       throw '*⚠️ No se encontraron resultados para tu búsqueda.*';
-
+/*
     let productos = json.data.map((item, index) => `
 ° *${item.title}*
 ≡ 🏷️ *Marca:* ${item.brand || 'Desconocida'}
@@ -76,7 +76,23 @@ ${item.presentation ? `≡ 🧾 *Presentación:* ${item.presentation}` : ''}
 ${item.prescription ? `≡ 💊 *Receta:* ${item.prescription}` : ''}
 ${item.shortDescription ? `≡ 📋 *Uso:* ${item.shortDescription}` : ''}
 ≡ 🌐 *Enlace:* https://inkafarma.pe/${item.url}
-`.trim()).join('\n________________________\n\n');
+`.trim()).join('\n________________________\n\n');*/
+
+let productos = json.data.map(item => {
+  let lineas = [];
+
+  lineas.push(`° *${item.title}*`);
+  lineas.push(`≡ 🏷️ *Marca:* ${item.brand || 'Desconocida'}`);
+  lineas.push(`≡ 💲 *Precio:* S/ ${item.pricePromo || item.price}${item.pricePromo ? ` (antes S/ ${item.price})` : ''}`);
+
+  if (item.discountRate > 0) lineas.push(`≡ 🎁 *Descuento:* ${item.discountRate}%`);
+  if (item.presentation) lineas.push(`≡ 🧾 *Presentación:* ${item.presentation}`);
+  if (item.prescription) lineas.push(`≡ 💊 *Receta:* ${item.prescription}`);
+  if (item.shortDescription) lineas.push(`≡ 📋 *Uso:* ${item.shortDescription}`);
+  lineas.push(`≡ 🌐 *Enlace:* https://inkafarma.pe/${item.url}`);
+
+  return lineas.join('\n');
+}).join('\n________________________\n\n');
 
     let respuesta = `\`\`\`乂 INKAFARMA - RESULTADOS\`\`\`\n\n🔎 *Resultado para:* _${text}_\n\n${productos}`;
     respuesta += `\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`;
