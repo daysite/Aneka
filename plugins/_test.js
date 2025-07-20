@@ -59,10 +59,9 @@ handler.tags = ['ia']
 handler.command = ['openai']
 
 export default handler*/
-
 import axios from 'axios'
 
-let handler = async (m, { args, usedPrefix, command }) => {
+let handler = async (m, { args, usedPrefix, command, conn }) => {
   const models = {
     gpt: 'chatgpt-4o',
     mini: 'chatgpt-4o-mini',
@@ -76,20 +75,18 @@ let handler = async (m, { args, usedPrefix, command }) => {
   }
 
   if (!args.length) {
-    return m.reply(
-      `🌌 *Uso correcto:*\n${usedPrefix + command} <modelo?> <pregunta>\n\n📌 *Ejemplos:*\n${usedPrefix + command} claude ¿Qué es el amor?\n${usedPrefix + command} modelos\n\n🧠 *Modelos disponibles:* pulsa el botón.`,
-      {
-        buttons: [
-          {
-            buttonId: `${usedPrefix + command} modelos`,
-            buttonText: { displayText: '📚 Ver modelos' },
-            type: 1
-          }
-        ],
-        footer: '',
-        headerType: 1
-      }
-    )
+    return await conn.sendMessage(m.chat, {
+      text: `🌌 *Uso correcto:*\n${usedPrefix + command} <modelo?> <pregunta>\n\n📌 *Ejemplos:*\n${usedPrefix + command} claude ¿Qué es el amor?\n${usedPrefix + command} modelos\n\n🧠 *Modelos disponibles:* pulsa el botón.`,
+      buttons: [
+        {
+          buttonId: `${usedPrefix + command} modelos`,
+          buttonText: { displayText: '📚 Ver modelos' },
+          type: 1
+        }
+      ],
+      footer: '',
+      headerType: 1
+    }, { quoted: m })
   }
 
   const modeloElegido = args[0].toLowerCase()
