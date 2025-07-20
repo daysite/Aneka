@@ -16,13 +16,14 @@ const handler = async (m, { args }) => {
 
     const randomSymbols = symbols.sort(() => 0.5 - Math.random()).slice(0, 15);
 
-    const message = `*Símbolos Encontrados*
-✦ *Búsqueda:* ${json.data.query}
-✦ *Total:* \`${json.data.total}\` símbolos
-✦ *Enviado:* \`15\` símbolos 
+    const message = `
+\`\`\`乂 SIMBOLOS - SEARCH\`\`\`
+
+° ${json.data.query}
 
 ${randomSymbols.map((s, i) => `${s}`).join('\n')}
-`.trim();
+
+> ${club}`.trim();
 
     await m.reply(message);
   } catch (e) {
