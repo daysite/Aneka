@@ -1,3 +1,41 @@
+import fetch from 'node-fetch';
+
+const handler = async (m, { conn, args, usedPrefix, command }) => {
+  try {
+    const res = await fetch(`https://delirius-apiofc.vercel.app/tools/symbols?query=aesthetic%20name%20symbols`);
+    if (!res.ok) throw await res.text();
+    const json = await res.json();
+    
+    if (!json.status || !json.data || !json.data.symbols) {
+      throw 'No se pudo obtener símbolos estéticos.';
+    }
+
+    const symbols = json.data.symbols;
+
+    // Escoge 15 símbolos aleatorios
+    const randomSymbols = symbols.sort(() => 0.5 - Math.random()).slice(0, 15);
+
+    const message = `
+╭━〔 *Símbolos Estéticos* 〕━⬣
+┃ ✦ Consulta: *${json.data.query}*
+┃ ✦ Total encontrados: *${json.data.total}*
+┃
+${randomSymbols.map((s, i) => `┃ ${i + 1}. ${s}`).join('\n')}
+╰━━━━━━━━━━━━━━━━━━⬣
+`.trim();
+
+    await m.reply(message);
+  } catch (e) {
+    console.error(e);
+    await m.reply('⚠️ Ocurrió un error al obtener los símbolos.');
+  }
+};
+
+handler.command = /^simbolos|symbols|aesthetic$/i;
+handler.help = ['symbols'];
+handler.tags = ['tools'];
+
+export default handler;
 
 /*const handler = async (m, { conn, text }) => {
   if (!text) throw '*[❗] Ingresa el mensaje a enviar con la ubicación*';
