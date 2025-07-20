@@ -15,7 +15,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
 
   if (!args.length) {
     return await conn.sendMessage(m.chat, {
-      text: `*${xia} Por favor, elige un modelo de Inteligencia Artificial que deseas usar.*\n> *\`Ejemplo:\`* ${usedPrefix + command} gemini ¡Hola!, ¿Que es la ilusión?`,
+      text: `*${xia} Por favor, elige un modelo de Inteligencia Artificial que deseas usar.*\n> *\`Ejemplo:\`* ${usedPrefix + command} gemini Hola que sos?`,
       buttons: [
         {
           buttonId: `${usedPrefix + command} modelos`,
@@ -35,7 +35,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([alias, id]) => `🔹 *${alias}* → ${id}`)
       .join('\n')
-    return m.reply(`${xia} *Modelos disponibles:*\n\n${lista}`)
+    return m.reply(`🤖 *Modelos disponibles:*\n\n${lista}`)
   }
 
   if (!models[modeloElegido]) {
@@ -45,7 +45,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
   const modelo = models[modeloElegido]
   const prompt = args.slice(1).join(' ')
 
-  if (!prompt) return m.reply('📝 *Escribe una pregunta para enviar a la IA.*')
+  if (!prompt) return m.reply(`*${xia} Por favor ingresa una petición a la inteligencia de ${modeloElegido}*\n> *\`Ejemplo:\`* Hola, qué es el sistema solar?`)
 
   await conn.sendPresenceUpdate('composing', m.chat)
 
