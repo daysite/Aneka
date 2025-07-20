@@ -17,14 +17,14 @@ let productos = json.data.map(item => {
   let lineas = [];
 
   lineas.push(`° *${item.title}*\n`);
-  lineas.push(`≡ 🏷️ \`*Marca:*\` ${item.brand || 'Desconocida'}`);
-  lineas.push(`≡ 💸 \`*Precio:*\` S/${item.pricePromo || item.price}${item.pricePromo ? ` (antes S/${item.price})` : ''}`);
+  lineas.push(`≡ *🏷️ \`Marca:\`* ${item.brand || 'Desconocida'}`);
+  lineas.push(`≡ *💸 \`Precio:\`* S/${item.pricePromo || item.price}${item.pricePromo ? ` (antes S/${item.price})` : ''}`);
 
-  if (item.discountRate > 0) lineas.push(`≡ 🔖 \`*Descuento:*\` ${item.discountRate}%`);
-  if (item.presentation) lineas.push(`≡ 🍁 \`*Intro:*\` ${item.presentation}`);
-  if (item.prescription) lineas.push(`≡ 🪶 \`*Receta:*\` ${item.prescription}`);
-  if (item.shortDescription) lineas.push(`≡ 📄 \`*Uso:*\` ${item.shortDescription}`);
-  lineas.push(`https://inkafarma.pe/${item.url}`);
+  if (item.discountRate > 0) lineas.push(`≡ *🔖 \`Descuento:\`* ${item.discountRate}%`);
+  if (item.presentation) lineas.push(`≡ *🌵 \`Intro:\`* ${item.presentation}`);
+  if (item.prescription) lineas.push(`≡ *🪶 \`Receta:\`* ${item.prescription}`);
+  if (item.shortDescription) lineas.push(`≡ *📄 \`Uso:\`* ${item.shortDescription}`);
+  lineas.push(`*https://inkafarma.pe/${item.url}*`);
 
   return lineas.join('\n');
 }).join('\n________________________\n\n');
