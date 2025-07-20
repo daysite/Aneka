@@ -12,7 +12,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
 
     const list = json.result.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
 
-    m.reply(`🔤 *Lista de Fuentes Disponibles:*\n${list}`)
+    m.reply(`*Lista de Fuentes Disponibles:*\n${list}`)
     return
   }
 
