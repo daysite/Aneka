@@ -14,17 +14,18 @@ let handler = async (m, { conn, text, command }) => {
     const card = json?.result?.card || {}
     const result = json?.result || {}
 
-    let msg = `╭━━━━[ 🔎 *CC Checker* ]━━━━⬣\n`
-    msg += `┃ ✦ *Estado:* ${result.status === 'Live' ? '✅ LIVE' : '❌ DIE'}\n`
-    msg += `┃ ✦ *Mensaje:* ${result.message || '-'}\n`
-    msg += `┃ ✦ *Tarjeta:* ${card.card || '-'}\n`
-    msg += `┃ ✦ *Tipo:* ${card.type || '-'}\n`
-    msg += `┃ ✦ *Marca:* ${card.brand || '-'}\n`
-    msg += `┃ ✦ *Categoría:* ${card.category || '-'}\n`
-    msg += `┃ ✦ *Banco:* ${card.bank || '-'}\n`
-    msg += `┃ ✦ *País:* ${card.country?.name || '-'} ${card.country?.emoji || ''}\n`
-    msg += `┃ ✦ *Moneda:* ${card.country?.currency || '-'}\n`
-    msg += `╰━━━━━━━━━━━━━━━━━━━━⬣`
+    let msg = `*ゲ◜៹ Tools - CCChecker ៹◞ゲ*
+
+° *💚 Estado:*${result.status === 'Live' ? 'LIVE 🟢' : 'DIE 🔴'}
+° *📧 Mensaje:* ${result.message || 'Ninguno'}
+° *🌵 Tipo:* ${card.card || 'Desconocido'}
+° *🏷️ Marca:* ${card.brand || 'Desconocida'}
+° *🪶 Categoría:* ${card.category || 'Indefinida'}
+° *🏦 Banco:* ${card.bank || 'Desconocido'}
+° *🌍 País:* ${card.country?.name || '-'} ${card.country?.emoji || ''}
+° *🪙 Moneda:* ${card.country?.currency || 'Desconocida'}
+
+> ${club}`
 
     m.reply(msg)
   } catch (e) {
