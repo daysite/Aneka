@@ -5,7 +5,7 @@ https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 import fetch from 'node-fetch';
 
 let handler = async (m, { text, conn, usedPrefix, command }) => {
-  if (!text) return conn.reply(m.chat, `*${xtools} Por favor, ingresa un producto a buscar en Inkafarma.*\n> *\`Ejemplo:\`* ${usedPrefix + command} crema nivea`, m);
+  if (!text) return conn.reply(m.chat, `*${xsearch} Por favor, ingresa un producto a buscar en Inkafarma.*\n> *\`Ejemplo:\`* ${usedPrefix + command} crema nivea`, m);
 
   const url = `https://delirius-apiofc.vercel.app/search/inkafarma?query=${encodeURIComponent(text)}&limit=6`;
 
