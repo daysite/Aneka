@@ -34,7 +34,7 @@ ${randomSymbols.map((s, i) => `${s}`).join('\n')}
 
 handler.command = /^simbolos|symbols|aesthetic$/i;
 handler.help = ['symbols'];
-handler.tags = ['tools'];
+handler.tags = ['search'];
 
 export default handler;
 
