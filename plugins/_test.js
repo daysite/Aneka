@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+/*import fetch from 'node-fetch';
 
 let handler = async (m, { text, conn, command }) => {
   if (!text) throw '🔍 *Ejemplo de uso:*\n.inkafarma crema nivea';
@@ -44,6 +44,54 @@ let handler = async (m, { text, conn, command }) => {
   } catch (e) {
     console.error(e);
     throw '❌ Ocurrió un error al buscar productos. Intenta más tarde.';
+  }
+};
+
+handler.help = ['inkafarma <producto>'];
+handler.tags = ['search'];
+handler.command = /^inkafarma$/i;
+
+export default handler;*/
+import fetch from 'node-fetch';
+
+let handler = async (m, { text, conn, command }) => {
+  if (!text) return conn.reply(m.chat, `*${xtools} Por favor, ingresa un producto a buscar en Inkafarma.*\n> *\`Ejemplo:\`* .${command} crema nivea`, m);
+
+  const url = `https://delirius-apiofc.vercel.app/search/inkafarma?query=${encodeURIComponent(text)}&limit=6`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw '*✖️ Error al contactar la API.*';
+
+    const json = await res.json();
+    if (!json.status || !json.data || json.data.length === 0)
+      throw '*⚠️ No se encontraron resultados para tu búsqueda.*';
+
+    let productos = json.data.map((item, index) => `
+° *${item.title}*
+≡ 🏷️ *Marca:* ${item.brand || 'Desconocida'}
+≡ 💲 *Precio:* S/ ${item.pricePromo || item.price}${item.pricePromo ? ` (antes S/ ${item.price})` : ''}
+${item.discountRate > 0 ? `≡ 🎁 *Descuento:* ${item.discountRate}%` : ''}
+${item.presentation ? `≡ 🧾 *Presentación:* ${item.presentation}` : ''}
+${item.prescription ? `≡ 💊 *Receta:* ${item.prescription}` : ''}
+${item.shortDescription ? `≡ 📋 *Uso:* ${item.shortDescription}` : ''}
+≡ 🌐 *Enlace:* https://inkafarma.pe/${item.url}
+`.trim()).join('\n________________________\n\n');
+
+    let respuesta = `\`\`\`乂 INKAFARMA - RESULTADOS\`\`\`\n\n🔎 *Resultado para:* _${text}_\n\n${productos}`;
+    respuesta += `\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`;
+
+    // Enviar imagen del primer producto (si existe), sino solo texto
+    const img = json.data[0].image;
+    if (img) {
+      await conn.sendFile(m.chat, img, 'producto.jpg', respuesta, m);
+    } else {
+      await conn.reply(m.chat, respuesta, m);
+    }
+
+  } catch (e) {
+    console.error(e);
+    throw '*✖️ Ocurrió un error al buscar productos. Intenta más tarde.*';
   }
 };
 
