@@ -1,13 +1,15 @@
 import fetch from 'node-fetch';
 
-const handler = async (m, { conn, args, usedPrefix, command }) => {
+const handler = async (m, { args }) => {
+  const query = args.length ? args.join(" ") : "aesthetic name symbols";
+
   try {
-    const res = await fetch(`https://delirius-apiofc.vercel.app/tools/symbols?query=aesthetic%20name%20symbols`);
+    const res = await fetch(`https://delirius-apiofc.vercel.app/tools/symbols?query=${encodeURIComponent(query)}`);
     if (!res.ok) throw await res.text();
     const json = await res.json();
     
-    if (!json.status || !json.data || !json.data.symbols) {
-      throw 'No se pudo obtener símbolos estéticos.';
+    if (!json.status || !json.data?.symbols?.length) {
+      throw 'No se encontraron símbolos para esa búsqueda.';
     }
 
     const symbols = json.data.symbols;
@@ -16,9 +18,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const randomSymbols = symbols.sort(() => 0.5 - Math.random()).slice(0, 15);
 
     const message = `
-╭━〔 *Símbolos Estéticos* 〕━⬣
-┃ ✦ Consulta: *${json.data.query}*
-┃ ✦ Total encontrados: *${json.data.total}*
+╭━〔 *Símbolos Encontrados* 〕━⬣
+┃ ✦ Búsqueda: *${json.data.query}*
+┃ ✦ Total: *${json.data.total} símbolos*
 ┃
 ${randomSymbols.map((s, i) => `┃ ${i + 1}. ${s}`).join('\n')}
 ╰━━━━━━━━━━━━━━━━━━⬣
@@ -27,7 +29,7 @@ ${randomSymbols.map((s, i) => `┃ ${i + 1}. ${s}`).join('\n')}
     await m.reply(message);
   } catch (e) {
     console.error(e);
-    await m.reply('⚠️ Ocurrió un error al obtener los símbolos.');
+    await m.reply('⚠️ No se pudieron obtener símbolos para esa búsqueda.');
   }
 };
 
@@ -36,6 +38,7 @@ handler.help = ['symbols'];
 handler.tags = ['tools'];
 
 export default handler;
+
 
 /*const handler = async (m, { conn, text }) => {
   if (!text) throw '*[❗] Ingresa el mensaje a enviar con la ubicación*';
