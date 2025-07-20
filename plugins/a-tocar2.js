@@ -92,7 +92,7 @@ const handler = async (m, { args, usedPrefix, command }) => {
       const json = await res.json();
       if (!json.status || !json.data) throw new Error('Respuesta inválida de la API secundaria');
 
-      await m.reply(`*🔠 Traducción:* ${json.data}`);
+      await m.reply(`*Traducción:* ${json.data}`);
       await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
     } catch (err) {
