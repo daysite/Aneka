@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0]) {
-    return m.reply(`*${xsearch} Por favor, ingresa un término de búsqueda.*> *\`Ejemplo:\`* ${usedPrefix + command} muertes en Lima`);
+    return m.reply(`*${xsearch} Por favor, ingresa un término de búsqueda.*\n> *\`Ejemplo:\`* ${usedPrefix + command} muertes en Lima`);
   }
 
   const query = encodeURIComponent(args.join(' '));
