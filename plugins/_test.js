@@ -22,7 +22,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     let txt = `\`\`\`乂 EL COMERCIO - SEARCH\`\`\`\n\n`;
     for (let i = 0; i < resultados.length; i++) {
       const { title, publish, url } = resultados[i];
-      txt += `*\`${i + 1}.\` ${title}*\n≡ *📆 \`Fecha:\`* ${publish}\n${url}\n________________________\n`;
+      txt += `*\`${i + 1}.\` ${title}*\n≡ *📆 \`Fecha:\`* ${publish}\n${url}\n________________________\n\n`;
     }
 
     await m.reply(txt.trim());
