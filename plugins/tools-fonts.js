@@ -27,8 +27,41 @@ let handler = async (m, { text, command, usedPrefix }) => {
 > *\`Ejemplo:\`* ${usedPrefix + command} 28 Shadow Ultra
 
 📄 *Lista de fuentes disponibles:*
-
-${list}`)
+1. CIRCLED
+2. ROUND
+3. Wide
+4. Bold
+5. Empire
+6. Serif
+7. Script
+8. Prem
+9. Monospace
+10. Sans
+11. Sans Bold
+12. Sans Italic
+13. Sans Italic
+14. PARENT
+15. BLUE
+16. SQ BOX
+17. SQUARED
+18. Tag
+19. Cute
+20. Thai
+21. Curvy
+22. Curvy2
+23. Curvy3
+23. Cyrillic
+24. Ethiopia
+25. Fraktur
+26. Rock Dots
+27. Small Caps
+28. Stroked
+29. Subscript
+30. Superscript
+31. Inverter
+32. Inverter
+33. Reversed
+34. Reversed`)
       return
     }
 
