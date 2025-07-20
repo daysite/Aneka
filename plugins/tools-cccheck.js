@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
-let handler = async (m, { conn, text, command }) => {
-  if (!text) throw `*${xtools} Por favor, ingresa una tarjeta con el formato correcto.*\n> *\`Ejemplo:\`* ${command} 5154620086381074|04|2027|672`
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) throw `*${xtools} Por favor, ingresa una tarjeta con el formato correcto.*\n> *\`Ejemplo:\`* ${usedPrefix + command} 5154620086381074|04|2027|672`
 
   const api = `https://www.dark-yasiya-api.site/other/cc-check?cc=${encodeURIComponent(text)}`
   m.reply('*⏳ Verificando la tarjeta, espera un momento...*')
