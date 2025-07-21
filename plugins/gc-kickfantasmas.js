@@ -3,7 +3,7 @@ let handler = async (m, { conn }) => {
   const sider = global.siderList[m.chat]
 
   if (!sider || !Array.isArray(sider) || sider.length === 0) {
-    return conn.reply(m.chat, '⚠️ No hay fantasmas guardados recientemente. Usa el comando *fantasmas* primero.', m)
+    return conn.reply(m.chat, '*⚠️ No hay fantasmas guardados recientemente.*\n> Usa *#fantasmas* primero', m)
   }
 
   let kicked = 0, failed = 0
@@ -15,12 +15,12 @@ let handler = async (m, { conn }) => {
     } catch (e) {
       failed++
     }
-    await delay(3000) // ⏳ espera 3 segundos entre cada expulsión
+    await delay(3000)
   }
 
   delete global.siderList[m.chat]
 
-  m.reply(`✅ Se eliminaron ${kicked} fantasmas.${failed > 0 ? `\n❌ Fallaron ${failed} eliminaciones.` : ''}`)
+  m.reply(`*✅ Se eliminaron ${kicked} fantasmas.* ${failed > 0 ? `\n*✖️ Fallaron ${failed} eliminaciones.*` : ''}`)
 }
 
 // Función delay
