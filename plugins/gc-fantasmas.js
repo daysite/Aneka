@@ -55,16 +55,16 @@ let handler = async (m, { conn, text, participants }) => {
 
   if (total === 0) return conn.reply(m.chat, `⚠️ En este grupo no hay fantasmas.`, m)
 
-  let mensaje = `*${await conn.getName(m.chat)}*\n> *\`Integrantes:\`* ${sum}\n> *\`Fantasmas:\`* ${total}\n\n━━ *_ETIQUETAS_*\n${sider.map(v => 'യ ׄ👻 @' + v.replace(/@.+/, '')).join('\n')}\n\n> 🪶 *\`Nota:\`* Este mensaje puede no ser completamente preciso. El bot comienza a monitorear la inactividad desde el momento en que se unió.`
+  let mensaje = `*${await conn.getName(m.chat)}*\n> *\`𝖨𝗇𝗍𝖾𝗀𝗋𝖺𝗇𝗍𝖾𝗌:\`* ${sum}\n> *\`𝖨𝗇𝖺𝖼𝗍𝗂𝗏𝗈𝗌:\`* ${total}\n\n━━ *_ETIQUETAS_*\n${sider.map(v => 'യ ׄ👻 @' + v.replace(/@.+/, '')).join('\n')}\n\n> 🪶 *\`Nota:\`* Este mensaje puede no ser completamente preciso. El bot comienza a monitorear la inactividad desde el momento en que se unió.`
 
   await conn.sendMessage(m.chat, {
     text: mensaje,
     mentions: sider,
-    footer: 'Shadow Bot ⚫',
+    footer: club,
     buttons: [
       {
         buttonId: `.kickfantasmas`,
-        buttonText: { displayText: '🧹 Eliminar fantasmas' },
+        buttonText: { displayText: '𝖤𝗅𝗂𝗆𝗂𝗇𝖺𝗋 𝖿𝖺𝗇𝗍𝖺𝗌𝗆𝖺𝗌' },
         type: 1
       }
     ],
