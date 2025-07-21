@@ -5,7 +5,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    "ff": `𑁯ᰍ    *\`𝖫ı𝗌ƚ𝖺𝗌\`*   📑   𐅹੭੭`,
+    "fflist": `𑁯ᰍ    *\`𝖫ı𝗌ƚ𝖺𝗌\`*   📑   𐅹੭੭`,
     "ffgc": `𑁯ᰍ    *\`𝖲𝖾𝗅𝖾𝖼𝗍\`*   🥧   𐅹੭੭`
   }
 
