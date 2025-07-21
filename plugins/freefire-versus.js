@@ -146,7 +146,7 @@ conn.sendMessage(m.chat, {
 };
 
 handler.help = ['v4mixto', 'v6mixto', 'v4masc', 'v6masc', 'v4fem', 'v6fem'];
-handler.tags = ['ff'];
+handler.tags = ['ff', 'fflist'];
 handler.command = /^(v4fem|vsfem4|v4masc|vsmasc4|v4mixto|vsmixto4|v6fem|vsfem6|v6masc|vsmasc6|v6mixto|vsmixto6)$/i;
 
 export default handler;
