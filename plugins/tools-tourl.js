@@ -11,9 +11,9 @@ let q = m.quoted ? m.quoted : m;
 let link = await catbox(media);
   let caption = `*ゲ◜៹  Tools - CatBox  ៹◞ゲ*
 
-° ⚖️ *`Peso:`* ${formatBytes(media.length)}
-° 🥠 *`Expired:`* Nunca
-° 🍁 *`Url:`* ${link}
+° ⚖️ *\`Peso:\`* ${formatBytes(media.length)}
+° 🥠 *\`Expired:\`* Nunca
+° 🍁 *\`Url:\`* ${link}
 
 > ${club}`;
 
