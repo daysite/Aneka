@@ -6,18 +6,20 @@ import { fileTypeFromBuffer } from "file-type";
 const handler = async (m, { conn }) => {
 let q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || "";
-  if (!mime) return m.reply(`*${xtools} Por favor, responda a una imagen, vídeo, gif o sticker para convertir en enlace.*`, null, { quoted: fkontak });
+  if (!mime) return m.reply(`*${xtools} Por favor, responda a una imagen, vídeo, gif o sticker para convertir en enlace.*`, null, { quoted: m });
   let media = await q.download();
 let link = await catbox(media);
-  let caption = `📮 *L I N K :*
- \`\`\`• ${link}\`\`\`
-📊 *S I Z E :* ${formatBytes(media.length)}
-📛 *E x p i r e d :* "No Expiry Date" 
-`;
+  let caption = `*ゲ◜៹  Tools - CatBox  ៹◞ゲ*
+
+° ⚖️ *`Peso:`* ${formatBytes(media.length)}
+° 🥠 *`Expired:`* Nunca
+° 🍁 *`Url:`* ${link}
+
+> ${club}`;
 
   await m.reply(caption);
 }
-handler.command = ['tourl']
+handler.command = ['tourl', 'catbox']
 handler.help = ['tourl']
 handler.tags = ['tools']
 export default handler
