@@ -30,7 +30,7 @@ while (b === a)
 }
 
 handler.help = ['donarsala']
-handler.tags = ['ff']
+handler.tags = ['ff', 'ffgc']
 handler.command = ['donarsala', 'sala']
 handler.group = true
 export default handler
