@@ -2,7 +2,7 @@ import { igdl } from 'ruhend-scraper';
 
 const handler = async (m, { text, conn, args, usedPrefix, command }) => {
   if (!args[0]) {
-    return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un link de Facebook.*`, fkontak, m);
+    return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un link de Facebook.*`, m);
   }
 
   await m.react('🕒');
