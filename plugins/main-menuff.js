@@ -5,11 +5,13 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   const vid = 'https://files.catbox.moe/39rx3n.mp4'
 
   let tags = {
-    "ff": `𑁯ᰍ    *\`𝖥𝗋𝖾𝖾 𝖥𝗂𝗋𝖾\`*   🍰   𐅹੭੭`
+    "ff": `𑁯ᰍ    *\`𝖫ı𝗌ƚ𝖺𝗌\`*   ${xlist}   𐅹੭੭`,
+    "ffgc": `𑁯ᰍ    *\`𝖲𝖾𝗅𝖾𝖼𝗍\`*   ${xff}   𐅹੭੭`
   }
 
   let emojis = {
-    "ff": "🍰"
+    "ff": xlist
+    "ffgc": xff
   }
 
   let defaultMenu = {
@@ -23,7 +25,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 `,
 
     header: category => `╭──• ${category}`,
-    body: cmd => `│ 🍰 ${cmd}`,
+    body: (cmd, emoji) => `│ ${emoji} ${cmd}`,
     footer: '╰──•',
     after: `> ${club}`
   }
