@@ -34,7 +34,7 @@ let handler = async (m, { conn, text, participants }) => {
     buttons: [
       {
         buttonId: `.kickfantasmas`,
-        buttonText: { displayText: '𝖤𝗅𝗂𝗆𝗂𝗇𝖺𝗋 𝖿𝖺𝗇𝗍𝖺𝗌𝗆𝖺𝗌' },
+        buttonText: { displayText: '🚮 𝖤𝗅𝗂𝗆𝗂𝗇𝖺𝗋 𝖿𝖺𝗇𝗍𝖺𝗌𝗆𝖺𝗌' },
         type: 1
       }
     ],
