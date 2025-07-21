@@ -19,15 +19,7 @@ total++
 sider.push(member[i])}}}
 if(total == 0) return conn.reply(m.chat, `⚠️ En este grupo no hay fantasmas.`, m)
 
-m.reply(`
-
-*${await conn.getName(m.chat)}*
-> *\`𝖨𝗇𝗍𝖾𝗀𝗋𝖺𝗇𝗍𝖾𝗌:\`* ${sum}
-
-  ━━ *_ETIQUETAS_*
-${sider.map(v => 'യ ׄ👻 @' + v.replace(/@.+/, '')).join('\n')}
-
-> 🪶 Nota: Esto no es al 100% correcto, el bot inicia el control de inactivos desde que se unió.`, null, { mentions: sider })}
+m.reply(`*${await conn.getName(m.chat)}*\n> *\`𝖨𝗇𝗍𝖾𝗀𝗋𝖺𝗇𝗍𝖾𝗌:\`* ${sum}\n\n  ━━ *_ETIQUETAS_*\n${sider.map(v => 'യ ׄ👻 @' + v.replace(/@.+/, '')).join('\n')}\n\n> 🪶 *\`Nota:\`* Este mensaje puede no ser completamente preciso. El bot comienza a monitorear la inactividad desde el momento en que se unió.`, null, { mentions: sider })}
 
 handler.help = ['fantasmas']
 handler.tags = ['gc']
