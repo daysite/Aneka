@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   let emojis = {
     "ff": "📑"
-    "ffgc": "🥧"
+    "ffgc": "🥧",
   }
 
   let defaultMenu = {
