@@ -39,6 +39,10 @@ let handler = async (m, { conn, text, participants }) => {
     ],
     headerType: 1
   }, { quoted: m })
+
+global.siderList = global.siderList || {}
+global.siderList[m.chat] = sider
+
 }
 
 handler.help = ['fantasmas']
