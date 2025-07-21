@@ -1,3 +1,7 @@
+/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
+𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
+
 let handler = async (m, { conn }) => {
   global.siderList = global.siderList || {}
   const sider = global.siderList[m.chat]
@@ -23,7 +27,6 @@ let handler = async (m, { conn }) => {
   m.reply(`*✅ Se eliminaron ${kicked} fantasmas.*${failed > 0 ? `\n*✖️ Fallaron ${failed} eliminaciones.*` : ''}`)
 }
 
-// Función delay
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 handler.help = ['kickfantasmas']
