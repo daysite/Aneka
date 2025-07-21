@@ -8,7 +8,7 @@ export default handler*/
 
 const handler = async (m, { conn, args }) => {
   try {
-    const text = 'daniel es...'; // Ajusta el texto según sea necesario
+    const text = 'daniel es gei y nuv'; // Ajusta el texto según sea necesario
     await conn.reply(m.chat, text, m);
   } catch (error) {
     console.error(error); // Maneja el error según sea necesario
