@@ -12,7 +12,7 @@ let handler = async (m, { conn, text, participants }) => {
     const id = member[i]
     const users = m.isGroup ? participants.find(u => u.id === id) : {}
     const user = global.db.data.users[id]
-    const attx = '☕ Este mensaje puede no ser completamente preciso, el bot comienza a monitorear la inactividad desde el momento en que se unió.'
+    const attx = '☕ 𝖤𝗌𝗍𝖾 𝗆𝖾𝗇𝗌𝖺𝗃𝖾 𝗉𝗎𝖾𝖽𝖾 𝗇𝗈 𝗌𝖾𝗋 𝖼𝗈𝗆𝗉𝗅𝖾𝗍𝖺𝗆𝖾𝗇𝗍𝖾 𝗉𝗋𝖾𝖼𝗂𝗌𝗈, 𝖾𝗅 𝖻𝗈𝗍 𝖼𝗈𝗆𝗂𝖾𝗇𝗓𝖺 𝖺 𝗆𝗈𝗇𝗂𝗍𝗈𝗋𝖾𝖺𝗋 𝗅𝖺 𝗂𝗇𝖺𝖼𝗍𝗂𝗏𝗂𝖽𝖺𝖽 𝖽𝖾𝗌𝖽𝖾 𝖾𝗅 𝗆𝗈𝗆𝖾𝗇𝗍𝗈 𝖾𝗇 𝗊𝗎𝖾 𝗌𝖾 𝗎𝗇𝗂ó.'
     const isInactive = !user || user.chat === 0
     const isNotAdmin = !users?.admin && !users?.superAdmin
     const isNotWhitelisted = user ? user.whitelist === false : true
