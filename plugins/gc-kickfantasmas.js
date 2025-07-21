@@ -20,7 +20,7 @@ let handler = async (m, { conn }) => {
 
   delete global.siderList[m.chat]
 
-  m.reply(`*✅ Se eliminaron ${kicked} fantasmas.* ${failed > 0 ? `\n*✖️ Fallaron ${failed} eliminaciones.*` : ''}`)
+  m.reply(`*✅ Se eliminaron ${kicked} fantasmas.*${failed > 0 ? `\n*✖️ Fallaron ${failed} eliminaciones.*` : ''}`)
 }
 
 // Función delay
