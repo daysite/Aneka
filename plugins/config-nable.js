@@ -229,9 +229,8 @@ case 'aceptarnuevos':
       chat.detect = isEnable
       break
 
-  case 'simi':
+  case 'autoresponder':
     case 'chatbot':
-    case 'simsimi':
       if (!m.isGroup) {
         if (!isOwner) {
           global.dfail('group', m, conn)
@@ -241,7 +240,7 @@ case 'aceptarnuevos':
         global.dfail('admin', m, conn)
         throw false
       }
-      chat.simi = isEnable
+      chat.autoresponder = isEnable
       break
 
     case 'document':
