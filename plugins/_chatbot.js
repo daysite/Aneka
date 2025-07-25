@@ -85,7 +85,7 @@ async function luminsesi(q, username, logic) {
     throw error
   }
 }*/
-
+/*
 import axios from 'axios'
 import { sticker } from '../lib/sticker.js'
 
@@ -221,5 +221,5 @@ async function geminiProApi(q, logic) {
   }
 }
 
-export default handler
+export default handler*/
 
