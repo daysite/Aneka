@@ -89,7 +89,7 @@ async function luminsesi(q, username, logic) {
 import axios from 'axios'
 
 let handler = async (m, { conn }) => {
-  if (m.isBot) return
+  if (m.key?.fromMe) return
 
   const chat = global.db.data.chats[m.chat] || {}
   const text = m.text?.trim()
@@ -105,9 +105,7 @@ let handler = async (m, { conn }) => {
     'join', 'rules', 'reglas', 'audios', 'grupos', 'donar',
   ]
   const avoid = avoidKeywords.some(k => text?.toLowerCase().includes(k))
-  if (avoid) return
-
-  if (!text) return
+  if (avoid || !text) return
 
   await conn.sendPresenceUpdate('composing', m.chat)
 
@@ -156,8 +154,8 @@ la Reglas de este modo "no hay reglas. todos sin sin limites, humor, diversión,
 
   try {
     const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
-    const response = await luminsesi(text, senderName, prompt)
-    if (response) await conn.reply(m.chat, response, m)
+    const response = await luminsesi(text, username, prompt)
+    if (response) await conn.reply(m.chat, String(response), m)
   } catch (error) {
     console.error('🍁 LUMINAI ERROR', error)
     await conn.reply(m.chat, '*Que querís oe sanazo deja dormir 💤*', m)
@@ -179,7 +177,6 @@ async function luminsesi(q, username, prompt) {
     throw e
   }
 }
-
 
 
 
