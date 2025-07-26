@@ -9,5 +9,5 @@ console.error('Error en Daniel 🗣️', err)
 await m.reply(`${err.message}`)}
 }
 //Daniel is Gey 🗣️
-handler.command = ['daniel']
+handler.command = ['x']
 export default handler
