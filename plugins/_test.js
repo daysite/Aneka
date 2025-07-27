@@ -1,6 +1,6 @@
 const handler = async (m, { conn }) => {
 const name = conn.getName(m.sender)
-const Daniel = `hola, Creador: @${creador}`.trim()
+const Daniel = `hola, Creador: ${creador} xd`.trim()
 
 try {
   await conn.sendMessage(m.chat, {
