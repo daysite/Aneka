@@ -77,16 +77,16 @@ import fetch from 'node-fetch';
 import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) throw `*🌴 Ingresa lo que deseas buscar en Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Quevedo`;
+  if (!text) throw `*${xsearch} Ingresa lo que deseas buscar en Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Quevedo`;
 
-  await m.react('🕐');
+  await m.react('⌛');
 
   try {
     const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}`);
     const json = await res.json();
 
     const tracks = json.data;
-    if (!tracks.length) throw '❌ *No se encontraron resultados en Spotify.*';
+    if (!tracks.length) throw '✖️ *No se encontraron resultados en Spotify.*';
 
     const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
 
@@ -97,9 +97,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     const listMessage = {
       body: {
-        text: `> *Resultados encontrados:* \`${tracks.length}\`\n\n🎧 *${randomTrack.title}*\n\n≡ ☁️ *\`Artista:\`* ${randomTrack.artist}\n≡ 🌵 *\`Duración:\`* ${randomTrack.duration}\n≡ 🌿 *\`Popularidad:\`* ${randomTrack.popularity}\n≡ 🍁 *\`Fecha:\`* ${randomTrack.publish}\n≡ 🌵 *Enlace:* ${randomTrack.url}`
+        text: `> *Resultados:* \`${tracks.length}\`\n\n🎧 *${randomTrack.title}*\n\n≡ 🌵 *\`Artista:\`* ${randomTrack.artist}\n≡ 🍃 *\`Duración:\`* ${randomTrack.duration}\n≡ 🍁 *\`Fecha:\`* ${randomTrack.publish}\n≡ 🌿 *\`Enlace:\`* ${randomTrack.url}`
       },
-      footer: { text: 'sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ' },
+      footer: { text: club },
       header: {
         title: '```乂 SPOTIFY - SEARCH```',
         hasMediaAttachment: true,
@@ -117,7 +117,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
                   {
                     header: track.title,
                     title: track.artist,
-                    description: `Descargar audio | Popularidad: ${track.popularity}`,
+                    description: `𝖣𝖾𝗌𝖼𝖺𝗋𝗀𝖺𝗋 𝖺𝗎𝖽𝗂𝗈 | 𝖣𝗎𝗋𝖺𝖼𝗂𝗈́𝗇: ${track.duration}`,
                     id: `.spotify ${track.url}`
                   }
                 ]
