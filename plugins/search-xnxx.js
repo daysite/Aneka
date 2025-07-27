@@ -5,7 +5,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     return m.reply(hotw);
     }
 
-  if (!text) throw m.reply(`*🍁 Por favor, ingresa el texto de lo que deseas buscar en xnxx*\n> *\`Ejemplo:\`* ${usedPrefix + command} Con mi Prima.`);
+  if (!text) return conn.reply(m.chat, `*${xsearch} Por favor, ingresa el texto de lo que deseas buscar en xnxx*\n> *\`Ejemplo:\`* ${usedPrefix + command} Con mi Prima.`);
 
   await m.react('⌛');
 
