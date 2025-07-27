@@ -100,7 +100,7 @@ for (let key in emojis) {
 
 🥞 𝖠𝖼𝗍𝗂𝗏𝗈: ${uptime}
 👥 𝖴𝗌𝗎𝖺𝗋𝗂𝗈𝗌: ${totalreg}
-☕ 𝖢𝗋𝖾𝖺𝖽𝗈𝗋:
+☕ 𝖢𝗋𝖾𝖺𝖽𝗈𝗋: @${creadorN}
 🥧 𝖵𝖾𝗋𝗌𝗂𝗈́𝗇:* 3.0.0
 
 💎 𝖣𝗂𝖺𝗆𝖺𝗇𝗍𝖾𝗌: ${diamantes}
@@ -146,7 +146,7 @@ ${readMore}
             video: { url: vid.getRandom() }, // Vid
             caption: menuText,
             contextInfo: {
-                mentionedJid: [m.sender],
+                mentionedJid: [m.sender, creadorM],
                 isForwarded: true,
                 forwardingScore: 999,
                 externalAdReply: {
