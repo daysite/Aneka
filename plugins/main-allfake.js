@@ -32,14 +32,22 @@ let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? c
 //let pp = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://telegra.ph/file/327f6ad853cb4f405aa80.jpg')
 
 //CREADOR Y OTROS
-global.creador = 'Wa.me/51927238856'
+global.creador = '51927238856'
+global.getCreatorMention = () => {
+  return {
+    text: '@' + global.creador,
+    jid: `${global.creador}@s.whatsapp.net`
+  };
+};
 global.botreal = `${(conn.user.jid == global.conn.user.jid ? '*Bot:* Oficial' : `*SubBot de: ${conn.user.jid.split('@')[0]}*`)}`
 global.asistencia = 'Wa.me/51927238856'
+
 
 //REACCIONES 
 global.rwait = '🕒'
 global.done = '✅'
 global.error = '✖️'
+
 
 //EMOJIS PREDETERMINADOS
 global.emoji = '🌿'
@@ -55,6 +63,7 @@ global.wait = '*⏳ Aguarde un momento...*';
 global.hotw = '*🔥 El contenido* `+18` *está desactivado para este chat.*\n> Use *enable nsfw* para activarlo.';
 global.mistake = '*✖️ Error en el comando*\n*Por favor, intenta nuevamente más tarde. Si esto persiste envia:*\n> #report El comando (comando) no funciona.';
 
+
 //ENLACES
 var group = 'https://chat.whatsapp.com/Caj518FwPjHLVmGn48GvhW'  
 var web = 'https://shadow-bot.vercel.app/' 
@@ -62,17 +71,6 @@ let instagram = 'https://www.instagram.com/shadowbot.md'
 
 global.redes = [group, web, instagram].getRandom()
 
-/*
-//IMAGEN
-let category = "imagen"
-const db = './src/database/db.json'
-const db_ = JSON.parse(fs.readFileSync(db))
-const random = Math.floor(Math.random() * db_.links[category].length)
-const randomlink = db_.links[category][random]
-const response = await fetch(randomlink)
-const rimg = await response.buffer()
-global.icons = rimg
-*/
 
 //TIEMPO
 var ase = moment().tz('America/Lima'); // Cambia 'America/Lima' por la zona horaria deseada
