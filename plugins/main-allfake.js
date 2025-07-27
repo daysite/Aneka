@@ -32,22 +32,17 @@ let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? c
 //let pp = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://telegra.ph/file/327f6ad853cb4f405aa80.jpg')
 
 //CREADOR Y OTROS
-/*
-global.creador = '51927238856'
-global.getCreatorMention = () => {
-  return {
-    text: '@' + global.creador,
-    jid: `${global.creador}@s.whatsapp.net`
-  };
-};
-*/
 
+global.creador = '51927238856';
+global.creator = global.creador + '@s.whatsapp.net';
+
+/*
 global.creatorNumber = '51927238856';
 global.mentioncreador = {
 text: '@' + global.creatorNumber,
 jid: `${global.creatorNumber}@s.whatsapp.net`
 };
-
+*/
 global.botreal = `${(conn.user.jid == global.conn.user.jid ? '*Bot:* Oficial' : `*SubBot de: ${conn.user.jid.split('@')[0]}*`)}`
 global.asistencia = 'Wa.me/51927238856'
 
