@@ -1,11 +1,12 @@
 const handler = async (m, { conn }) => {
 const name = conn.getName(m.sender)
-const Daniel = `hola, Creador: @${creador} xd`.trim()
+const tag = '@' + m.sender.split('@')[0]
+const Daniel = `hola ${tag}, Creador: @${creador} xd`.trim()
 
 try {
   await conn.sendMessage(m.chat, {
     text: Daniel,
-    mentions: [creator],
+    mentions: [m.sender, creator],
   }, { quoted: fkontak })
 } catch (err) {
 console.error('Error en Daniel 🗣️', err)
