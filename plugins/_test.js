@@ -5,7 +5,7 @@ const Daniel = `Creador: ${mentioncreador.text}`.trim()
 try {
   await conn.sendMessage(m.chat, {
     text: Daniel,
-    mentions: [m.sender],
+    mentions: [mentioncreador.jid],
   }, { quoted: fkontak })
 } catch (err) {
 console.error('Error en Daniel 🗣️', err)
