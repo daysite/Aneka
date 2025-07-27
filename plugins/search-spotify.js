@@ -97,7 +97,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     const listMessage = {
       body: {
-        text: `> *Resultados:* \`${tracks.length}\`\n\n🎧 *${randomTrack.title}*\n\n≡ 🌵 *\`Artista:\`* ${randomTrack.artist}\n≡ 🍃 *\`Duración:\`* ${randomTrack.duration}\n≡ 🍁 *\`Fecha:\`* ${randomTrack.publish}\n≡ 🌿 *\`Enlace:\`* ${randomTrack.url}`
+        text: `> *Resultados:* \`${tracks.length}\`\n\n*${randomTrack.title}*\n\n≡ 🌵 *\`Artista:\`* ${randomTrack.artist}\n≡ 🍃 *\`Duración:\`* ${randomTrack.duration}\n≡ 🍁 *\`Fecha:\`* ${randomTrack.publish}\n≡ 🌿 *\`Enlace:\`* ${randomTrack.url}`
       },
       footer: { text: club },
       header: {
