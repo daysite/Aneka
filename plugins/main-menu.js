@@ -107,7 +107,7 @@ for (let key in emojis) {
 🥮 𝖤𝗑𝗉: ${exp}
 🥠 𝖭𝗂𝗏𝖾𝗅: ${level}
 🍙 𝖱𝖺𝗇𝗀𝗈: ${role}
-${readMore}
+
 ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
 `,
 
