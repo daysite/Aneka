@@ -152,7 +152,6 @@ const handler = async (m, { conn }) => {
   const sunflare = 'ShadowBot - Perfil'
   const img = perfilUrl
   const insta = 'https://instagram.com/ShadowBotMD' // Puedes reemplazar por tu enlace real
-  const fkontak = fkontak2
 
   await conn.sendLuffy(m.chat, txt, sunflare, profileText, img, img, insta, fkontak2)
 }
