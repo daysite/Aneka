@@ -77,7 +77,7 @@ const handler = async (m, { conn }) => {
   }, { quoted: fkontak2 })
 }
 
-handler.help = ['profile2']
+handler.help = ['profile']
 handler.tags = ['rg']
 handler.command = ['profile', 'perfil']
 handler.register = true
