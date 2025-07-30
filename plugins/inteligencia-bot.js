@@ -2,9 +2,6 @@
 import axios from 'axios'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-if (!db.data.chats[m.chat].simi && m.isGroup) {
-    return;
-}
 
   const username = `${conn.getName(m.sender)}`
   const basePrompt = `Eres Shadow Ultra, el asistente oficial y avanzado del bot Shadow. Tu propósito es ayudar a los usuarios a entender y utilizar correctamente todos los comandos, funciones y modos del bot. Eres rápido, claro, directo y profesional. Explicas con precisión cómo funciona cada comando, ya sea de administración, diversión, multimedia, herramientas, modo bot, sub-bots, etc.
