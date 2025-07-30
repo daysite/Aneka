@@ -86,6 +86,8 @@ Responde a "${username}" usando este conocimiento.`
   }
 }
 
+handler.tags = ['ia']
+handler.help = ['bot']
 handler.command = ['ot', 'bot']
 handler.customPrefix = /b|B|.|#/i;
 export default handler
