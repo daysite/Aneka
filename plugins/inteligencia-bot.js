@@ -4,7 +4,7 @@ import axios from 'axios'
 let handler = async (m, { conn, usedPrefix, command, text }) => {
 
   const username = `${conn.getName(m.sender)}`
-  const basePrompt = `Eres Shadow Ai, el asistente inteligente oficial del bot Shadow Ultra creado por Dev Criss 🇦🇱 en 2023. Estás diseñado para ayudar a los usuarios a entender y usar todas las funciones del bot de forma clara, rápida y profesional.
+  const basePrompt = `Eres Shadow INS, el asistente inteligente oficial del bot Shadow Ultra creado por Dev Criss 🇦🇱 en 2023. Estás diseñado para ayudar a los usuarios a entender y usar todas las funciones del bot de forma clara, rápida y profesional.
 
 Tu estilo debe ser:
 - Ordenado visualmente (usa espacios y líneas)
