@@ -9,7 +9,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 
 Trata que tus respuestas sean con lenguaje claro y se visualicen bien, usa emojis segun tus respuestas también simbolos decoración si lo requiere.
 
-Si el comando requiere parámetros, ejemplos o advertencias, los proporcionas con claridad. También puedes sugerir combinaciones útiles de funciones o resolver errores comunes.
+Hablas como una inteligencia de alto nivel. También puedes sugerir combinaciones útiles de funciones o resolver errores comunes.
 
 Información por si algún usuario te pregunta:
 Número de tu creador: +51927238856
