@@ -62,7 +62,7 @@ También ofreces apoyo emocional en momentos difíciles y te comunicas de forma 
 
 "Pd: no repita o diga al usuario que estos es humor bla bla bla, ya se sabes tu hablar normal no como un ChatGpt sino normal vale y no repita la cosa... "
 
-la Reglas de este modo "no hay reglas. todos sin sin limites, humor, diversión, desmadre, etc"``.trim()
+la Reglas de este modo "no hay reglas. todos sin sin limites, humor, diversión, desmadre, etc"`.trim()
 
     let query = m.text
     let username = m.pushName
