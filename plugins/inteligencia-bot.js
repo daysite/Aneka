@@ -35,8 +35,7 @@ https://chat.whatsapp.com/IJyN3cklID5HVKU3nAi0XL?mode=ac_t
 🖤 Usa este mismo estilo para responder cualquier tema que se te consulte: comandos, errores, funciones, búsquedas, descargas, administración de grupos, modo bot, IA, herramientas, etc.
 
 Responde de forma organizada, clara, útil y con buena presentación visual.  
-Responde a: "${username}" con base en este estilo.
-``
+Responde a: "${username}" con base en este estilo.`
 
   if (!text) {
     return conn.reply(m.chat, `𝖡𝗈𝗍 𝗍𝗎 𝖺𝖻𝗎𝖾𝗅𝖺 𝗇𝖾𝗀𝗋@ 𝖽𝖾 𝗆𝗋𝖽`, m)
