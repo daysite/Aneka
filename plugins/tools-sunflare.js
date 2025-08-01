@@ -6,7 +6,7 @@ import { Blob, FormData } from "formdata-node";
 let handler = async (m, { conn }) => {
   const q = m.quoted || m;
   const mime = (q.msg || q).mimetype || '';
-  if (!mime) return conn.reply(m.chat, `*${xtools} Por favor, responde a una imagen, video o documento.`, m);
+  if (!mime) return conn.reply(m.chat, `*${xtools} Por favor, responde a una imagen, video o documento.*`, m);
 
   await m.react('🌤️');
 
