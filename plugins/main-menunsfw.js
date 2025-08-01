@@ -2,7 +2,7 @@
 let handler = async (m, { conn, usedPrefix: _p }) => {
 
   let usertag = '@' + m.sender.split('@')[0]
-  const vid = 'https://files.catbox.moe/39rx3n.mp4'
+  const img = 'https://cdn-sunflareteam.vercel.app/images/fb422b6600.jpg'
 
   let tags = {
     "nsfw": "𑁯ᰍ    *`𝖭𝗌ẜɯ`*   ♨️   𐅹੭੭",
@@ -58,10 +58,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   await m.react('🔥')
   await conn.sendMessage(m.chat, {
-    video: { url: vid },
+    image: { url: img },
     caption: text,
     mentions: [m.sender],
-    gifPlayback: true
+    gifPlayback: false
   }, { quoted: fkontak })
 }
 
