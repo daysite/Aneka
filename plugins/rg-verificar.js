@@ -8,6 +8,7 @@ const fkontak = {
   }
 }
 
+let name2 = conn.getName(m.sender)
 let Reg = /\|?(.*)([.|] *?)([0-9]*)$/i
 
 let handler = async function (m, { conn, text, usedPrefix, command }) {
@@ -47,19 +48,21 @@ await m.react('💌')
 
   const sn = createHash('md5').update(m.sender).digest('hex')
 
-  let shortText = `⊱『💚𝆺𝅥 𝗥𝗘𝗚𝗜𝗦𝗧𝗥𝗔𝗗𝗢(𝗔) 𝆹𝅥💚』⊰'`
+  let shortText = `෫໋ׅׄ𝆬🍃ິ⃨ 𝖱𝖾𝗀𝗂𝗌𝗍𝗋𝗈 - 𝖲𝗁𝖺𝖽𝗈𝗐 ׅ𝖴𝗅𝗍𝗋𝖺  ׄ ׄ𑁍̵ ֕︵۪۪۪۪᷼ ּ`
   let title = dev
-  let fullText = `*Registro - ${botname}*
+  let fullText = `𐙚ㅤ *𝖱𝖾︩𝗀𝗂𝗌𝗍𝗋𝗈* ㅤﾉㅤ *𝖢𝗈𝗆𝗉𝗅𝖾ł𝗈* ㅤᗝ̵
+ㅤ꒰       ֹ      ﹙᷼͝sʜᴀᴅᴏᴡ᷼͝﹚       ִ       ꒱
 
-- *Nombre:* ${user.name}
-- *Edad:* ${user.age} años
+✿᷎︩︪͡⪧ \`Nombre:\` ${user.name}
+✿᷎︩︪͡⪧ \`Edad:\` ${user.age} años
 
-*Recompensas:*
+𐔌𐔌  *𝖱𝖾𝖼໊𝗈𝗆͟𝗉͟𝖾͟𝗇͟𝗌͟𝖺𝗌 ࣲ* ׅ  ☕ᩨ   ׄ
 
-🪙 15 ShadowCoins
-💫 245 Exp
+ᦷᩘᦷ     ݂   🪙 ፡ ```15 Coins```
+ᦷᩘᦷ     ݂   🍸 ፡ ```245 Xp```
+ᦷᩘᦷ     ݂   🎫 ፡ ```12 Tokens```
 
-> ✎ Usa *.profile* para ver tu perfil.`.trim()
+> 𝖢𝗈𝗅𝗈𝖼𝖺 *#profile* 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 𝗍𝗎 𝗉𝖾𝗋𝖿𝗂𝗅`.trim()
 
   await conn.sendLuffy(m.chat, shortText, title, fullText, img, img, 'https://instagram.com/dev.criss_vx', fkontak)
   await m.react('✅')
