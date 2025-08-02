@@ -4,53 +4,50 @@ import fetch from 'node-fetch'
 const fkontak = {
   key: { participant: '0@s.whatsapp.net' },
   message: {
-    locationMessage: { displayName: `${botname}`, vcard: '' }
+    locationMessage: {
+      displayName: botname,
+      vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:${botname}\nTEL;type=CELL;type=VOICE;waid=0:0\nEND:VCARD`
+    }
   }
 }
 
-let name2 = conn.getName(m.sender)
-let Reg = /\|?(.*)([.|] *?)([0-9]*)$/i
-
 let handler = async function (m, { conn, text, usedPrefix, command }) {
   const user = global.db.data.users[m.sender]
+  const name2 = await conn.getName(m.sender)
+  const Reg = /^(.*?)[.|] *?(\d{1,3})$/i
 
-  if (user.registered === true) {
-    return m.reply(`*🍚 Ya te encuentras registrado en mi base de datos.*\n*Si deseas eliminar tu registro use la función \`#unreg\`*`)
-  }
+  if (user.registered === true)
+    return m.reply(`*🍚 Ya te encuentras registrado en mi base de datos.*\n*Si deseas eliminar tu registro usa la función \`#unreg\`*`)
 
-  if (!Reg.test(text)) {
+  if (!Reg.test(text))
     return m.reply(`*🍚 Por favor, ingresa tu nombre y edad para registrarte en mi base de datos.*\n> *\`Ejemplo:\`*\n> ${usedPrefix + command} ${name2}.20`)
-  }
 
-  let [_, name, __, age] = text.match(Reg)
+  let [_, name, ageStr] = text.match(Reg) || []
   if (!name) return m.reply('*⚠️ El nombre no puede estar vacío.*')
-  if (!age) return m.reply('*⚠️ La edad no puede estar vacía.*')
+  if (!ageStr) return m.reply('*⚠️ La edad no puede estar vacía.*')
   if (name.length > 30) return m.reply('*⚠️ El nombre es muy largo (máx 30 caracteres).*')
 
-  age = parseInt(age)
+  let age = parseInt(ageStr)
   if (isNaN(age)) return m.reply('*👴🏻 Qué haces acá, no deberías estar en el cementerio?*')
   if (age < 5 || age > 100) return m.reply('*👶🏻 Mira el nenito quiere jugar al bot*')
 
-await m.react('💌')
+  await m.react('💌')
 
-  user.name = name.trim()
-  user.age = age
-  user.regTime = +new Date
-  user.registered = true
-  user.money += 600
-  user.coins += 15
-  user.exp += 245
-  user.joincount += 5
+  Object.assign(user, {
+    name: name.trim(),
+    age,
+    regTime: +new Date(),
+    registered: true,
+    diamantes: (user.coins || 0) + 15,
+    exp: (user.exp || 0) + 245,
+  })
 
-  let perfil = await conn.profilePictureUrl(m.sender, 'image')
-    .catch(() => 'https://files.catbox.moe/xr2m6u.jpg')
-  let img = await (await fetch(perfil)).buffer()
-
+  const perfil = await conn.profilePictureUrl(m.sender, 'image').catch(() => 'https://files.catbox.moe/xr2m6u.jpg')
+  const img = await (await fetch(perfil)).buffer()
   const sn = createHash('md5').update(m.sender).digest('hex')
 
-  let shortText = `෫໋ׅׄ𝆬🍃ິ⃨ 𝖱𝖾𝗀𝗂𝗌𝗍𝗋𝗈 - 𝖲𝗁𝖺𝖽𝗈𝗐 ׅ𝖴𝗅𝗍𝗋𝖺  ׄ ׄ𑁍̵ ֕︵۪۪۪۪᷼ ּ`
-  let title = dev
-  let fullText = `𐙚ㅤ *𝖱𝖾︩𝗀𝗂𝗌𝗍𝗋𝗈* ㅤﾉㅤ *𝖢𝗈𝗆𝗉𝗅𝖾ł𝗈* ㅤᗝ̵
+  const shortText = `෫໋ׅׄ𝆬🍃ິ⃨ 𝖱𝖾𝗀𝗂𝗌𝗍𝗋𝗈 - 𝖲𝗁𝖺𝖽𝗈𝗐 ׅ𝖴𝗅𝗍𝗋𝖺  ׄ ׄ𑁍̵ ֕︵۪۪۪۪᷼ ּ`
+  const fullText = `𐙚ㅤ *𝖱𝖾︩𝗀𝗂𝗌𝗍𝗋𝗈* ㅤﾉㅤ *𝖢𝗈𝗆𝗉𝗅𝖾ł𝗈* ㅤᗝ̵
 ㅤ꒰       ֹ      ﹙᷼͝sʜᴀᴅᴏᴡ᷼͝﹚       ִ       ꒱
 
 ✿᷎︩︪͡⪧ \`Nombre:\` ${user.name}
@@ -58,13 +55,13 @@ await m.react('💌')
 
 𐔌𐔌  *𝖱𝖾𝖼໊𝗈𝗆͟𝗉͟𝖾͟𝗇͟𝗌͟𝖺𝗌 ࣲ* ׅ  ☕ᩨ   ׄ
 
-ᦷᩘᦷ     ݂   🪙 ፡ ```15 Coins```
-ᦷᩘᦷ     ݂   🍸 ፡ ```245 Xp```
-ᦷᩘᦷ     ݂   🎫 ፡ ```12 Tokens```
+ᦷᩘᦷ     ݂   🪙 ፡ \`\`\`15 Coins\`\`\`
+ᦷᩘᦷ     ݂   🍸 ፡ \`\`\`245 Xp\`\`\`
+ᦷᩘᦷ     ݂   🎫 ፡ \`\`\`12 Tokens\`\`\`
 
 > 𝖢𝗈𝗅𝗈𝖼𝖺 *#profile* 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 𝗍𝗎 𝗉𝖾𝗋𝖿𝗂𝗅`.trim()
 
-  await conn.sendLuffy(m.chat, shortText, title, fullText, img, img, 'https://instagram.com/dev.criss_vx', fkontak)
+  await conn.sendLuffy(m.chat, shortText, dev, fullText, img, img, 'https://instagram.com/dev.criss_vx', fkontak)
   await m.react('✅')
 }
 
