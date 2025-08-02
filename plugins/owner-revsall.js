@@ -55,7 +55,7 @@ var handler = async (m, { conn }) => {
 
 handler.command = ['revsall'];
 handler.help = ['revsall'];
-handler.tags = ['tools'];
+handler.tags = ['owner'];
 handler.owner = true;
 
 export default handler;
