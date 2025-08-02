@@ -5,7 +5,6 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
 
     let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
     let name = await conn.getName(who);
-    let edtr = `@${m.sender.split`@`[0]}`;
     let username = conn.getName(m.sender);
 
     // VCARD
@@ -19,17 +18,6 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
         contacts: {
             displayName: `${list.length} Contacto`,
             contacts: list
-        },
-        contextInfo: {
-            externalAdReply: {
-                showAdAttribution: true,
-                title: 'Hello, I am the official creator of Shadow Ultra.',
-                body: dev,
-                thumbnailUrl: 'https://files.catbox.moe/8an9fs.jpg',
-                sourceUrl: 'https://wa.me/51927238856?text=Hola+quiero+adquirir+bot',
-                mediaType: 1,
-                renderLargerThumbnail: true
-            }
         }
     }, {
         quoted: m
@@ -37,7 +25,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
 
     let txt = `👋 *Hola \`${username}\` este es*\n*el contacto de mi desarrollador*`;
 
-    await conn.sendMessage(m.chat, { text: txt });
+    await conn.sendMessage(m.chat, { text: txt }, { quoted: m });
 };
 
 handler.help = ['owner'];
