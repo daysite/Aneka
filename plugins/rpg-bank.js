@@ -1,25 +1,74 @@
-// Bank Editado Por Cuervo
-//★彡[ᴄʀᴇᴀᴛᴇ ʙʏ ᴄᴜᴇʀᴠᴏ-ᴛᴇᴀᴍ-ꜱᴜᴘʀᴇᴍᴇ]彡★
-// Respeten credito xddddd (ratas inmundas)
+/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
+𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
+https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
-import fetch from 'node-fetch'
 import db from '../lib/database.js'
-let img = 'https://files.catbox.moe/x81ait.jpg'
-let handler = async (m, {conn, usedPrefix}) => {
-   let who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : m.sender
-   if (who == conn.user.jid) return m.react('✖️')
-   if (!(who in global.db.data.users)) return m.reply(`*⚠️ El usuario no se encuentra en mi base de datos*`)
-   let user = global.db.data.users[who]
-   let name = conn.getName(who);
-   let txt = (`${who == m.sender ? `╭━〔  \`\`\`SHADOW ULTRA\`\`\`  〕⬣\n┋ 👤 *Usuario:* ${name}\n┋ 💎 *Diamantes en Cartera*: ${user.diamantes}\n┋ 🏦 *Coins en Banco*: ${user.bank}\n┋ ✨ *Experiencia:* ${user.exp}\n┋ 🆙 *Nivel:* ${user.level}\n┋ ⚜️ *Rol:* ${user.role}\n┋ 📅 *Fecha:* ${new Date().toLocaleString('id-ID')}\n╰━━━━━━━━━━━━⬣` : `╭━〔  \`\`\`SHADOW ULTRA\`\`\`  〕⬣\n┋ 👤 *Usuario:* @${who.split('@')[0]}\n┋  💎 *Diamantes en Cartera*: ${user.diamantes}\n┋ 🏦 *Coins en Banco*: ${user.bank}\n┋ *✨ Experiencia:* ${user.exp}\n┋ 🆙 *Nivel:* ${user.level}\n┋ ⚜️ *Rol:* ${user.role}\n┋ 📅 *Fecha:* ${new Date().toLocaleString('id-ID')}\n╰━━━━━━━━━━━━⬣`}`)
-//await conn.sendButton(m.chat, texto, wm, img, [['Retirar Todo', `${usedPrefix}retirar all`], ['Meter Al Banco Todo', `${usedPrefix}d all`] ], null, { mentions: [who] })
+const img = 'https://files.catbox.moe/zggh6y.jpg'
 
-await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, {mentions: [who] }, rcanal)
+const fkontak2 = {
+  key: {
+    participants: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast",
+    fromMe: false,
+    id: "Halo"
+  },
+  message: {
+    locationMessage: {
+      name: `Banco - ${botname}`,
+      jpegThumbnail: await (await fetch('https://cdn-sunflareteam.vercel.app/images/72184a0f56.png')).buffer()
+    }
+  },
+  participant: "0@s.whatsapp.net"
+};
+
+let handler = async (m, { conn, usedPrefix }) => {
+  const who = m.mentionedJid?.[0] || m.quoted?.sender || m.sender
+if (!who || who === conn.user.jid)
+  return m.reply(`*${emojis} Debes mencionar o responder a un usuario válido.*`)
+
+  if (!(who in global.db.data.users)) return m.reply(`*⚠️ El usuario no está registrado en la base de datos.*`)
+
+  const user = global.db.data.users[who]
+  const name = await conn.getName(who)
+  const fecha = new Date().toLocaleString('es-PE')
+
+  const txt = `🏦 *Bienvenido al Banco de Coins*
+> Cuenta vinculada a: ${who === m.sender ? name : `@${who.split('@')[0]}`}
+
+*💼 Detalles actuales:*
+🪙 *Cartera:* ${user.diamantes}
+🏦 *Banco:* ${user.bank}
+💫 *Experiencia:* ${user.exp}
+🆙 *Nivel:* ${user.level}
+⚜️ *Role:* ${user.role}
+
+Consulta tus finanzas, sube de nivel y gana recompensas.\n`.trim()
+
+  const buttons = [
+    { buttonId: `${usedPrefix}retirar all`, buttonText: { displayText: '🪙 Retirar Todo' }, type: 1 },
+    { buttonId: `${usedPrefix}d all`, buttonText: { displayText: 'Depositar Todo 🏦' }, type: 1 }
+  ]
+
+  await conn.sendMessage(m.chat, {
+    image: { url: img },
+    caption: txt,
+    footer: dev,
+    buttons,
+    mentions: [who],
+    headerType: 4
+  }, { quoted: fkontak2 })
 }
+
+/*
+  await conn.sendFile(m.chat, img, 'perfil.jpg', txt, m, null, {
+    mentions: [who]
+  })
+}*/
 
 handler.help = ['bank']
 handler.tags = ['rpg']
-handler.command = ['bank', 'banco'] 
-handler.register = true 
+handler.command = ['bank', 'banco', 'banko']
+handler.register = true
 handler.group = true
-export default handler 
+
+export default handler
