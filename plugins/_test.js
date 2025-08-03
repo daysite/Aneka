@@ -1,123 +1,77 @@
-/*import axios from 'axios'
+import axios from 'axios'
 import * as cheerio from 'cheerio'
 
 function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5)
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
 }
 
 async function mfsearch(query) {
-  if (!query) throw new Error('Query is required')
+  if (!query) throw new Error('Debes especificar una búsqueda.')
 
-  const { data: html } = await axios.get(`https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`)
+  const searchUrl = `https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`
+  const { data: html } = await axios.get(searchUrl)
   const $ = cheerio.load(html)
 
   const links = shuffle(
     $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
   ).slice(0, 5)
 
-  const result = await Promise.all(links.map(async link => {
-    const { data } = await axios.get(`https://mediafiretrend.com${link}`)
+  if (!links.length) return []
+
+  const results = await Promise.all(links.map(async (path) => {
+    const url = `https://mediafiretrend.com${path}`
+    const { data } = await axios.get(url)
     const $ = cheerio.load(data)
-    const raw = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
-    const match = raw.match(/unescape['"`]([^'"`]+)['"`]/)
-    if (!match) throw new Error('No se pudo decodificar el enlace')
-    const decoded = cheerio.load(decodeURIComponent(match[1]))
+
+    const filename = $('tr:nth-child(2) td:nth-child(2) b').text().trim()
+    const filesize = $('tr:nth-child(3) td:nth-child(2)').text().trim()
+    const sourceUrl = $('tr:nth-child(5) td:nth-child(2)').text().trim()
+    const sourceTitle = $('tr:nth-child(6) td:nth-child(2)').text().trim()
+
+    const rawScript = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
+    const match = rawScript.match(/unescape['"`]([^'"`]+)['"`]/)
+    const decodedUrl = match ? cheerio.load(decodeURIComponent(match[1]))('a').attr('href') : null
 
     return {
-      filename: $('tr:nth-child(2) td:nth-child(2) b').text().trim(),
-      filesize: $('tr:nth-child(3) td:nth-child(2)').text().trim(),
-      url: decoded('a').attr('href'),
-      source_url: $('tr:nth-child(5) td:nth-child(2)').text().trim(),
-      source_title: $('tr:nth-child(6) td:nth-child(2)').text().trim()
+      filename,
+      filesize,
+      url: decodedUrl || 'Enlace no disponible',
+      source_url: sourceUrl,
+      source_title: sourceTitle
     }
   }))
 
-  return result
+  return results
 }
 
 let handler = async (m, { text }) => {
-  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.*`)
+  if (!text) return m.reply('📌 Ejemplo: *.mfsearch free fire config*')
 
-  await m.reply('⏳ *Buscando archivos en MediaFire...*')
-
+  m.reply('🔍 Buscando archivos...')
   try {
     const results = await mfsearch(text)
-    if (!results.length) return m.reply('⚠️ No se encontró nada, intenta con otra búsqueda.')
 
-    const msg = results.map((v, i) => `
-° *${v.filename}*
-≡ ⚖️ *\`Tamaño:\`* ${v.filesize}
-≡ 🌿 *\`Link:\`* ${v.url}
-≡ 🌴 *\`Fuente:\`* ${v.source_title}
-≡ ☕ *\`URL Fuente:\`* ${v.source_url}
-`.trim()).join('\n________________________\n\n')
+    if (!results.length)
+      return m.reply('❌ No se encontró nada, intenta con otra palabra.')
 
-    const final = `\`\`\`乂 MEDIAFIRE - RESULTADOS\`\`\`\n\n🔍 *Búsqueda:* _${text}_\n\n${msg}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
-    await m.reply(final)
+    const list = results.map((v) =>
+`° ${v.filename}
+≡ 📦 Tamaño: ${v.filesize}
+≡ 🔗 Link: ${v.url}
+≡ 📌 Fuente: ${v.source_title}
+≡ 🌐 URL Fuente: ${v.source_url}`).join('\n\n________________________\n\n')
 
-  } catch (e) {
-    console.error(e)
-    m.reply(`✖️ *Error:* ${e.message}`)
+    const replyMsg = `乂 *MEDIAFIRE - RESULTADOS*\n\n${list}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
+
+    await m.reply(replyMsg)
+  } catch (err) {
+    console.error(err)
+    m.reply(`⚠️ Ocurrió un error:\n${err.message}`)
   }
-}
-
-handler.help = ['mediafiresearch']
-handler.tags = ['search']
-handler.command = ['mfsearch', 'mediafiresearch']
-
-export default handler*/
-
-import axios from 'axios'
-import * as cheerio from 'cheerio'
-
-function shuffle(arr) {
-    for (let i = arr.length - 1; i> 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-;[arr[i], arr[j]] = [arr[j], arr[i]]
-}
-    return arr
-}
-
-async function mfsearch(query) {
-    if (!query) throw new Error('Query is required')
-    const { data: html} = await axios.get(`https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`)
-    const $ = cheerio.load(html)
-    const links = shuffle(
-        $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
-).slice(0, 5)
-
-    const result = await Promise.all(links.map(async link => {
-        const { data} = await axios.get(`https://mediafiretrend.com${link}`)
-        const $ = cheerio.load(data)
-        const raw = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
-        const match = raw.match(/unescape\(['"`]([^'"`]+)['"`]\)/)
-        if (!match) throw new Error('No se pudo decodificar el enlace')
-        const decoded = cheerio.load(decodeURIComponent(match[1]))
-        return {
-            filename: $('tr:nth-child(2) td:nth-child(2) b').text().trim(),
-            filesize: $('tr:nth-child(3) td:nth-child(2)').text().trim(),
-            url: decoded('a').attr('href'),
-            source_url: $('tr:nth-child(5) td:nth-child(2)').text().trim(),
-            source_title: $('tr:nth-child(6) td:nth-child(2)').text().trim()
-}
-}))
-    return result
-}
-
-let handler = async (m, { text}) => {
-    if (!text) return m.reply('Contoh:.mfsearch epep config')
-
-    m.reply('🔍 Buscando archivos...')
-    try {
-        let res = await mfsearch(text)
-        if (!res.length) return m.reply('❌ No se encontró nada, prueba con otra búsqueda')
-        let tekss = res.map((v, i) =>
-            `${i + 1}. ${v.filename}\n📦 Tamaño: ${v.filesize}\n🔗 Link: ${v.url}\n📌 Fuente: ${v.source_title} (${v.source_url})`
-).join('\n\n')
-        await m.reply(tekss)
-} catch (e) {
-        m.reply(`⚠️ Error: ${e.message}`)
-}
 }
 
 handler.help = ['mediafiresearch <query>']
