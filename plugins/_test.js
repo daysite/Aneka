@@ -51,7 +51,7 @@ async function mfsearch(query) {
 
 let handler = async (m, { text, usedPrefix, command }) => {
 
-  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.\n> *\`Ejemplo:\`* ${usedPrefix + command} free fire config`)
+  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.*\n> *\`Ejemplo:\`* ${usedPrefix + command} free fire config`)
 
   try {
 
