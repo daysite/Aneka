@@ -36,7 +36,7 @@ async function mfsearch(query) {
 }
 
 let handler = async (m, { text }) => {
-  if (!text) return m.reply(`❗ *Ejemplo:* .mfsearch epep config`)
+  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.*`)
 
   await m.reply('⏳ *Buscando archivos en MediaFire...*')
 
