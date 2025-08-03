@@ -49,7 +49,7 @@ let handler = async (m, { text }) => {
 ≡ ⚖️ *\`Tamaño:\`* ${v.filesize}
 ≡ 🌿 *\`Link:\`* ${v.url}
 ≡ 🌴 *\`Fuente:\`* ${v.source_title}
-≡ ☕ `URL Fuente:\`* ${v.source_url}
+≡ ☕ *\`URL Fuente:\`* ${v.source_url}
 `.trim()).join('\n________________________\n\n')
 
     const final = `\`\`\`乂 MEDIAFIRE - RESULTADOS\`\`\`\n\n🔍 *Búsqueda:* _${text}_\n\n${msg}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
