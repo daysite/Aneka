@@ -1,79 +1,58 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
   }
-  return array
+  return arr
 }
 
 async function mfsearch(query) {
-  if (!query) throw new Error('Escribe una búsqueda')
-
-  const searchUrl = `https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`
-  const { data: html } = await axios.get(searchUrl)
+  if (!query) throw new Error('Query is required')
+  const { data: html } = await axios.get(`https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`)
   const $ = cheerio.load(html)
-
   const links = shuffle(
     $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
   ).slice(0, 5)
 
-  if (!links.length) return []
-
-  const results = await Promise.all(links.map(async (path) => {
-    const url = `https://mediafiretrend.com${path}`
-    const { data } = await axios.get(url)
+  const result = await Promise.all(links.map(async link => {
+    const { data } = await axios.get(`https://mediafiretrend.com${link}`)
     const $ = cheerio.load(data)
-
-    const filename = $('tr:nth-child(2) td:nth-child(2) b').text().trim()
-    const filesize = $('tr:nth-child(3) td:nth-child(2)').text().trim()
-    const sourceUrl = $('tr:nth-child(5) td:nth-child(2)').text().trim()
-    const sourceTitle = $('tr:nth-child(6) td:nth-child(2)').text().trim()
-
-    const rawScript = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
-    const match = rawScript.match(/unescape['"`]([^'"`]+)['"`]/)
-    const decodedUrl = match ? cheerio.load(decodeURIComponent(match[1]))('a').attr('href') : null
-
+    const raw = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
+    const match = raw.match(/unescape['"`]([^'"`]+)['"`]/)
+    if (!match) throw new Error('No se pudo decodificar el enlace')
+    const decoded = cheerio.load(decodeURIComponent(match[1]))
     return {
-      filename,
-      filesize,
-      url: decodedUrl || 'Enlace no disponible',
-      source_url: sourceUrl,
-      source_title: sourceTitle
+      filename: $('tr:nth-child(2) td:nth-child(2) b').text().trim(),
+      filesize: $('tr:nth-child(3) td:nth-child(2)').text().trim(),
+      url: decoded('a').attr('href'),
+      source_url: $('tr:nth-child(5) td:nth-child(2)').text().trim(),
+      source_title: $('tr:nth-child(6) td:nth-child(2)').text().trim()
     }
   }))
-
-  return results
+  return result
 }
 
+let handler = async (m, { text }) => {
+  if (!text) return m.reply('Contoh:.mfsearch epep config')
 
-let handler = async (m, { text, usedPrefix, command }) => {
-
-  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.*\n> *\`Ejemplo:\`* ${usedPrefix + command} free fire config`)
-
+  m.reply('🔍 Buscando archivos...')
   try {
-
-   // await m.react('⌛')
-    const results = await mfsearch(text)
-
-    if (!results.length)
-      return m.reply('*⚠️ No se encontró nada, intenta con otra palabra.*')
-
-    const list = results.map((v) =>
+    let res = await mfsearch(text)
+    if (!res.length) return m.reply('❌ No se encontró nada, prueba con otra búsqueda')
+    let teks = `乂 *MEDIAFIRE - RESULTADOS*\n\n`
+    teks += res.map(v =>
 `° ${v.filename}
 ≡ ⚖️ *\`Tamaño:\`* ${v.filesize}
 ≡ 🌿 \`Link:\` ${v.url}
 ≡ 🍙 \`Fuente:\` ${v.source_title}
-≡ 🌵 \`Url Fuente:\` ${v.source_url}`).join('\n\n________________________\n\n')
-
-    const replyMsg = `乂 *MEDIAFIRE - RESULTADOS*\n\n${list}\n\n> ${dev}`
-
-    await m.reply(replyMsg)
-  } catch (err) {
-    console.error(err)
-    m.reply(`⚠️ Ocurrió un error:\n${err.message}`)
+≡ 🌵 \`Url Fuente:\` ${v.source_url}`).join('\n\n')
+    teks += `\n\n> Shadow Ultra MD`
+    await m.reply(teks)
+  } catch (e) {
+    m.reply(`⚠️ Error: ${e.message}`)
   }
 }
 
