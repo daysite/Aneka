@@ -61,7 +61,7 @@ let handler = async (m, { text }) => {
   }
 }
 
-handler.help = ['mediafiresearch <query>']
+handler.help = ['mediafiresearch']
 handler.tags = ['search']
 handler.command = ['mfsearch', 'mediafiresearch']
 
