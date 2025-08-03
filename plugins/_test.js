@@ -10,7 +10,7 @@ function shuffle(array) {
 }
 
 async function mfsearch(query) {
-  if (!query) throw new Error('😉')
+  if (!query) throw new Error('Escribe una búsqueda')
 
   const searchUrl = `https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`
   const { data: html } = await axios.get(searchUrl)
@@ -48,22 +48,25 @@ async function mfsearch(query) {
   return results
 }
 
-let handler = async (m, { text }) => {
-  if (!text) return m.reply('📌 Ejemplo: *.mfsearch free fire config*')
 
-  m.reply('🔍 Buscando archivos...')
+let handler = async (m, { text, usedPrefix, command }) => {
+
+  if (!text) return m.reply(`*${xsearch} Por favor, ingresa una búsqueda de mediafire.\n> *\`Ejemplo:\`* ${usedPrefix + command} free fire config`)
+
   try {
+
+    await m.react('⌛')
     const results = await mfsearch(text)
 
     if (!results.length)
-      return m.reply('❌ No se encontró nada, intenta con otra palabra.')
+      return m.reply('*⚠️ No se encontró nada, intenta con otra palabra.*')
 
     const list = results.map((v) =>
 `° ${v.filename}
-≡ 📦 Tamaño: ${v.filesize}
-≡ 🔗 Link: ${v.url}
-≡ 📌 Fuente: ${v.source_title}
-≡ 🌐 URL Fuente: ${v.source_url}`).join('\n\n________________________\n\n')
+≡ ⚖️ *\`Tamaño:\`* ${v.filesize}
+≡ 🌿 \`Link:\` ${v.url}
+≡ 🍙 \`Fuente:\` ${v.source_title}
+≡ 🌵 \`Url Fuente:\` ${v.source_url}`).join('\n\n________________________\n\n')
 
     const replyMsg = `乂 *MEDIAFIRE - RESULTADOS*\n\n${list}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
 
