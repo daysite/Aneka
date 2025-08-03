@@ -10,7 +10,7 @@ function shuffle(array) {
 }
 
 async function mfsearch(query) {
-  if (!query) throw new Error('Debes especificar una búsqueda.')
+  if (!query) throw new Error('😉')
 
   const searchUrl = `https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`
   const { data: html } = await axios.get(searchUrl)
@@ -18,7 +18,7 @@ async function mfsearch(query) {
 
   const links = shuffle(
     $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
-  ).slice(0, 5)
+  ).slice(0, 10)
 
   if (!links.length) return []
 
