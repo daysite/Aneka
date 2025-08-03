@@ -18,7 +18,7 @@ async function mfsearch(query) {
 
   const links = shuffle(
     $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
-  ).slice(0, 10)
+  ).slice(0, 5)
 
   if (!links.length) return []
 
@@ -55,7 +55,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
 
   try {
 
-    await m.react('⌛')
+   // await m.react('⌛')
     const results = await mfsearch(text)
 
     if (!results.length)
