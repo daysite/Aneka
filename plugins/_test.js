@@ -1,17 +1,68 @@
-const handler = async (m, { conn }) => {
-const name = conn.getName(m.sender)
-const tag = '@' + m.sender.split('@')[0]
-const Daniel = `hola ${tag}, Creador: @${creadorN} xd xd`.trim()
+import axios from 'axios'
+import * as cheerio from 'cheerio'
 
-try {
-  await conn.sendMessage(m.chat, {
-    text: Daniel,
-    mentions: [m.sender, creadorM],
-  }, { quoted: fkontak })
-} catch (err) {
-console.error('Error en Daniel 🗣️', err)
-await m.reply(`${err.message}`)}
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5)
 }
-//Daniel is Gey 🗣️
-handler.command = ['x']
+
+async function mfsearch(query) {
+  if (!query) throw new Error('Query is required')
+
+  const { data: html } = await axios.get(`https://mediafiretrend.com/?q=${encodeURIComponent(query)}&search=Search`)
+  const $ = cheerio.load(html)
+
+  const links = shuffle(
+    $('tbody tr a[href*="/f/"]').map((_, el) => $(el).attr('href')).get()
+  ).slice(0, 5)
+
+  const result = await Promise.all(links.map(async link => {
+    const { data } = await axios.get(`https://mediafiretrend.com${link}`)
+    const $ = cheerio.load(data)
+    const raw = $('div.info tbody tr:nth-child(4) td:nth-child(2) script').text()
+    const match = raw.match(/unescape['"`]([^'"`]+)['"`]/)
+    if (!match) throw new Error('No se pudo decodificar el enlace')
+    const decoded = cheerio.load(decodeURIComponent(match[1]))
+
+    return {
+      filename: $('tr:nth-child(2) td:nth-child(2) b').text().trim(),
+      filesize: $('tr:nth-child(3) td:nth-child(2)').text().trim(),
+      url: decoded('a').attr('href'),
+      source_url: $('tr:nth-child(5) td:nth-child(2)').text().trim(),
+      source_title: $('tr:nth-child(6) td:nth-child(2)').text().trim()
+    }
+  }))
+
+  return result
+}
+
+let handler = async (m, { text }) => {
+  if (!text) return m.reply(`❗ *Ejemplo:* .mfsearch epep config`)
+
+  await m.reply('⏳ *Buscando archivos en MediaFire...*')
+
+  try {
+    const results = await mfsearch(text)
+    if (!results.length) return m.reply('⚠️ No se encontró nada, intenta con otra búsqueda.')
+
+    const msg = results.map((v, i) => `
+° *${v.filename}*
+≡ ⚖️ *\`Tamaño:\`* ${v.filesize}
+≡ 🌿 *\`Link:\`* ${v.url}
+≡ 🌴 *\`Fuente:\`* ${v.source_title}
+≡ ☕ `URL Fuente:\`* ${v.source_url}
+`.trim()).join('\n________________________\n\n')
+
+    const final = `\`\`\`乂 MEDIAFIRE - RESULTADOS\`\`\`\n\n🔍 *Búsqueda:* _${text}_\n\n${msg}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
+    await m.reply(final)
+
+  } catch (e) {
+    console.error(e)
+    m.reply(`✖️ *Error:* ${e.message}`)
+  }
+}
+
+handler.help = ['mediafiresearch <query>']
+handler.tags = ['search']
+handler.command = ['mfsearch', 'mediafiresearch']
+
 export default handler
