@@ -68,7 +68,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
 ≡ 🍙 \`Fuente:\` ${v.source_title}
 ≡ 🌵 \`Url Fuente:\` ${v.source_url}`).join('\n\n________________________\n\n')
 
-    const replyMsg = `乂 *MEDIAFIRE - RESULTADOS*\n\n${list}\n\n> sʜᴀᴅᴏᴡ ᴜʟᴛʀᴀ ᴍᴅ`
+    const replyMsg = `乂 *MEDIAFIRE - RESULTADOS*\n\n${list}\n\n> ${dev}`
 
     await m.reply(replyMsg)
   } catch (err) {
