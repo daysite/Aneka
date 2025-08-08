@@ -39,7 +39,7 @@ conn.reply(m.chat, texto.trim(), m, estilo)
 
 handler.command = ['stats', 'estadisticas']
 handler.help = ['stats']
-handler.tags = ['info']
+handler.tags = ['owner']
 handler.owner = true
 
 export default handler
