@@ -14,7 +14,7 @@ let s = Math.floor((ms % 60000) / 1000)
 return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
 }
 
-let texto = '${xowner} *Estadísticas de Plugins*\n\n'
+let texto = `${xowner} *Estadísticas de Plugins*\n\n`
 const now = +new Date()
 
 const entries = Object.entries(stats).sort((a, b) => b[1].total - a[1].total)
