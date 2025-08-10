@@ -114,8 +114,8 @@ global.usname = await conn.getName(m.sender)
 var more = String.fromCharCode(8206)
 global.readMore = more.repeat(850)
 
-global.packN = `協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  🍁 ࣪ ˖ ∿
-↳ @shadows_club\n\n☁ 𝖲𝖾𝗇𝖽𝗂𝗇𝗀 𝖻𝗒 𝖡𝗈𝗍:\n↳ @${usnamebot}\n🌺 𝖴𝗌𝗎𝖺𝗋𝗂𝗈:`;
+global.packN = `∿ 協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  閲覧 ࣪ ˖ 
+↳ @shadowsclub.xyz\n\n🥞 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐁𝐲:\n↳ @${usnamebot}\n🦦 𝐔𝐬𝐮𝐚𝐫𝐢𝐨:`;
 global.authN = `\n↳ @${usname}`;
 
 //FAKES
