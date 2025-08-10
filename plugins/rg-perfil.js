@@ -60,11 +60,11 @@ const handler = async (m, { conn }) => {
 🏦 *Banco:* \`${bank.toLocaleString()}\`
 `.trim()
 
-  await conn.sendLuffy(m.chat, textoCorto, tituloDecorado, textoLargo, img, img, 'https://instagram.com/dev.criss_vx', fkontak, {
-    mentions: [userId] // ← corregido: antes tenías "user.Id"
+  await conn.sendLuffy(m.chat, textoCorto, tituloDecorado, textoLargo, img, img, ig, fkontak, {
+    mentions: [userId]
   })
 
-  await m.react('🪪')
+  await m.react('🍮')
 }
 
 handler.help = ['profile']
