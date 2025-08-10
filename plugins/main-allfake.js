@@ -116,8 +116,8 @@ global.readMore = more.repeat(850)
 
 global.packN = `∿ 協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  閲覧 ࣪ ˖ 
 ↳ @shadowsclub.xyz\n\n🍮 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐁𝐲:\n↳ @${usnamebot}\n🦦 𝐔𝐬𝐮𝐚𝐫𝐢𝐨:
-\n↳ @${usname}`;
-global.authN = `\n⿻ ׄ ˚. Տ𝗁⍺𝖽ᦅ𝗐  ⚡︎  𝖴𝗅ł𝗋⍺ ׄㅤ🥞ᩧᰰ˚`;
+↳ @${usname}`;
+global.authN = club;
 
 //FAKES
 global.fkontak = { key: { participants:"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
