@@ -116,7 +116,7 @@ global.readMore = more.repeat(850)
 
 global.packN = `∿ 協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  閲覧 ࣪ ˖ 
 ↳ @shadowsclub.xyz\n\n🍮 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐁𝐲:\n↳ @${usnamebot}\n🦦 𝐔𝐬𝐮𝐚𝐫𝐢𝐨:
-↳ @${usname}`;
+↳ @${usname}\n\n`;
 global.authN = club;
 
 //FAKES
