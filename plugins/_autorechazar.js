@@ -8,7 +8,7 @@ handler.before = async function (m, { conn, isBotAdmin }) {
   if (!chat.autorechazar || !isBotAdmin) return !0
 
   // Prefijo permitido para NO rechazar (1 o 5)
-  const prefix = /^(1|5)\d+$/
+  const prefix = /^(1)\d+$/
 
   try {
     if (m.messageStubType === 172 && m.messageStubParameters?.length) {
