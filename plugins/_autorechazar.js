@@ -1,6 +1,6 @@
 let autorechazar = m => m
 
-autorechazar.before = async function (m, { conn, isBotAdmin }) {
+handler.before = async function (m, { conn, isBotAdmin }) {
   if (!m.isGroup) return !1
   let chat = global.db.data.chats[m.chat] || {}
 
