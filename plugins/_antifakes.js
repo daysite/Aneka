@@ -4,7 +4,7 @@ handler.before = async function (m, {conn, isAdmin, isBotAdmin} ) {
 if (!m.isGroup) return !1
 let chat = global.db.data.chats[m.chat]
 if (isBotAdmin && chat.antifake) {
-let texto = `☕ *Hola @${m.sender.split`@`[0]}, los números raros no estan permitidos, serás eliminado.*`
+let texto = `☁️ *Hola* *@${m.sender.split`@`[0]},* *los números raros no estan permitidos, serás eliminado.*`
 if (m.sender.startsWith('6' || '6')) {
 global.db.data.users[m.sender].block = true
 await conn.reply(m.chat, texto, m)
