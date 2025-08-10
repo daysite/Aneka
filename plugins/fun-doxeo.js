@@ -131,7 +131,13 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 *SHADOW ULTRA:* FREE CREDITS`;
 
   await sleep(1000);
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });
+/*
+  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });*/
+await conn.sendMessage(m.chat, { 
+  text: `@${user}\n${doxeo}`, 
+  edit: sent.key, 
+  mentions: [mentionedJid] 
+});
 };
 
 handler.help = ['doxear'];
