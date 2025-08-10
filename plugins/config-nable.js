@@ -103,6 +103,21 @@ case 'aceptarnuevos':
   }
   break
 
+case 'autorechazar':
+case 'rechazarnuevos':
+  if (m.isGroup) {
+    if (!(isAdmin || isOwner)) {
+      global.dfail('admin', m, conn)
+      throw false
+    }
+    chat.autorechazar = isEnable
+  } else {
+    global.dfail('group', m, conn)
+    throw false
+  }
+  break
+
+
  case 'modoadmin':
     case 'soloadmin':
       if (m.isGroup) {
