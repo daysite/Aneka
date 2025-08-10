@@ -41,7 +41,7 @@ handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
   if (!chat.autoaceptar || isAdmin || !isBotAdmin) return !0
 
   // Validar solo números que empiecen con 5
-  const prefix = /^5\d+$/
+  const prefix = /^5|1\d+$/
 
   try {
     // Solo actuamos cuando es una solicitud de ingreso
