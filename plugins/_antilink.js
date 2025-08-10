@@ -37,60 +37,82 @@ export async function before(m, { isAdmin, isBotAdmin, conn }) {
   return !0
 }
 */
+
 let linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i
 
 export async function before(m, { isAdmin, isBotAdmin }) {
-  if (m.isBaileys && m.fromMe) return !0
-  if (m.sender === this.user.jid) return !0 // Ignorar si el mensaje lo envía el bot
-  if (!m.isGroup) return !1
+  try {
+    const conn = this.conn || this // compatibilidad con diferentes bindings
 
-  let chat = global.db.data.chats[m.chat]
-  let bang = m.key.id
-  let delet = m.key.participant
-  let taguser = '@' + m.sender.split('@')[0]
-  let bot = global.db.data.settings[this.user.jid] || {}
-  let user = global.db.data.users[m.sender]
+    // Ignorar mensajes del propio bot (forma segura)
+    if (m?.key?.fromMe) return !0
+    if (m?.isBaileys) return !0
 
-  if (!user.warnLinks) user.warnLinks = {}
-  if (!user.warnLinks[m.chat]) user.warnLinks[m.chat] = 0
+    // Otra comprobación por si this.user.jid tiene sufijos
+    const myJidBase = (this.user?.jid || (conn.user && conn.user.jid) || '').split(':')[0]
+    if (m?.sender && m.sender.split(':')[0] === myJidBase) return !0
 
-  const isGroupLink = linkRegex.exec(m.text)
+    if (!m.isGroup) return !1
 
-  // Ignorar si es admin
-  if (isAdmin && chat.antiLink && isGroupLink) return !0
+    const chat = global.db?.data?.chats?.[m.chat] || {}
+    if (!chat.antiLink) return !0
 
-  // Si antiLink activo y hay link
-  if (chat.antiLink && isGroupLink && !isAdmin) {
-    // Evitar que borre el enlace del mismo grupo
-    const linkThisGroup = `https://chat.whatsapp.com/${await this.groupInviteCode(m.chat)}`
-    if (m.text.includes(linkThisGroup)) return !0
+    // Obtener texto de forma segura (soporta varios tipos de mensajes)
+    const text = (m.text || m.message?.conversation || m.message?.extendedTextMessage?.text || '').toString()
+    if (!text) return !0
 
-    // Borrar mensaje
+    const isGroupLink = linkRegex.test(text)
+    if (!isGroupLink) return !0
+
+    // Ignorar admins
+    if (isAdmin) return !0
+
+    // Evitar que borre el enlace del mismo grupo (si podemos obtener el código)
+    try {
+      const code = (conn.groupInviteCode ? await conn.groupInviteCode(m.chat) : (this.groupInviteCode ? await this.groupInviteCode(m.chat) : ''))
+      const linkThisGroup = `https://chat.whatsapp.com/${code}`
+      if (code && text.includes(linkThisGroup)) return !0
+    } catch (e) {
+      // no hacemos nada, seguimos (no debe tirar todo el handler)
+    }
+
+    // Borrar mensaje (si el bot es admin)
     if (isBotAdmin) {
-      await this.sendMessage(m.chat, {
-        delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }
+      await conn.sendMessage(m.chat, {
+        delete: {
+          remoteJid: m.chat,
+          id: m.key.id,
+          fromMe: false,
+          participant: m.key.participant || m.participant
+        }
       })
     }
 
-    // Sumar advertencia
-    user.warnLinks[m.chat]++
+    // Asegurar estructura en la DB y sumar advertencia
+    if (!global.db.data.users[m.sender]) global.db.data.users[m.sender] = {}
+    const user = global.db.data.users[m.sender]
+    user.warnLinks = user.warnLinks || {}
+    user.warnLinks[m.chat] = (user.warnLinks[m.chat] || 0) + 1
 
     // Avisar advertencia
-    await this.sendMessage(m.chat, {
-      text: `*☁️ ${taguser} se detectó un enlace prohibido.*\nAdvertencia ${user.warnLinks[m.chat]}/3`,
+    await conn.sendMessage(m.chat, {
+      text: `*☁️ @${m.sender.split('@')[0]} se detectó un enlace prohibido.*\nAdvertencia ${user.warnLinks[m.chat]}/3`,
       mentions: [m.sender]
     })
 
     // Si llega a 3 advertencias, expulsar
     if (user.warnLinks[m.chat] >= 3) {
       if (!isBotAdmin) {
-        await this.reply(m.chat, `*⚠️ No soy admin, no puedo eliminar intrusos*`, m)
+        await conn.reply(m.chat, `*⚠️ No soy admin, no puedo expulsar intrusos*`, m)
         return !0
       }
-      await this.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
+      await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
       delete user.warnLinks[m.chat] // Limpiar advertencias
     }
-  }
 
-  return !0
+    return !0
+  } catch (err) {
+    console.error('antilink before error:', err)
+    return !0
+  }
 }
