@@ -8,7 +8,7 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
 
     if (m.id.startsWith('3EB0') && m.id.length === 22) {
         if (chat.antiBot) {
-            await conn.reply(m.chat, `Este grupo no nesesita de tu presencia bot de segunda ⚡`, m);
+            await conn.reply(m.chat, `*☁️ Este grupo no nesesita de tu presencia bot de segunda.*`, m);
             if (isBotAdmin) {
                 await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }});
                 await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
