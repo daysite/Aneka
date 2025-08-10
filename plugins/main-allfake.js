@@ -109,9 +109,12 @@ global.date = `${diaSemana}, ${fecha.format('D')} de ${mes} del ${fecha.format('
 global.hora = fecha.format('h:mm A')
 
 //TAGS & STICKERS
+
 global.usnamebot = await conn.getName(conn.user.id)
-global.usname = await conn.getName(m.sender)
-var more = String.fromCharCode(8206)
+const gname = await conn.getName(m.sender)
+const user = global.db.data?.users?.[m.sender] || {}
+global.usname = user.registered && user.name ? user.name : gname
+const more = String.fromCharCode(8206)
 global.readMore = more.repeat(850)
 
 global.packN = `∿ 協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  閲覧 ࣪ ˖ 
