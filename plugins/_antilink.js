@@ -61,15 +61,15 @@ if (m.text.includes(linkThisGroup)) return !0
 }
 
 await conn.sendMessage(m.chat, {
-  text: `*${emojis} ${taguser} los enlaces de WhatsApp no están permitidos en este chat, por lo cual serás eliminado.*`,
+  text: `*☁️ ${taguser} los enlaces de WhatsApp no están permitidos en este chat, por lo cual serás eliminado.*`,
   mentions: [m.sender]
 })
 
-if (!isBotAdmin) return conn.reply(m.chat, `*${emojis} No soy admin, no puedo eliminar intrusos*`)
+if (!isBotAdmin) return conn.reply(m.chat, `*⚠️ No soy admin, no puedo eliminar intrusos*`, m)
 if (isBotAdmin) {
 await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }})
 await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
-} else if (!bot.restrict) return conn.reply(m.chat, `*${emojis} Esta característica esta desactivada*`, m, rcanal, )
+} else if (!bot.restrict) return conn.reply(m.chat, `*☕ Esta característica esta desactivada*`, m)
 }
 return !0
 
