@@ -1,4 +1,4 @@
-/*
+
 let linkRegex = /chat.whatsapp.com\/([0-9A-Za-z]{20,24})/i
 
 export async function before(m, { isAdmin, isBotAdmin, conn }) {
@@ -35,7 +35,9 @@ export async function before(m, { isAdmin, isBotAdmin, conn }) {
   }
 
   return !0
-}*/
+}
+
+/*
 let linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i
 
 export async function before(m, { isAdmin, isBotAdmin }) {
@@ -107,4 +109,4 @@ export async function before(m, { isAdmin, isBotAdmin }) {
   }
 
   return !0
-}
+}*/
