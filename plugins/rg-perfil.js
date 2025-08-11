@@ -8,7 +8,6 @@ const loadMarriages = () => {
     ? JSON.parse(fs.readFileSync(path, 'utf-8'))
     : {}
 }
-const toM = a => '@' + a.split('@')[0]
 
 const handler = async (m, { conn }) => {
   loadMarriages()
@@ -17,8 +16,8 @@ const handler = async (m, { conn }) => {
   const user = global.db.data.users[userId] || {}
 
   const nme = await conn.getName(userId)
- // const tag = `@${userId.split('@')[0]}`
-  const tag = toM(userId)
+  //const tag = `@${userId.split('@')[0]}`
+  const tag = m.sender
   const name = user.registered && user.name ? user.name : nme
   const perfilUrl = await conn.profilePictureUrl(userId, 'image')
     .catch(() => 'https://files.catbox.moe/xr2m6u.jpg')
