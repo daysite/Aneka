@@ -32,7 +32,7 @@
 "license": "GPL-3.0-or-later",
 "dependencies": {
 "@vitalets/google-translate-api": "^9.2.0",
-"@whiskeysockets/baileys": "git+ssh://git@github.com/The-King-Destroy/bails.git",
+"@whiskeysockets/baileys": "npm:@izumi-xyz/meta",
 "google-libphonenumber": "latest",
 "@adiwajshing/keyed-db": "^0.2.4",
 "@bochilteam/scraper": "^5.0.1",
