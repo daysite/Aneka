@@ -42,7 +42,7 @@ const handler = async (m, { conn }) => {
   const tituloDecorado = club // <- no tocar, como pediste
   const textoLargo = `
 =͟͟͞͞ ✿  *𝖯𝖾𝗋𝖿𝗂𝗅 𝖽𝖾𝗅 𝖴𝗌𝗎𝖺𝗋𝗂𝗈  ←╮*
-╰ ࣪ ˖ ∿ ${toM(userId)}
+╰ ࣪ ˖ ∿ ${taguser(tag)}
 
 > ${desc}
 
@@ -62,7 +62,7 @@ const handler = async (m, { conn }) => {
 `.trim()
 
   await conn.sendLuffy(m.chat, textoCorto, tituloDecorado, textoLargo, img, img, ig, fkontak, {
-    mentions: [userId]
+    mentions: [tag]
   })
 
   await m.react('🍮')
