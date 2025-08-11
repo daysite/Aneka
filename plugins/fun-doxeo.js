@@ -13,7 +13,9 @@ const handler = async (m, { conn, text }) => {
   if (!mentionedJid) return m.reply('*⚠️ Debes etiquetar a alguien.*');
 
 
-  const user = mentionedJid.split('@')[0];
+  let who = m.messageStubParameters[0]
+  let user = `@${who.split('@')[0]}`
+ // const user = mentionedJid.split('@')[0];
   const pn = new PhoneNumber('+' + user);
   const regionCode = pn.getRegionCode();
 
@@ -131,13 +133,8 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 *SHADOW ULTRA:* FREE CREDITS`;
 
   await sleep(1000);
-/*
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });*/
-await conn.sendMessage(m.chat, { 
-  text: `@${user}\n${doxeo}`, 
-  edit: sent.key, 
-  mentions: [mentionedJid] 
-});
+
+  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });
 };
 
 handler.help = ['doxear'];
