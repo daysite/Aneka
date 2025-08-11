@@ -37,6 +37,10 @@ global.creadorN = '51927238856';
 global.creadorM = global.creadorN + '@s.whatsapp.net';
 global.botreal = `${(conn.user.jid == global.conn.user.jid ? '*Bot:* Oficial' : `*SubBot de: ${conn.user.jid.split('@')[0]}*`)}`
 global.asistencia = 'Wa.me/51927238856'
+global.taguser = (jid) => {
+  if (!jid) return '@usuario';
+  return `@${jid.split('@')[0]}`;
+};
 
 
 //REACCIONES 
