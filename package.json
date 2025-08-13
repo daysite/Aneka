@@ -2,7 +2,7 @@
 "name": "ShadowUltra-MD",
 "version": "3.0.0",
 "description": "WhatsApp Bot Multi Device",
-"main": "main.js",
+"index": "index.js",
 "type": "module",
 "directories": {
 "lib": "lib",
