@@ -23,17 +23,14 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     }, TIEMPO_ESPERA)
   };
 
-  let info =
-    `*╭─「 🪐 ${video.title} 」*\n` +
-    `│ ❒ *Título:* ${video.title}\n` +
-    `│ ✶ *Autor:* ${video.author.name}\n` +
-    `│ ⤿ *Duración:* ${video.timestamp}\n` +
-    `│ ⤿ *Publicado:* ${video.ago}\n` +
-    `│ ⤿ *Vistas:* ${video.views.toLocaleString()}\n` +
-    `│ ⤿ *Canal:* ${video.author.url.replace('https://', '')}\n` +
-    `*╰─〔 Tipo: Descarga 〕*\n\n` +
-    `⛅ *¿Quieres el audio o el vídeo?*\nResponde con:\n` +
-    `1 o 1️⃣ para Audio\n2 o 2️⃣ para Vídeo`;
+  let info = `\`\`\`◜YouTube - Download◞\`\`\`
+
+${video.title}
+
+≡ *☕ \`Autor:\`* ${video.author.name}
+≡ *🍮 \`Duración:\`* ${video.timestamp}
+≡ *🥞 \`Fecha:\`*${video.ago}
+≡ *☁️ \`Vistas:\`* ${video.views.toLocaleString()}\n\n> » Responde 1 para Audio\n> » Responde 2 para vídeo`;
 
   await conn.sendMessage(m.chat, { image: { url: video.thumbnail }, caption: info }, { quoted: m });
 };
@@ -47,7 +44,7 @@ handler.before = async (m, { conn }) => {
 
     if (resp === '1' || resp === '1️⃣') {
       clearTimeout(estado.timeout);
-      await m.reply(`🪐 Espere el audio: ${estado.videoInfo.title}`);
+      await m.react ('🎶');
       await enviarArchivo(m, conn, estado.videoInfo.url, 'mp3', estado.videoInfo.title);
       delete estados[m.sender];
       return true;
@@ -55,7 +52,7 @@ handler.before = async (m, { conn }) => {
 
     if (resp === '2' || resp === '2️⃣') {
       clearTimeout(estado.timeout);
-      await m.reply(`⛅ Espere el vídeo: ${estado.videoInfo.title}`);
+      await m.react('📹');
       await enviarArchivo(m, conn, estado.videoInfo.url, 'mp4', estado.videoInfo.title);
       delete estados[m.sender];
       return true;
@@ -63,7 +60,7 @@ handler.before = async (m, { conn }) => {
 
     estado.intentos = (estado.intentos || 0) + 1;
     if (estado.intentos <= 1) {
-      await m.reply('🪐 Por favor responde con 1 (audio) o 2 (vídeo), o reacciona con 1️⃣ o 2️⃣.');
+      await m.reply('*☁️ Por favor responde con 1 (audio) o 2 (vídeo), o reacciona con 1️⃣ o 2️⃣.');
     }
     return true;
   }
