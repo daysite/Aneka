@@ -150,7 +150,7 @@ handler.before = async (m, { conn, usedPrefix }) => {
       await conn.sendMessage(m.chat, { react: { text: "🎶", key: m.key } });
       await conn.fakeReply(
         m.chat,
-        `${usedPrefix}ytmp3 ${estado.videoInfo.url}`,
+        `#ytmp3 ${estado.videoInfo.url}`,
         m.sender,
         'Procesando audio 🎶'
       );
@@ -163,7 +163,7 @@ handler.before = async (m, { conn, usedPrefix }) => {
       await conn.sendMessage(m.chat, { react: { text: "📹", key: m.key } });
       await conn.fakeReply(
         m.chat,
-        `${usedPrefix}ytmp4 ${estado.videoInfo.url}`,
+        `#ytmp4 ${estado.videoInfo.url}`,
         m.sender,
         'Procesando vídeo 📹'
       );
