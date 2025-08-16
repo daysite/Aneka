@@ -119,7 +119,7 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
 *RESULTADOS OBTENIDOS - V5*
 
-*Nombre:* ${text}
+*Nombre:* @${number}
 *País:* ${pais}
 *Ciudad:* ${location.city}
 *Región:* ${location.region}
