@@ -4,10 +4,11 @@ handler.all = async function (m) {
   let chat = global.db.data.chats[m.chat] || {}
   if (!chat.antiTraba) return
   if (!m.isGroup) return
+  if (m.key.fromMe) return // ⬅️ Ignorar los mensajes del bot
 
   try {
     // Detectar si el texto supera los 1000 caracteres
-    if (m.text && m.text.length > 10) {
+    if (m.text && m.text.length > 1000) {
       await this.sendMessage(m.chat, {
         delete: {
           remoteJid: m.chat,
@@ -16,8 +17,6 @@ handler.all = async function (m) {
           participant: m.key.participant || m.sender
         }
       })
-
-      await this.sendMessage(m.chat, { text: `⚠️ Mensaje demasiado largo eliminado automáticamente.` })
     }
   } catch (e) {
     console.error('Error anti-traba:', e)
