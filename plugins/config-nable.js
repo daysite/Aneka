@@ -103,14 +103,14 @@ case 'aceptarnuevos':
   }
   break
 
-case 'autorechazar':
-case 'rechazarnuevos':
+case 'antitraba':
+case 'antivirus':
   if (m.isGroup) {
     if (!(isAdmin || isOwner)) {
       global.dfail('admin', m, conn)
       throw false
     }
-    chat.autorechazar = isEnable
+    chat.antiTraba = isEnable
   } else {
     global.dfail('group', m, conn)
     throw false
