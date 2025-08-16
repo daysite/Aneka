@@ -11,8 +11,12 @@ export async function before(m, { conn, participants, groupMetadata }) {
   } else if (m.messageStubType == 28 || m.messageStubType == 32) {
     groupSize--;
   }
+let who = m.messageStubParameters[0] // jid real (ej: 51987654321@s.whatsapp.net)
+  let name = await conn.getName(who)
+  let taguser = '@' + who.split('@')[0] // se muestra en el texto
+/*
   let who = m.messageStubParameters[0]
-  let taguser = `@${who.split('@')[0]}`
+  let taguser = `@${who.split('@')[0]}`*/
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => 'https://files.catbox.moe/xr2m6u.jpg')
   let img = await (await fetch(`${pp}`)).buffer()
   let chat = global.db.data.chats[m.chat]
