@@ -165,12 +165,12 @@ handler.tags = ['fun'];
 handler.command = ['doxxeo', 'doxxear', 'doxeo', 'doxear', 'doxxing', 'doxing', 'doxx', 'dox'];
 handler.group = true;
 
-export default handler;*/
+export default handler;
 
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n */
-
+/*
 import PhoneNumber from 'awesome-phonenumber'
 import { performance } from 'perf_hooks'
 
@@ -262,4 +262,4 @@ handler.help = ['doxear @user']
 handler.tags = ['fun']
 handler.command = ['doxtes', 'doxear', 'doxxeo']
 
-export default handler
+export default handler*/
