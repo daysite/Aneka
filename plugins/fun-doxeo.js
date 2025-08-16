@@ -1,11 +1,31 @@
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
-/*
+
 import fetch from 'node-fetch';
 import PhoneNumber from 'awesome-phonenumber';
 import { performance } from 'perf_hooks';
 
+const handler = async (m, { conn }) => {
+  // 📌 Obtener al usuario target (mención o quote)
+  const who = m.quoted?.sender || m.mentionedJid?.[0]
+  if (!who) return m.reply(`*${xfun} Por favor, menciona a la persona que deseas doxear.*`)
+
+  // 📌 Nombre real en WhatsApp
+  let name
+  try {
+    name = await conn.getName(who)
+  } catch {
+    name = who.split('@')[0]
+  }
+
+  // 📌 Número (si es posible)
+  const number = who.split('@')[0]
+  const pn = new PhoneNumber('+' + number)
+  const regionCode = pn.getRegionCode() //😔
+
+
+/*
 const handler = async (m, { conn, text }) => {
   if (!text) return m.reply(`*${xfun} Por favor, menciona a la persona que deseas doxear.*`);
 
@@ -17,7 +37,7 @@ const handler = async (m, { conn, text }) => {
 //  let user = `@${who.split('@')[0]}`
   const user = mentionedJid.split('@')[0];
   const pn = new PhoneNumber('+' + user);
-  const regionCode = pn.getRegionCode();
+  const regionCode = pn.getRegionCode();*/
 
   const countryNames = {
     US: 'Estados Unidos 🇺🇸', MX: 'México 🇲🇽', AR: 'Argentina 🇦🇷', PE: 'Perú 🇵🇪',
@@ -134,7 +154,10 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
   await sleep(1000);
 
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });
+
+  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: [who] })
+/*
+  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });*/
 };
 
 handler.help = ['doxear'];
