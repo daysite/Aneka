@@ -115,6 +115,8 @@ export async function handler(chatUpdate) {
                 if (!('antiLink' in chat))
                     chat.antiLink = false
                 if (!('antiLink2' in chat))
+                    chat.antiTraba = false
+                if (!('antiTraba' in chat))
                     chat.antiLink2 = false
                 if (!('onlyLatinos' in chat))
                     chat.onlyLatinos = false
@@ -163,6 +165,7 @@ export async function handler(chatUpdate) {
                     autorechazar: false,
                     antiLink: false,
                     antiLink2: false,
+                    antiTraba: false,
                     antiBot: false,
                     antiBot2: false,
                     antifake: false,
