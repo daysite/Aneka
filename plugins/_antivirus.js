@@ -2,27 +2,46 @@ let handler = m => m
 
 handler.all = async function (m, { isBotAdmin }) {
   let chat = global.db.data.chats[m.chat] || {}
-  if (!chat.antiTraba) return // si no está activado, no hace nada
+  if (!chat.antiTraba) return
   if (!m.isGroup) return
   if (!isBotAdmin) return
 
   try {
-    // 🔎 Detectar mensajes traba:
-    // 1. Mensajes excesivamente largos
-    if ((m.text && m.text.length > 4000) || JSON.stringify(m.message).length > 5000) {
-      await this.sendMessage(m.chat, { delete: m.key }) // borrar solo ese mensaje
-      await this.sendMessage(m.chat, { text: `⚠️ Mensaje traba detectado y eliminado.` })
+    // Detectar mensajes muy largos (ejemplo 4000+ chars)
+    let longText = (m.text && m.text.length > 4000)
+    let tooBig = JSON.stringify(m.message || {}).length > 5000
+
+    if (longText || tooBig) {
+      // Borrar mensaje traba con key completo
+      await this.sendMessage(m.chat, {
+        delete: {
+          remoteJid: m.chat,
+          fromMe: false,
+          id: m.key.id,
+          participant: m.key.participant || m.sender
+        }
+      })
+
+      await this.sendMessage(m.chat, { text: `⚠️ Mensaje traba eliminado automáticamente.` })
       return
     }
 
-    // 2. Mensajes invisibles (stubType 68, como tu ejemplo)
+    // Detectar mensaje invisible tipo stub 68
     if (m.messageStubType === 68) {
-      await this.sendMessage(m.chat, { delete: m.key })
+      await this.sendMessage(m.chat, {
+        delete: {
+          remoteJid: m.chat,
+          fromMe: false,
+          id: m.key.id,
+          participant: m.key.participant || m.sender
+        }
+      })
+
       await this.sendMessage(m.chat, { text: `⚠️ Mensaje sospechoso eliminado.` })
     }
 
   } catch (e) {
-    console.error(e)
+    console.error('Error anti-traba:', e)
   }
 }
 
