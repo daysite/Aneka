@@ -7,7 +7,7 @@ handler.all = async function (m) {
 
   try {
     // Detectar si el texto supera los 1000 caracteres
-    if (m.text && m.text.length > 1000) {
+    if (m.text && m.text.length > 10) {
       await this.sendMessage(m.chat, {
         delete: {
           remoteJid: m.chat,
