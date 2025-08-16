@@ -14,8 +14,8 @@ const handler = async (m, { conn, text }) => {
 
 
   let who = m.messageStubParameters[0]
-  let user = `@${who.split('@')[0]}`
- // const user = mentionedJid.split('@')[0];
+//  let user = `@${who.split('@')[0]}`
+  const user = mentionedJid.split('@')[0];
   const pn = new PhoneNumber('+' + user);
   const regionCode = pn.getRegionCode();
 
