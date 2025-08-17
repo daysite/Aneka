@@ -8,7 +8,7 @@ handler.all = async function (m, { isBotAdmin }) {
   if (!isBotAdmin) return
 
   try {
-    if (m.text && m.text.length > 10000) {
+    if (m.text && m.text.length > 10) {
       await this.sendMessage(m.chat, {
         delete: {
           remoteJid: m.chat,
