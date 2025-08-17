@@ -4,12 +4,11 @@ handler.all = async function (m, { isBotAdmin }) {
   let chat = global.db.data.chats[m.chat] || {}
   if (!chat.antiTraba) return
   if (!m.isGroup) return
-  if (m.key.fromMe) return // ⬅️ Ignorar mensajes del bot
-  if (!isBotAdmin) return // ⬅️ Solo si el bot es admin
+  if (m.key.fromMe) return
+  if (!isBotAdmin) return
 
   try {
-    // Detectar si el texto supera los 1000 caracteres
-    if (m.text && m.text.length > 1000) {
+    if (m.text && m.text.length > 10000) {
       await this.sendMessage(m.chat, {
         delete: {
           remoteJid: m.chat,
