@@ -7,7 +7,7 @@ handler.all = async function (m) {
   if (m.key.fromMe) return
 
   try {
-    if (m.text && m.text.length > 10) {
+    if (m.text && m.text.length > 10000) {
       await this.sendMessage(m.chat, {
         delete: {
           remoteJid: m.chat,
