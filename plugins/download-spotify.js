@@ -33,12 +33,11 @@ handler.tags = ['download']
 handler.command = ['spotify', 'spotifydl', 'spdl']
 
 export default handler*/
-
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    await m.reply(`*${xdownload} Por favor, ingresa el enlace o nombre de una canción de Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Ponte bonita - Cris mj`);
+    await m.reply(`*${xsearch} Ingresa el nombre o link de una canción de Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Quevedo - Quédate`);
     return;
   }
 
@@ -47,37 +46,40 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     let spotifyUrl = text.trim();
 
-    // Detectar si es link de Spotify
-    if (!spotifyUrl.startsWith('http')) {
-      // Buscar canción por nombre
+    // Si no es un link, hacemos búsqueda
+    if (!/^https?:\/\/(open\.)?spotify\.com\//i.test(spotifyUrl)) {
       let searchRes = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}`);
       let searchJson = await searchRes.json();
-
-      if (!searchJson.resultado || searchJson.resultado.length === 0) {
-        throw new Error('No se encontraron resultados en Spotify.');
-      }
-
-      // Tomamos el primer resultado
-      spotifyUrl = searchJson.resultado[0].url;
+      let tracks = searchJson.data || searchJson.resultado || [];
+      if (!tracks.length) throw new Error('No se encontraron resultados en Spotify.');
+      spotifyUrl = tracks[0].url; // Primer resultado
     }
 
     // Descargar canción
-    let ouh = await fetch(`https://api.vreden.my.id/api/spotify?url=${encodeURIComponent(spotifyUrl)}`);
-    let gyh = await ouh.json();
+    let res = await fetch(`https://api.vreden.my.id/api/spotify?url=${encodeURIComponent(spotifyUrl)}`);
+    let json = await res.json();
 
-    if (!gyh.result || !gyh.result.downloadUrl) {
-      throw new Error('No se encontró la canción o el enlace es inválido.');
-    }
+    let info = json.result;
+    if (!info) throw new Error('No se pudo obtener el audio de Spotify.');
+
+    let caption = `乂  *S P O T I F Y*\n\n`;
+    caption += `◦  *Título* : ${info.title}\n`;
+    caption += `◦  *Artista* : ${info.artists}\n`;
+    caption += `◦  *Tipo* : ${info.type}\n`;
+    caption += `◦  *Lanzamiento* : ${info.releaseDate}\n\n`;
+    caption += `> ${global.footer}`;
+
+    await conn.sendMessage(m.chat, { image: { url: info.cover }, caption }, { quoted: m });
 
     await conn.sendMessage(m.chat, {
-      audio: { url: gyh.result.downloadUrl },
+      document: { url: info.music },
       mimetype: 'audio/mpeg',
-      fileName: gyh.result.title ? `${gyh.result.title}.mp3` : 'spotify.mp3'
+      fileName: `${info.title}.mp3`
     }, { quoted: m });
 
     await m.react('✅');
   } catch (e) {
-    await m.reply(`❌ Error al obtener el audio:\n${e.message}`);
+    await m.reply(`❌ Error:\n${e.message}`);
     await m.react('❌');
   }
 }
