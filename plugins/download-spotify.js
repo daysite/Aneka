@@ -33,12 +33,11 @@ handler.tags = ['download']
 handler.command = ['spotify', 'spotifydl', 'spdl']
 
 export default handler*/
-
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    await m.reply(`*${xdownload} Por favor, ingresa el nombre o link de una canción de Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Quevedo - Quédate`)
+    await m.reply(`*${xdownload} Ingresa el nombre o link de una canción de Spotify.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Darell - Caliente`)
     return
   }
 
@@ -47,6 +46,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     let spotifyUrl = text.trim()
 
+    // 📌 Si no es link, hacer búsqueda
     if (!/^https?:\/\/(open\.)?spotify\.com\//i.test(spotifyUrl)) {
       let searchRes = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}`)
       let searchJson = await searchRes.json()
@@ -55,26 +55,38 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       spotifyUrl = tracks[0].url
     }
 
+    // 📌 Llamar API de descarga
     let res = await fetch(`https://api.vreden.my.id/api/spotify?url=${encodeURIComponent(spotifyUrl)}`)
     let json = await res.json()
-    let info = json.result
-    if (!info) throw new Error('No se pudo obtener el audio de Spotify.')
+    let info = json?.result
+    if (!info) throw new Error('No se pudo obtener datos de la canción.')
+
+    // 📌 Fallbacks si algún campo viene vacío
+    let title = info.title || 'Título desconocido'
+    let artists = info.artists || 'Desconocido'
+    let type = info.type || 'N/A'
+    let releaseDate = info.releaseDate || 'No disponible'
+    let cover = info.cover || 'https://i.ibb.co/5R5WpJx/spotify.png'
+    let music = info.music || null
+
+    // 📌 Evitar enviar audio vacío
+    if (!music) throw new Error('El link de audio no está disponible.')
 
     let caption = `\`\`\`◜Spotify - Download◞\`\`\`\n\n`
-    caption += `*${info.title}*\n`
-    caption += `‎ ‎ׄׄ   ››  🌿  *\`Artista:\`* ${info.artists}\n`
-    caption += `‎ ‎ׄׄ   ››  🌵  *\`Tipo:\`* ${info.type}\n`
-    caption += `‎ ‎ׄׄ   ››  🌸  *\`Lanzamiento:\`* ${info.releaseDate}\n\n`
+    caption += `*${title}*\n`
+    caption += `‎ ‎ׄׄ   ››  🌿  *\`Artista:\`* ${artists}\n`
+    caption += `‎ ‎ׄׄ   ››  🌵  *\`Tipo:\`* ${type}\n`
+    caption += `‎ ‎ׄׄ   ››  🌸  *\`Lanzamiento:\`* ${releaseDate}\n\n`
     caption += `> ${club}`
 
-    // 📌 Enviar preview con thumbnail (no como imagen real)
+    // 📌 Preview con thumbnail
     await conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
         externalAdReply: {
-          title: info.title,
-          body: info.artists,
-          thumbnailUrl: info.cover,
+          title: title,
+          body: artists,
+          thumbnailUrl: cover,
           sourceUrl: spotifyUrl,
           mediaType: 1,
           renderLargerThumbnail: true
@@ -82,11 +94,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       }
     }, { quoted: m })
 
-    // 📌 Enviar audio (no documento)
+    // 📌 Audio directo
     await conn.sendMessage(m.chat, {
-      audio: { url: info.music },
+      audio: { url: music },
       mimetype: 'audio/mpeg',
-      fileName: `${info.title}.mp3`
+      fileName: `${title}.mp3`
     }, { quoted: m })
 
     await m.react('✅')
