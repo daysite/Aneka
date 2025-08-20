@@ -67,7 +67,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `◦  *Artista* : ${info.artists}\n`;
     caption += `◦  *Tipo* : ${info.type}\n`;
     caption += `◦  *Lanzamiento* : ${info.releaseDate}\n\n`;
-    caption += `> ${global.footer}`;
+    caption += `> ${dev}`;
 
     await conn.sendMessage(m.chat, { image: { url: info.cover }, caption }, { quoted: m });
 
