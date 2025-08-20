@@ -2,6 +2,7 @@ import fetch from 'node-fetch'
 
 const SPOTIFY_SEARCH_API = 'https://delirius-apiofc.vercel.app/search/spotify?q='
 const SPOTIFY_DL_API = 'https://api.vreden.my.id/api/spotify?url='
+const SPOTIFY_DL_API_FALLBACK = 'https://delirius-apiofc.vercel.app/download/spotifydl?url='
 const SPOTIFY_FALLBACK_COVER = 'https://i.ibb.co/5R5WpJx/spotify.png'
 
 async function searchSpotify(query) {
@@ -11,9 +12,34 @@ async function searchSpotify(query) {
 }
 
 async function downloadSpotify(url) {
-  const res = await fetch(SPOTIFY_DL_API + encodeURIComponent(url))
-  const json = await res.json()
-  return json?.result
+  try {
+    // 👉 API principal
+    const res = await fetch(SPOTIFY_DL_API + encodeURIComponent(url))
+    const json = await res.json()
+    if (json?.result) return json.result
+  } catch (e) {
+    console.error('[SPOTIFY MAIN API ERROR]', e)
+  }
+
+  try {
+    // 👉 API fallback
+    const res2 = await fetch(SPOTIFY_DL_API_FALLBACK + encodeURIComponent(url))
+    const json2 = await res2.json()
+    if (json2?.status && json2?.data) {
+      return {
+        title: json2.data.title,
+        artists: json2.data.author,
+        type: json2.data.type,
+        releaseDate: 'No disponible',
+        cover: json2.data.image,
+        music: json2.data.url
+      }
+    }
+  } catch (e) {
+    console.error('[SPOTIFY FALLBACK API ERROR]', e)
+  }
+
+  return null // 👉 si todo falla
 }
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
@@ -38,7 +64,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     // 🎵 Descargar info
     const info = await downloadSpotify(spotifyUrl)
-    if (!info) throw new Error('No se pudo obtener datos de la canción.')
+    if (!info) throw new Error('No se pudo obtener datos de la canción, intenta de nuevo más tarde.')
 
     const {
       title = 'Título desconocido',
@@ -49,7 +75,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       music = null
     } = info
 
-    if (!music) throw new Error('El link de audio no está disponible.')
+    if (!music) throw new Error('El link de audio no está disponible, intenta más tarde.')
 
     // 📝 Armamos el caption
     const caption = [
@@ -87,7 +113,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     await m.react('✅')
   } catch (err) {
-    console.error('[SPOTIFY ERROR]', err) // log para debug
+    console.error('[SPOTIFY ERROR]', err)
     await m.reply(`❌ Error:\n${err.message}`)
     await m.react('❌')
   }
@@ -95,6 +121,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.help = ['spotify']
 handler.tags = ['download']
-handler.command = ['sp2', 'spotifydl2', 'spdl2', 'spotify2']
+handler.command = ['spotify', 'spotifydl', 'spdl']
 
 export default handler
