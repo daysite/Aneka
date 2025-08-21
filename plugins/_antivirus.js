@@ -1,4 +1,4 @@
-let handler = m => m
+/*let handler = m => m
 
 handler.all = async function (m) {
   let chat = global.db.data.chats[m.chat] || {}
@@ -22,4 +22,4 @@ handler.all = async function (m) {
   }
 }
 
-export default handler
+export default handler*/
