@@ -43,7 +43,7 @@ global.sessions = 'ShadowSession'
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
-global.moneda = 'ShadowCoins 🪙'
+global.moneda = 'Diamantes 💎'
 global.xanime = '🍮'
 global.xmenus = '🌿'
 global.xconfig = '🧋'
