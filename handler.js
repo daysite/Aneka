@@ -253,10 +253,12 @@ if (opts['queque'] && m.text && !(isMods || isPrems)) {
 }
 
 // 🛡️ Ignorar mensajes de Baileys o duplicados
-if (m.isBaileys || m.sender === this.user?.jid) return
+if (m.isBaileys) return
 
 // 🎯 Recompensa de experiencia
 m.exp += Math.ceil(Math.random() * 10)
+
+let usedPrefix 
 
 // 📊 Datos de grupo
 let groupMetadata = {}
