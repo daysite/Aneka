@@ -197,19 +197,18 @@ export async function handler(chatUpdate) {
         } catch (e) {
             console.error(e)
         }
+/*
+//VALIDACION 1 🤨
 if (opts['nyimak']) return
 if (!m.fromMe && opts['self']) return
 if (opts['swonly'] && m.chat !== 'status@broadcast') return
 if (typeof m.text !== 'string') m.text = ''
 
-// ✅ Datos del usuario en DB
 let _user = global.db.data?.users?.[m.sender]
 
-// 🔍 Normalizar número y detectar si es LID o JID
 const cleanSender = m.sender.replace(/[^0-9]/g, '')
 const senderType = m.sender.includes('@lid') ? '@lid' : '@s.whatsapp.net'
 
-// 🔑 Propietarios
 const isROwner = global.owner
   .map(([num]) => num.replace(/[^0-9]/g, ''))
   .some(n => [`${n}@s.whatsapp.net`, `${n}@lid`].includes(m.sender))
@@ -219,7 +218,6 @@ const isPrems = isROwner || _user?.premiumTime > 0
 
 if (!isOwner && opts['self']) return
 
-// 🕒 Cola de mensajes
 if (opts['queque'] && m.text && !(isMods || isPrems)) {
   let queque = this.msgqueque
   const time = 5000
@@ -238,15 +236,12 @@ if (opts['queque'] && m.text && !(isMods || isPrems)) {
   }
 }
 
-// ❌ Ignorar mensajes internos de Baileys
 if (m.isBaileys) return
 
-// 🎲 Experiencia
 m.exp += Math.ceil(Math.random() * 10)
 
-let usedPrefix // lo defines luego
+let usedPrefix 
 
-// 📌 Obtener datos del grupo (con caché opcional)
 let groupMetadata = {}
 let participants = []
 if (m.isGroup) {
@@ -255,7 +250,6 @@ if (m.isGroup) {
   participants = groupMetadata.participants || []
 }
 
-// 🔍 Función para buscar participante (jid o lid)
 function findParticipant(jid) {
   return participants.find(p => p.jid === jid || p.lid === jid.split('@')[0]) || {}
 }
@@ -263,14 +257,70 @@ function findParticipant(jid) {
 const user = findParticipant(m.sender)
 const bot  = findParticipant(conn.user?.jid)
 
-// 👑 Admins
+// Admins
 const isRAdmin = user.admin === 'superadmin'
 const isAdmin = isRAdmin || user.admin === 'admin'
 const isBotAdmin = ['admin', 'superadmin'].includes(bot.admin)
 
-// 🏢 Detectar Business y Canales
+// Detect Business y Canales
 m.isWABusiness = /smb[ai]/.test(global.conn.authState?.creds?.platform || '')
-m.isChannel = /@newsletter$/.test(m.chat) || /@newsletter$/.test(m.sender)
+m.isChannel = /@newsletter$/.test(m.chat) || /@newsletter$/.test(m.sender)*/
+
+if (opts['nyimak']) return
+        if (!m.fromMe && opts['self']) return
+        if (opts['swonly'] && m.chat !== 'status@broadcast') return
+        if (typeof m.text !== 'string')
+            m.text = ''
+
+
+        let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
+
+
+        const sendNum = m?.sender?.replace(/[^0-9]/g, '')
+        const isROwner = [conn.decodeJid(global.conn?.user?.id), ...global.owner?.map(([number]) => number)].map(v => (v || '').replace(/[^0-9]/g, '')).includes(sendNum)
+        /*
+                const isROwner = [conn.decodeJid(global.conn.user.id),
+         ...global.owner.map(([number]) => number)].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)*/
+
+        const isOwner = isROwner || m.fromMe
+        const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+
+        const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || _user.prem == true
+
+        if (opts['queque'] && m.text && !(isMods || isPrems)) {
+            let queque = this.msgqueque, time = 1000 * 5
+            const previousID = queque[queque.length - 1]
+            queque.push(m.id || m.key.id)
+            setInterval(async function () {
+                if (queque.indexOf(previousID) === -1) clearInterval(this)
+                await delay(time)
+            }, time)
+        }
+
+        if (m.isBaileys)
+            return
+        /*if (m.fromMe || m.isBaileys || m.sender === this.user.jid) return*/
+
+        m.exp += Math.ceil(Math.random() * 10)
+
+        let usedPrefix
+
+        const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
+        const participants = (m.isGroup ? groupMetadata.participants : []) || []
+        const normalizeJid = jid => jid?.replace(/[^0-9]/g, '')
+        const cleanJid = jid => jid?.split(':')[0] || ''
+        const senderNum = normalizeJid(m.sender)
+        const botNums = [this.user?.jid, this.user?.lid].map(j => normalizeJid(cleanJid(j)))
+        const user = m.isGroup
+            ? participants.find(u => normalizeJid(u.id) === senderNum)
+            : {}
+        const bot = m.isGroup
+            ? participants.find(u => botNums.includes(normalizeJid(u.id)))
+            : {}
+
+        const isRAdmin = user?.admin === 'superadmin'
+        const isAdmin = isRAdmin || user?.admin === 'admin'
+        const isBotAdmin = !!bot?.admin || bot?.admin === 'admin'
 
 
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
