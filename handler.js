@@ -197,100 +197,6 @@ export async function handler(chatUpdate) {
         } catch (e) {
             console.error(e)
         }
-
-// 🔒 VALIDACIÓN FUERTE by Shadow Ultra
-if (opts['nyimak']) return
-if (!m.fromMe && opts['self']) return
-if (opts['swonly'] && m.chat !== 'status@broadcast') return
-if (typeof m.text !== 'string') m.text = ''
-
-// 🧩 Usuario en DB
-let _user = global.db.data?.users?.[m.sender] || {}
-
-// 📌 Limpiar número del sender
-const normalizeJid = jid => jid?.replace(/[^0-9]/g, '')
-const cleanJid = jid => jid?.split(':')[0] || ''
-const senderNum = normalizeJid(m.sender)
-
-// 📌 Dueños reales
-const rawOwners = [
-  conn.decodeJid(global.conn?.user?.id),
-  ...(global.owner || []).map(([num]) => num)
-].filter(Boolean)
-
-const ownerNums = rawOwners.map(v => normalizeJid(v))
-
-const isROwner = ownerNums.includes(senderNum)
-const isOwner = isROwner || m.fromMe
-
-// 📌 Mods / Prems
-const isMods = isOwner || (global.mods || [])
-  .map(v => normalizeJid(v + '@s.whatsapp.net'))
-  .includes(m.sender)
-
-const isPrems = isROwner 
-  || (global.prems || []).map(v => normalizeJid(v + '@s.whatsapp.net')).includes(m.sender)
-  || _user.premiumTime > 0
-  || _user.prem === true
-
-// 🚦 Cola de mensajes (evita flood/spam)
-if (opts['queque'] && m.text && !(isMods || isPrems)) {
-  let queque = this.msgqueque
-  const time = 5000
-  const prevID = queque[queque.length - 1]
-  queque.push(m.id || m.key.id)
-
-  if (prevID) {
-    await new Promise(resolve => {
-      let check = setInterval(() => {
-        if (!queque.includes(prevID)) {
-          clearInterval(check)
-          resolve()
-        }
-      }, time)
-    })
-  }
-}
-
-// 🛡️ Ignorar mensajes de Baileys o duplicados
-if (m.isBaileys) return
-
-// 🎯 Recompensa de experiencia
-m.exp += Math.ceil(Math.random() * 10)
-
-let usedPrefix 
-
-// 📊 Datos de grupo
-let groupMetadata = {}
-let participants = []
-
-if (m.isGroup) {
-  groupMetadata = this.groupMetadataCache?.[m.chat] 
-    || await this.groupMetadata(m.chat).catch(_ => null) 
-    || {}
-  participants = groupMetadata.participants || []
-}
-
-// 📌 Buscar participante
-function findParticipant(jid) {
-  const clean = normalizeJid(cleanJid(jid))
-  return participants.find(u => normalizeJid(cleanJid(u.id)) === clean) || {}
-}
-
-const user = m.isGroup ? findParticipant(m.sender) : {}
-const bot  = m.isGroup ? findParticipant(this.user?.jid) : {}
-
-// 👑 Admins
-const isRAdmin   = user?.admin === 'superadmin'
-const isAdmin    = isRAdmin || user?.admin === 'admin'
-const isBotAdmin = ['admin', 'superadmin'].includes(bot?.admin)
-
-// 🏢 Detectar si es Business o Canal
-m.isWABusiness = /smb[ai]/.test(global.conn?.authState?.creds?.platform || '')
-m.isChannel    = /@newsletter$/.test(m.chat) || /@newsletter$/.test(m.sender)
-
-/*
-//VALIDACION 1 🤨
 if (opts['nyimak']) return
 if (!m.fromMe && opts['self']) return
 if (opts['swonly'] && m.chat !== 'status@broadcast') return
@@ -356,7 +262,7 @@ const isBotAdmin = ['admin', 'superadmin'].includes(bot.admin)
 
 // Detect Business y Canales
 m.isWABusiness = /smb[ai]/.test(global.conn.authState?.creds?.platform || '')
-m.isChannel = /@newsletter$/.test(m.chat) || /@newsletter$/.test(m.sender)*/
+m.isChannel = /@newsletter$/.test(m.chat) || /@newsletter$/.test(m.sender)
 
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
         for (let name in global.plugins) {
