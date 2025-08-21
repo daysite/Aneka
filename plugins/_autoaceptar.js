@@ -1,5 +1,5 @@
 
-
+/*
 let handler = m => m
 
 handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
@@ -30,31 +30,4 @@ handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
 }
 
 export default handler
-/*
-
-let handler = m => m
-
-handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
-  if (!m.isGroup) return !1
-  let chat = global.db.data.chats[m.chat] || {}
-  
-  // Si no está activado o el que habla es admin, no hacer nada
-  if (!chat.autoaceptar || isAdmin || !isBotAdmin) return !0
-
-  // Validar solo números que empiecen con 5
-  const prefix = /^5|1\d+$/
-
-  try {
-    // Solo actuamos cuando es una solicitud de ingreso
-    if (m.messageStubType === 172 && m.messageStubParameters?.length) {
-      const [jid] = m.messageStubParameters
-      if (prefix.test(jid.split('@')[0])) {
-        await conn.groupRequestParticipantsUpdate(m.chat, [jid], 'approve').catch(() => {})
-      }
-    }
-  } catch (e) {
-    console.error('Error autoaceptar:', e)
-  }
-}
-
-export default handler*/
+*/
