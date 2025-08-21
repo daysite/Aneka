@@ -150,7 +150,7 @@ for (let key in emojis) {
                 isForwarded: true,
                 forwardingScore: 999,
                 externalAdReply: {
-                    title: '⏤͟͞ू⃪ ፝͜⁞Sʜᴀᴅᴏᴡ✰⃔࿐\nNᴜᴇᴠᴀ Vᴇʀsɪᴏɴ Uʟᴛʀᴀ 🌤️',
+                    title: '⏤͟͞ू⃪ ፝͜⁞Sʜᴀᴅᴏᴡ✰⃔࿐\nNᴜᴇᴠᴀ Vᴇʀsɪᴏɴ Uʟᴛʀᴀ ☁️',
                     thumbnailUrl: perfil,
                     mediaType: 1,
                     renderLargerThumbnail: false,
