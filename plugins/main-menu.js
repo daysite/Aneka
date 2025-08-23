@@ -13,7 +13,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     role = role || 'Aldeano'
 
     //const taguser = '@' + m.sender.split('@s.whatsapp.net')[0]
-    const taguser = `@${m.sender.split('@')[0]}`
+    let taguser = '@' + m.sender.split('@')[0]
     const _uptime = process.uptime() * 1000
     const uptime = clockString(_uptime)
 
@@ -147,7 +147,7 @@ for (let key in emojis) {
             video: { url: vid.getRandom() }, // Vid
             caption: menuText,
             contextInfo: {
-                mentionedJid: [creadorM],
+                mentionedJid: [m.sender, creadorM],
                 isForwarded: true,
                 forwardingScore: 999,
                 externalAdReply: {
