@@ -196,21 +196,18 @@ export async function handler(chatUpdate) {
             }
         } catch (e) {
             console.error(e)
-        }
+        } //By will & Criss Validación Funcional
 if (opts['nyimak']) return
 if (!m.fromMe && opts['self']) return
 if (opts['swonly'] && m.chat !== 'status@broadcast') return
 if (typeof m.text !== 'string') m.text = ''
 
-// 🔹 Usuario en DB
 let _user = global.db.data?.users?.[m.sender]
 
-// 🔹 Normalizar números (quita @, :X, etc.)
 const normalizeNum = jid => (jid || '').replace(/[^0-9]/g, '')
 const senderNum = normalizeNum(m.sender)
 const botNum = normalizeNum(conn.user?.id)
 
-// 🔹 Owners / Mods / Prems
 const owners = [
   conn.decodeJid(global.conn?.user?.id),
   ...(global.owner || []).map(([n]) => n)
@@ -219,13 +216,11 @@ const owners = [
 const mods = (global.mods || []).map(normalizeNum)
 const prems = (global.prems || []).map(normalizeNum)
 
-// 🔹 Flags principales
 const isROwner = owners.includes(senderNum)
 const isOwner = isROwner || m.fromMe
 const isMods = isOwner || mods.includes(senderNum)
 const isPrems = isOwner || prems.includes(senderNum) || _user?.prem === true
 
-// 🔹 Cola de mensajes (rate-limit a users normales)
 if (opts['queque'] && m.text && !(isMods || isPrems)) {
   let queque = this.msgqueque, delayTime = 5000
   const prevID = queque[queque.length - 1]
@@ -237,102 +232,40 @@ if (opts['queque'] && m.text && !(isMods || isPrems)) {
   })()
 }
 
-// 🔹 Evitar loops del bot
 if (m.isBaileys) return
 
-// 🔹 Sistema de XP
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
-// 🔹 Función para obtener lid real
 async function getLidFromJid(id, conn) {
   if (id.endsWith('@lid')) return id
   const res = await conn.onWhatsApp(id).catch(() => [])
   return res[0]?.lid || id
 }
 
-// 🔹 JIDs/LIDs de sender y bot
 const senderLid = await getLidFromJid(m.sender, conn)
 const botLid = await getLidFromJid(conn.user.jid, conn)
 const senderJid = m.sender
 const botJid = conn.user.jid
 
-// 🔹 Metadata del grupo
 const groupMetadata = m.isGroup
   ? (conn.chats[m.chat]?.metadata || await conn.groupMetadata(m.chat).catch(() => null))
   : {}
 
 const participants = groupMetadata?.participants || []
 
-// 🔹 Función robusta para encontrar participante
 const getParticipant = (jid, lid) =>
   participants.find(p =>
     [p.id, p.jid].includes(jid) || [p.id, p.jid].includes(lid)
   ) || {}
 
-// 🔹 Datos de user y bot en el grupo
 const user = getParticipant(senderJid, senderLid)
 const bot = getParticipant(botJid, botLid)
 
-// 🔹 Roles de admins
 const isRAdmin = user?.admin === "superadmin"
 const isAdmin = ["admin", "superadmin"].includes(user?.admin)
 const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
-
-/*
-        if (opts['nyimak']) return
-        if (!m.fromMe && opts['self']) return
-        if (opts['swonly'] && m.chat !== 'status@broadcast') return
-        if (typeof m.text !== 'string')
-            m.text = ''
-
-
-        let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-
-
-        const sendNum = m?.sender?.replace(/[^0-9]/g, '')
-        const isROwner = [conn.decodeJid(global.conn?.user?.id), ...global.owner?.map(([number]) => number)].map(v => (v || '').replace(/[^0-9]/g, '')).includes(sendNum)
-
-        const isOwner = isROwner || m.fromMe
-        const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
-
-        const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || _user.prem == true
-
-        if (opts['queque'] && m.text && !(isMods || isPrems)) {
-            let queque = this.msgqueque, time = 1000 * 5
-            const previousID = queque[queque.length - 1]
-            queque.push(m.id || m.key.id)
-            setInterval(async function () {
-                if (queque.indexOf(previousID) === -1) clearInterval(this)
-                await delay(time)
-            }, time)
-        }
-
-        if (m.isBaileys)
-            return
-
-        m.exp += Math.ceil(Math.random() * 10)
-
-        let usedPrefix
-
-// Fix isRAdmin y isBotAdmin >> Destroy y WillZek 
-async function getLidFromJid(id, conn) {
-if (id.endsWith('@lid')) return id
-const res = await conn.onWhatsApp(id).catch(() => [])
-return res[0]?.lid || id
-}
-const senderLid = await getLidFromJid(m.sender, conn)
-const botLid = await getLidFromJid(conn.user.jid, conn)
-const senderJid = m.sender
-const botJid = conn.user.jid
-const groupMetadata = m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}
-const participants = m.isGroup ? (groupMetadata.participants || []) : []
-const user = participants.find(p => p.id === senderLid || p.jid === senderJid) || {}
-const bot = participants.find(p => p.id === botLid || p.id === botJid) || {}
-const isRAdmin = user?.admin === "superadmin"
-const isAdmin = isRAdmin || user?.admin === "admin"
-const isBotAdmin = !!bot?.admin*/
 
 /*
 if (opts['nyimak']) return
