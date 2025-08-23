@@ -94,7 +94,7 @@ gay: '🏳️‍🌈', lesbiana: '🏳️‍🌈', pajero: '😏💦', pajera: '
   ];
   const response = responses[Math.floor(Math.random() * responses.length)];
 
-  const cal = `*\`🤍 CALCULADORA 🤍\`*
+  const cal = `*\`🤍 𝖢𝖠𝖫𝖢𝖴𝖫𝖠𝖳𝖮𝖱 🤍\`*
 
 🌿 *Los cálculos han arrojado que ${text.toUpperCase()} es* \`${percentages}%\` *${command} ${emoji}*
 
@@ -235,24 +235,24 @@ const handler = async (m, { conn, command, args }) => {
   ];
   const finalResponse = responses[Math.floor(Math.random() * responses.length)];
 
-  const cal = `*🤍 \`CALCULADORA\` 🤍*
+  const cal = `*🤍 \`𝖢𝖠𝖫𝖢𝖴𝖫𝖠𝖳𝖮𝖱 𝖱𝖠𝖭𝖣\` 🤍*
 
-${emojis} *Los cálculos han arrojado que* *${taguser}* *es* \`${percentage}%\` *${command} ${emoji}*
+🌷 *Los cálculos han arrojado que* *${taguser}* *es* \`${percentage}%\` *${command} ${emoji}*
 
 *${description}*
 > *${finalResponse}*`.trim();
 
   async function loading() {
     const bars = [
-      "《 █▒▒▒▒▒▒▒▒▒▒▒》10%",
-      "《 ████▒▒▒▒▒▒▒▒》30%",
-      "《 ███████▒▒▒▒▒》50%",
-      "《 ██████████▒▒》80%",
-      "《 ████████████》100%"
+      "█▒▒▒▒▒▒▒▒▒10%",
+      "████▒▒▒▒▒▒30%",
+      "█████▒▒▒▒▒50%",
+      "██████████100%",
+      "██████████100%"
     ];
 
     let { key } = await conn.sendMessage(m.chat, {
-      text: '*☁️ Calculando el porcentaje...*',
+      text: '☁️ 𝐍𝐨𝐰 𝐥𝐨𝐚𝐝𝐢𝐧𝐠. . .',
       mentions: [user]
     });
 
