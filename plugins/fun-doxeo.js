@@ -52,7 +52,7 @@ const handler = async (m, { conn, text }) => {
   const locationByCountry = {
     US: { city: 'Los Angeles', region: 'California', lat: '34.0522', lon: '-118.2437' },
     MX: { city: 'CDMX', region: 'Ciudad de México', lat: '19.4326', lon: '-99.1332' },
-    AR: { city: 'Buenos Aires', region: 'Buenos Aires', lat: '-34.6037', lon: '-58.3816' },
+    AR: { city: 'Buenos Aires', region: 'Buenos Aires', lat: '-98.6037', lon: '-76.3816' },
     PE: { city: 'Lima', region: 'Lima Metropolitana', lat: '-12.0464', lon: '-77.0428' },
     CO: { city: 'Bogotá', region: 'Cundinamarca', lat: '4.7110', lon: '-74.0721' },
     BR: { city: 'São Paulo', region: 'São Paulo', lat: '-23.5505', lon: '-46.6333' },
