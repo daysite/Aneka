@@ -293,9 +293,6 @@ const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
 
         const sendNum = m?.sender?.replace(/[^0-9]/g, '')
         const isROwner = [conn.decodeJid(global.conn?.user?.id), ...global.owner?.map(([number]) => number)].map(v => (v || '').replace(/[^0-9]/g, '')).includes(sendNum)
-        /*
-                const isROwner = [conn.decodeJid(global.conn.user.id),
-         ...global.owner.map(([number]) => number)].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)*/
 
         const isOwner = isROwner || m.fromMe
         const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
