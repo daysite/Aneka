@@ -1,31 +1,7 @@
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
-/*
-import fetch from 'node-fetch';
-import PhoneNumber from 'awesome-phonenumber';
-import { performance } from 'perf_hooks';
 
-const handler = async (m, { conn }) => {
-  // 📌 Obtener al usuario target (mención o quote)
-  const who = m.quoted?.sender || m.mentionedJid?.[0]
-  if (!who) return m.reply(`*${xfun} Por favor, menciona a la persona que deseas doxear.*`)
-
-  // 📌 Nombre real en WhatsApp
-  let name
-  try {
-    name = await conn.getName(who)
-  } catch {
-    name = who.split('@')[0]
-  }
-
-  // 📌 Número (si es posible)
-  const number = who.split('@')[0]
-  const pn = new PhoneNumber('+' + number)
-  const regionCode = pn.getRegionCode() //😔
-
-
-/*
 const handler = async (m, { conn, text }) => {
   if (!text) return m.reply(`*${xfun} Por favor, menciona a la persona que deseas doxear.*`);
 
@@ -37,8 +13,8 @@ const handler = async (m, { conn, text }) => {
 //  let user = `@${who.split('@')[0]}`
   const user = mentionedJid.split('@')[0];
   const pn = new PhoneNumber('+' + user);
-  const regionCode = pn.getRegionCode();*/
-/*
+  const regionCode = pn.getRegionCode();
+
 
   const countryNames = {
     US: 'Estados Unidos 🇺🇸', MX: 'México 🇲🇽', AR: 'Argentina 🇦🇷', PE: 'Perú 🇵🇪',
@@ -91,11 +67,11 @@ const handler = async (m, { conn, text }) => {
   const randomWifi = () => `WiFi-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
   const boosts = [
-    '*☠ ¡¡Iniciando Doxeo!! ☠*',
-    '*25% completado...*',
-    '*47% completado...*',
-    '*62% completado...*',
-    '*97% completado...*'
+    '⋘ 𝑙𝑜𝑎𝑑𝑖𝑛𝑔 𝑑𝑎𝑡𝑎... ⋙',
+    '25% 𝒄𝒐𝒎𝒑𝒍𝒆𝒕𝒂𝒅𝒐. . .',
+    '*47% 𝒄𝒐𝒎𝒑𝒍𝒆𝒕𝒂𝒅𝒐. . .*',
+    '*62% 𝒄𝒐𝒎𝒑𝒍𝒆𝒕𝒂𝒅𝒐. . .*',
+    '*97% 𝒄𝒐𝒎𝒑𝒍𝒆𝒕𝒂𝒅𝒐. . .*'
   ];
 
   let sent = await conn.sendMessage(m.chat, { text: boosts[0] }, { quoted: m });
@@ -120,7 +96,7 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
 *RESULTADOS OBTENIDOS - V5*
 
-*Nombre:* @${number}
+*Nombre:*
 *País:* ${pais}
 *Ciudad:* ${location.city}
 *Región:* ${location.region}
@@ -155,18 +131,17 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
   await sleep(1000);
 
-*/
   //await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: [who] })
 /*
   await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });*/
 };
-/*
+
 handler.help = ['doxear'];
 handler.tags = ['fun'];
 handler.command = ['doxxeo', 'doxxear', 'doxeo', 'doxear', 'doxxing', 'doxing', 'doxx', 'dox'];
 handler.group = true;
 
-export default handler;*/
+export default handler;
 
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
