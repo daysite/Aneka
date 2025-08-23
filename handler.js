@@ -311,7 +311,6 @@ const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
 
         if (m.isBaileys)
             return
-        /*if (m.fromMe || m.isBaileys || m.sender === this.user.jid) return*/
 
         m.exp += Math.ceil(Math.random() * 10)
 
