@@ -1,4 +1,4 @@
-/*import similarity from 'similarity';
+import similarity from 'similarity';
 const threshold = 0.72;
 
 const handler = (m) => m;
@@ -40,54 +40,5 @@ handler.before = async function(m) {
 };
 
 handler.exp = 0;
-export default handler;*/
-
-import similarity from 'similarity';
-const defaultThreshold = 0.72;
-
-const handler = (m) => m;
-
-handler.before = async function(m) {
-  const id = m.chat;
-
-  // Verificar si el mensaje es respuesta al acertijo del bot
-  if (!m.quoted || !m.quoted.fromMe || !m.quoted.text || !/^ⷮ/i.test(m.quoted.text)) return;
-
-  this.tekateki = this.tekateki || {};
-
-  const current = this.tekateki?.[id];
-  if (!current) return; // No hay juego activo en este chat
-
-  const [msg, json, expReward, timeout, threshold = defaultThreshold] = current;
-
-  // Validar que el mensaje citado corresponde al acertijo (por id o texto)
-  const quotedMatches =
-    m.quoted.id === msg.id || 
-    m.quoted.text.trim() === msg.text.trim();
-
-  if (!quotedMatches) return;
-
-  const normalize = (str) => str.toLowerCase().trim();
-  const answer = normalize(json.response);
-  const userAns = normalize(m.text);
-
-  if (userAns === answer) {
-    m.reply(`乂  *ACERTIJO RESUELTO*  
-✅ Respuesta: ${json.response}  
-🎉 +${expReward} Exp`);
-
-    clearTimeout(timeout);
-    delete this.tekateki[id];
-  } 
-  else if (similarity(userAns, answer) >= threshold) {
-    m.reply(`*Casi lo logras!* 🔎\nEstás muy cerca...`);
-  } 
-  else {
-    m.reply('*❌ Respuesta incorrecta!*');
-  }
-
-  return true; // seguir con la ejecución normal
-};
-
-handler.exp = 0;
 export default handler;
+
