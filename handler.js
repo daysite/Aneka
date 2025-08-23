@@ -197,6 +197,84 @@ export async function handler(chatUpdate) {
         } catch (e) {
             console.error(e)
         }
+if (opts['nyimak']) return
+if (!m.fromMe && opts['self']) return
+if (opts['swonly'] && m.chat !== 'status@broadcast') return
+if (typeof m.text !== 'string') m.text = ''
+
+let _user = global.db.data?.users?.[m.sender]
+
+// 🔹 Normalizar número
+const normalizeNum = jid => (jid || '').replace(/[^0-9]/g, '')
+const senderNum = normalizeNum(m.sender)
+const botNum = normalizeNum(conn.user?.id)
+
+// 🔹 Owners / Mods / Prems
+const owners = [conn.decodeJid(global.conn?.user?.id), ...(global.owner || []).map(([n]) => n)].map(normalizeNum)
+const mods = (global.mods || []).map(normalizeNum)
+const prems = (global.prems || []).map(normalizeNum)
+
+const isROwner = owners.includes(senderNum)
+const isOwner = isROwner || m.fromMe
+const isMods = isOwner || mods.includes(senderNum)
+const isPrems = isOwner || prems.includes(senderNum) || _user?.prem === true
+
+// 🔹 Cola de mensajes (solo si no es mod/prem)
+if (opts['queque'] && m.text && !(isMods || isPrems)) {
+  let queque = this.msgqueque, delayTime = 5000
+  const prevID = queque[queque.length - 1]
+  queque.push(m.id || m.key.id)
+  ;(async function waitForPrev() {
+    while (queque.includes(prevID)) {
+      await delay(delayTime)
+    }
+  })()
+}
+
+// 🔹 Evitar bucles
+if (m.isBaileys) return
+
+// 🔹 XP
+m.exp += Math.ceil(Math.random() * 10)
+
+let usedPrefix
+
+// 🔹 Función para obtener lid real de un jid
+async function getLidFromJid(id, conn) {
+  if (id.endsWith('@lid')) return id
+  const res = await conn.onWhatsApp(id).catch(() => [])
+  return res[0]?.lid || id
+}
+
+const senderLid = await getLidFromJid(m.sender, conn)
+const botLid = await getLidFromJid(conn.user.jid, conn)
+const senderJid = m.sender
+const botJid = conn.user.jid
+
+// 🔹 Metadata del grupo
+const groupMetadata = m.isGroup
+  ? (conn.chats[m.chat]?.metadata || await conn.groupMetadata(m.chat).catch(() => null))
+  : {}
+
+const participants = groupMetadata?.participants || []
+
+// 🔹 Función robusta para encontrar participante
+const getParticipant = (jid, lid) =>
+  participants.find(p =>
+    [p.id, p.jid].includes(jid) || [p.id, p.jid].includes(lid)
+  ) || {}
+
+// 🔹 Obtener datos de usuario y bot en el grupo
+const user = getParticipant(senderJid, senderLid)
+const bot = getParticipant(botJid, botLid)
+
+// 🔹 Roles
+const isRAdmin = user?.admin === "superadmin"
+const isAdmin = ["admin", "superadmin"].includes(user?.admin)
+const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
+
+
+/*
         if (opts['nyimak']) return
         if (!m.fromMe && opts['self']) return
         if (opts['swonly'] && m.chat !== 'status@broadcast') return
@@ -252,7 +330,7 @@ const user = participants.find(p => p.id === senderLid || p.jid === senderJid) |
 const bot = participants.find(p => p.id === botLid || p.id === botJid) || {}
 const isRAdmin = user?.admin === "superadmin"
 const isAdmin = isRAdmin || user?.admin === "admin"
-const isBotAdmin = !!bot?.admin
+const isBotAdmin = !!bot?.admin*/
 
 /*
 if (opts['nyimak']) return
