@@ -1,4 +1,4 @@
-import similarity from 'similarity';
+/*import similarity from 'similarity';
 const threshold = 0.72;
 
 const handler = (m) => m;
@@ -37,6 +37,55 @@ handler.before = async function(m) {
   }
 
   return true; // Asegúrate de que esto sea verdadero para continuar la ejecución
+};
+
+handler.exp = 0;
+export default handler;*/
+
+import similarity from 'similarity';
+const defaultThreshold = 0.72;
+
+const handler = (m) => m;
+
+handler.before = async function(m) {
+  const id = m.chat;
+
+  // Validar si es respuesta a un acertijo enviado por el bot
+  if (!m.quoted || !m.quoted.fromMe || !m.quoted.text || !/^ⷮ/i.test(m.quoted.text)) return;
+
+  this.tekateki = this.tekateki || {};
+
+  const current = this.tekateki?.[id];
+  if (!current) return; // El juego ya terminó o no existe
+
+  // Verificar si el mensaje citado corresponde al acertijo actual
+  if (m.quoted.id === current[0].id) {
+    const json = current[1];
+    const expReward = current[2];
+    const timeout = current[3];
+    const threshold = current[4] || defaultThreshold;
+
+    const normalize = (str) => str.toLowerCase().trim();
+    const answer = normalize(json.response);
+    const userAns = normalize(m.text);
+
+    if (userAns === answer) {
+      m.reply(`乂  *ACERTIJO RESUELTO*  
+✅ Respuesta: ${json.response}  
+🎉 +${expReward} Exp`);
+
+      clearTimeout(timeout);
+      delete this.tekateki[id];
+    } 
+    else if (similarity(userAns, answer) >= threshold) {
+      m.reply(`*Casi lo logras!* 🔎\nEstás muy cerca...`);
+    } 
+    else {
+      m.reply('*❌ Respuesta incorrecta!*');
+    }
+  }
+
+  return true; // Continuar ejecución
 };
 
 handler.exp = 0;
