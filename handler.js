@@ -202,24 +202,30 @@ if (!m.fromMe && opts['self']) return
 if (opts['swonly'] && m.chat !== 'status@broadcast') return
 if (typeof m.text !== 'string') m.text = ''
 
+// 🔹 Usuario en DB
 let _user = global.db.data?.users?.[m.sender]
 
-// 🔹 Normalizar número
+// 🔹 Normalizar números (quita @, :X, etc.)
 const normalizeNum = jid => (jid || '').replace(/[^0-9]/g, '')
 const senderNum = normalizeNum(m.sender)
 const botNum = normalizeNum(conn.user?.id)
 
 // 🔹 Owners / Mods / Prems
-const owners = [conn.decodeJid(global.conn?.user?.id), ...(global.owner || []).map(([n]) => n)].map(normalizeNum)
+const owners = [
+  conn.decodeJid(global.conn?.user?.id),
+  ...(global.owner || []).map(([n]) => n)
+].map(normalizeNum)
+
 const mods = (global.mods || []).map(normalizeNum)
 const prems = (global.prems || []).map(normalizeNum)
 
+// 🔹 Flags principales
 const isROwner = owners.includes(senderNum)
-const isOwnerFlag = isROwner || m.fromMe   // 👉 renombrado para no chocar
-const isMods = isOwnerFlag || mods.includes(senderNum)
-const isPrems = isOwnerFlag || prems.includes(senderNum) || _user?.prem === true
+const isOwner = isROwner || m.fromMe
+const isMods = isOwner || mods.includes(senderNum)
+const isPrems = isOwner || prems.includes(senderNum) || _user?.prem === true
 
-// 🔹 Cola de mensajes (solo si no es mod/prem)
+// 🔹 Cola de mensajes (rate-limit a users normales)
 if (opts['queque'] && m.text && !(isMods || isPrems)) {
   let queque = this.msgqueque, delayTime = 5000
   const prevID = queque[queque.length - 1]
@@ -231,21 +237,22 @@ if (opts['queque'] && m.text && !(isMods || isPrems)) {
   })()
 }
 
-// 🔹 Evitar bucles
+// 🔹 Evitar loops del bot
 if (m.isBaileys) return
 
-// 🔹 XP
+// 🔹 Sistema de XP
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
-// 🔹 Función para obtener lid real de un jid
+// 🔹 Función para obtener lid real
 async function getLidFromJid(id, conn) {
   if (id.endsWith('@lid')) return id
   const res = await conn.onWhatsApp(id).catch(() => [])
   return res[0]?.lid || id
 }
 
+// 🔹 JIDs/LIDs de sender y bot
 const senderLid = await getLidFromJid(m.sender, conn)
 const botLid = await getLidFromJid(conn.user.jid, conn)
 const senderJid = m.sender
@@ -264,7 +271,7 @@ const getParticipant = (jid, lid) =>
     [p.id, p.jid].includes(jid) || [p.id, p.jid].includes(lid)
   ) || {}
 
-// 🔹 Obtener datos de usuario y bot en el grupo
+// 🔹 Datos de user y bot en el grupo
 const user = getParticipant(senderJid, senderLid)
 const bot = getParticipant(botJid, botLid)
 
@@ -272,7 +279,6 @@ const bot = getParticipant(botJid, botLid)
 const isRAdmin = user?.admin === "superadmin"
 const isAdmin = ["admin", "superadmin"].includes(user?.admin)
 const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
-
 
 /*
         if (opts['nyimak']) return
