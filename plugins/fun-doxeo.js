@@ -3,15 +3,15 @@
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 const handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`*${xfun} Por favor, menciona a la persona que deseas doxear.*`);
-
-  const mentionedJid = m.mentionedJid && m.mentionedJid[0];
-  if (!mentionedJid) return m.reply('*⚠️ Debes etiquetar a alguien.*');
 
 
-  let who = m.messageStubParameters[0]
-//  let user = `@${who.split('@')[0]}`
-  const user = mentionedJid.split('@')[0];
+  let user = m.mentionedJid && m.mentionedJid[0]
+           ? m.mentionedJid[0]
+           : m.quoted?.sender;
+
+  if (!user) return conn.reply(m.chat, `*${xfun} Por favor, menciona algún usuario para doxear.*`, m);
+
+  const taguser = '@' + user.split('@')[0];
   const pn = new PhoneNumber('+' + user);
   const regionCode = pn.getRegionCode();
 
@@ -96,7 +96,7 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
 *RESULTADOS OBTENIDOS - V5*
 
-*Nombre:*
+*Nombre:* ${taguser}
 *País:* ${pais}
 *Ciudad:* ${location.city}
 *Región:* ${location.region}
@@ -131,9 +131,7 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
   await sleep(1000);
 
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: [who] })
-/*
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: conn.parseMention(doxeo) });*/
+  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: [user] })
 };
 
 handler.help = ['doxear'];
