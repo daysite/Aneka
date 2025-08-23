@@ -14,7 +14,6 @@ const handler = async (m, { conn, text }) => {
   const cleanNum = user.replace(/[^0-9]/g, '');
   const taguser = '@' + cleanNum;
 
-  try {
     const phoneUtil = PhoneNumberUtil.getInstance();
     const pn = phoneUtil.parse('+' + cleanNum);
     const regionCode = phoneUtil.getRegionCodeForNumber(pn);
@@ -144,100 +143,3 @@ handler.command = ['doxxeo', 'doxxear', 'doxeo', 'doxear', 'doxxing', 'doxing', 
 handler.group = true;
 
 export default handler;
-
-/* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
-𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
-https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n */
-/*
-import PhoneNumber from 'awesome-phonenumber'
-import { performance } from 'perf_hooks'
-
-const handler = async (m, { conn }) => {
-  // 📌 Obtener al usuario target (mención o quote)
-  const who = m.quoted?.sender || m.mentionedJid?.[0]
-  if (!who) return m.reply('*⚠️ Debes etiquetar o responder a alguien.*')
-
-  // 📌 Nombre real en WhatsApp
-  let name
-  try {
-    name = await conn.getName(who)
-  } catch {
-    name = who.split('@')[0]
-  }
-
-  // 📌 Número (si es posible)
-  const number = who.split('@')[0]
-  const pn = new PhoneNumber('+' + number)
-  const regionCode = pn.getRegionCode()
-
-  const countryNames = {
-    US: 'Estados Unidos 🇺🇸', MX: 'México 🇲🇽', AR: 'Argentina 🇦🇷', PE: 'Perú 🇵🇪',
-    CO: 'Colombia 🇨🇴', BR: 'Brasil 🇧🇷', CL: 'Chile 🇨🇱', VE: 'Venezuela 🇻🇪',
-    EC: 'Ecuador 🇪🇨', BO: 'Bolivia 🇧🇴', PY: 'Paraguay 🇵🇾', UY: 'Uruguay 🇺🇾',
-    GT: 'Guatemala 🇬🇹', HN: 'Honduras 🇭🇳', NI: 'Nicaragua 🇳🇮', SV: 'El Salvador 🇸🇻',
-    CR: 'Costa Rica 🇨🇷', PA: 'Panamá 🇵🇦', DO: 'República Dominicana 🇩🇴', CU: 'Cuba 🇨🇺',
-    ES: 'España 🇪🇸', FR: 'Francia 🇫🇷', IT: 'Italia 🇮🇹', DE: 'Alemania 🇩🇪',
-    GB: 'Reino Unido 🇬🇧',
-  }
-
-  const locationByCountry = {
-    PE: { city: 'Lima', region: 'Lima Metropolitana', lat: '-12.0464', lon: '-77.0428' },
-    MX: { city: 'CDMX', region: 'Ciudad de México', lat: '19.4326', lon: '-99.1332' },
-    AR: { city: 'Buenos Aires', region: 'Buenos Aires', lat: '-34.6037', lon: '-58.3816' },
-    CO: { city: 'Bogotá', region: 'Cundinamarca', lat: '4.7110', lon: '-74.0721' },
-    // puedes seguir agregando...
-  }
-
-  const pais = countryNames[regionCode] || '🌎 Desconocido'
-  const location = locationByCountry[regionCode] || { city: 'Desconocida', region: 'Desconocida', lat: '0.0000', lon: '0.0000' }
-
-  const sleep = ms => new Promise(res => setTimeout(res, ms))
-  const randomIP = () => `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`
-  const randomIPv6 = () => Array(8).fill().map(() => Math.floor(Math.random() * 65536).toString(16)).join(':')
-  const randomMAC = () => Array(6).fill().map(() => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(':')
-  const randomToken = () => `ghp_${Math.random().toString(36).substring(2, 20)}`
-
-  const boosts = [
-    '*☠ ¡¡Iniciando Doxeo!! ☠*',
-    '*25% completado...*',
-    '*62% completado...*',
-    '*97% completado...*'
-  ]
-
-  let sent = await conn.sendMessage(m.chat, { text: boosts[0] }, { quoted: m })
-  for (let i = 1; i < boosts.length; i++) {
-    await sleep(700)
-    await conn.sendMessage(m.chat, { text: boosts[i], edit: sent.key })
-  }
-
-  const start = performance.now()
-  await sleep(400 + Math.random() * 400)
-  const end = performance.now()
-  const speed = ((end - start) / 1000).toFixed(3)
-
-  const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.lon}`
-
-  const doxeo = `*\`👨🏻‍💻 DOXEO FINALIZADO\`*
-> *Realizado en* \`${speed} segundos\`
-
-*Nombre:* ${name}
-*Número:* @${number}
-*País:* ${pais}
-*Ciudad:* ${location.city}
-*Región:* ${location.region}
-*Ubicación:* ${googleMapsUrl}
-*IP Pública:* ${randomIP()}
-*IPv6:* ${randomIPv6()}
-*MAC:* ${randomMAC()}
-*Token:* ${randomToken()}
-
-⚠️ *xd*`
-
-  await conn.sendMessage(m.chat, { text: doxeo, edit: sent.key, mentions: [who] })
-}
-
-handler.help = ['doxear @user']
-handler.tags = ['fun']
-handler.command = ['doxtes', 'doxear', 'doxxeo']
-
-export default handler*/
