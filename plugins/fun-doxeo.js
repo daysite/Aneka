@@ -38,6 +38,7 @@ const handler = async (m, { conn, text }) => {
   const user = mentionedJid.split('@')[0];
   const pn = new PhoneNumber('+' + user);
   const regionCode = pn.getRegionCode();*/
+/*
 
   const countryNames = {
     US: 'Estados Unidos 🇺🇸', MX: 'México 🇲🇽', AR: 'Argentina 🇦🇷', PE: 'Perú 🇵🇪',
