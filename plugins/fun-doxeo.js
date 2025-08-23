@@ -3,6 +3,7 @@
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 import { PhoneNumberUtil } from 'google-libphonenumber';
+import { performance } from 'perf_hooks';
 
 const handler = async (m, { conn, text }) => {
   let user = m.mentionedJid && m.mentionedJid[0]
