@@ -215,9 +215,9 @@ const mods = (global.mods || []).map(normalizeNum)
 const prems = (global.prems || []).map(normalizeNum)
 
 const isROwner = owners.includes(senderNum)
-const isOwner = isROwner || m.fromMe
-const isMods = isOwner || mods.includes(senderNum)
-const isPrems = isOwner || prems.includes(senderNum) || _user?.prem === true
+const isOwnerFlag = isROwner || m.fromMe   // 👉 renombrado para no chocar
+const isMods = isOwnerFlag || mods.includes(senderNum)
+const isPrems = isOwnerFlag || prems.includes(senderNum) || _user?.prem === true
 
 // 🔹 Cola de mensajes (solo si no es mod/prem)
 if (opts['queque'] && m.text && !(isMods || isPrems)) {
@@ -268,7 +268,7 @@ const getParticipant = (jid, lid) =>
 const user = getParticipant(senderJid, senderLid)
 const bot = getParticipant(botJid, botLid)
 
-// 🔹 Roles
+// 🔹 Roles de admins
 const isRAdmin = user?.admin === "superadmin"
 const isAdmin = ["admin", "superadmin"].includes(user?.admin)
 const isBotAdmin = ["admin", "superadmin"].includes(bot?.admin)
