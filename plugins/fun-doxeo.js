@@ -1,20 +1,8 @@
 /* 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗦𝗵𝗮𝗱𝗼𝘄'𝘀 𝗖𝗹𝘂𝗯 🌺᭄
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
-/*
-const handler = async (m, { conn, text }) => {
 
-
-  let user = m.mentionedJid && m.mentionedJid[0]
-           ? m.mentionedJid[0]
-           : m.quoted?.sender;
-
-  if (!user) return conn.reply(m.chat, `*${xfun} Por favor, menciona algún usuario para doxear.*`, m);
-
-  const taguser = '@' + user.split('@')[0];
-  const pn = new PhoneNumber('+' + user);
-  const regionCode = pn.getRegionCode();
-*/
+import { PhoneNumberUtil } from 'google-libphonenumber';
 
 const handler = async (m, { conn, text }) => {
   let user = m.mentionedJid && m.mentionedJid[0]
