@@ -3,6 +3,24 @@
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
 import fetch from 'node-fetch';
+import libphonenumber from 'google-libphonenumber';
+import { performance } from 'perf_hooks';
+
+const handler = async (m, { conn, text }) => {
+  let user = m.mentionedJid && m.mentionedJid[0]
+    ? m.mentionedJid[0]
+    : m.quoted?.sender;
+
+  if (!user) return conn.reply(m.chat, `*${xfun} Por favor, menciona algún usuario para doxear.*`, m);
+
+  const cleanNum = user.replace(/[^0-9]/g, '');
+  const taguser = '@' + cleanNum;
+
+  const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+  const pn = phoneUtil.parse('+' + cleanNum);
+  const regionCode = phoneUtil.getRegionCodeForNumber(pn);
+/*
+import fetch from 'node-fetch';
 import PhoneNumber from 'awesome-phonenumber';
 import { performance } from 'perf_hooks';
 
@@ -19,7 +37,7 @@ const handler = async (m, { conn, text }) => {
     const phoneUtil = PhoneNumberUtil.getInstance();
     const pn = phoneUtil.parse('+' + cleanNum);
     const regionCode = phoneUtil.getRegionCodeForNumber(pn);
-
+*/
 
   const countryNames = {
     US: 'Estados Unidos 🇺🇸', MX: 'México 🇲🇽', AR: 'Argentina 🇦🇷', PE: 'Perú 🇵🇪',
@@ -97,7 +115,6 @@ const googleMapsUrl = `https://www.google.com/maps?q=${location.lat},${location.
 
 📆 *${date}*
 ⏰ *${hora}*
-
 
 *RESULTADOS OBTENIDOS - V5*
 
