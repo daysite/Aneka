@@ -2,7 +2,8 @@
 𝖢𝗋𝖾𝖺𝖽𝗈 𝗉𝗈𝗋 𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 🇦🇱
 https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n*/
 
-import { PhoneNumberUtil } from 'google-libphonenumber';
+import fetch from 'node-fetch';
+import PhoneNumber from 'awesome-phonenumber';
 import { performance } from 'perf_hooks';
 
 const handler = async (m, { conn, text }) => {
