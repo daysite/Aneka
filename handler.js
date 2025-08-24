@@ -237,15 +237,8 @@ if (m.isBaileys) return
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
-/*
-async function getLidFromJid(id, conn) {
-  if (id.endsWith('@lid')) return id
-  const res = await conn.onWhatsApp(id).catch(() => [])
-  return res[0]?.lid || id
-}*/
 
 async function getLidFromJid(id, conn) {
-  if (!id) return null
   if (id.endsWith('@lid')) return id
   const res = await conn.onWhatsApp(id).catch(() => [])
   return res[0]?.lid || id
@@ -261,15 +254,10 @@ const groupMetadata = m.isGroup
   : {}
 
 const participants = groupMetadata?.participants || []
-/*
-const getParticipant = (jid, lid) =>
-  participants.find(p =>
-    [p.id, p.jid].includes(jid) || [p.id, p.jid].includes(lid)
-  ) || {}*/
 
 const getParticipant = (jid, lid) =>
   participants.find(p =>
-    [p.id, p.jid, p.lid].includes(jid) || [p.id, p.jid, p.lid].includes(lid)
+    [p.id, p.jid].includes(jid) || [p.id, p.jid].includes(lid)
   ) || {}
 
 const user = getParticipant(senderJid, senderLid)
