@@ -248,6 +248,7 @@ const botLid = await getLidFromJid(conn.user.jid, conn)
 const senderJid = m.sender
 const botJid = conn.user.jid
 
+let usedPrefix 
 const groupMetadata = m.isGroup
   ? (conn.chats[m.chat]?.metadata || await conn.groupMetadata(m.chat).catch(() => null))
   : {}
