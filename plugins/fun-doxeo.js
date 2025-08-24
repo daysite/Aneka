@@ -160,5 +160,6 @@ handler.help = ['doxear'];
 handler.tags = ['fun'];
 handler.command = ['doxxeo', 'doxxear', 'doxeo', 'doxear', 'doxxing', 'doxing', 'doxx', 'dox'];
 handler.group = true;
+handler.diamantes = 3
 
 export default handler;
