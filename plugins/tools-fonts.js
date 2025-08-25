@@ -1,6 +1,3 @@
-// ==================== FUENTES SIN API ====================
-
-// Lista de fuentes con caracteres A-Z y a-z en Unicode
 const fuentes = [
   {
     name: 'CIRCLED',
@@ -64,7 +61,6 @@ const fuentes = [
   }
 ]
 
-// 🔹 Construir mapas automáticamente
 for (let fuente of fuentes) {
   fuente.map = {}
   const AtoZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -75,12 +71,10 @@ for (let fuente of fuentes) {
   }
 }
 
-// 🔹 Función para convertir texto según el mapa
 function convertirFuente(texto, mapa) {
   return texto.split('').map(ch => mapa[ch] || ch).join('')
 }
 
-// ==================== HANDLER ====================
 let handler = async (m, { text, command, usedPrefix }) => {
   if (!text) {
     let lista = fuentes.map((f, i) => `${i + 1}. ${f.name}`).join('\n')
@@ -88,24 +82,24 @@ let handler = async (m, { text, command, usedPrefix }) => {
 `*📄 Lista de fuentes disponibles (A-Z):*
 ${lista}
 
-> Ejemplo:  ${usedPrefix + command} 5 Shadow Ultra`)
+> *\`Ejemplo:\`*  ${usedPrefix + command} 5 Shadow Ultra`)
   }
 
   const match = text.match(/^(\d+)\s+(.+)/)
   if (!match) {
-    return m.reply(`*⚠️ Coloca el número de la fuente y el texto.*\nEjemplo:\n${usedPrefix + command} 1 Hola Mundo`)
+    return m.reply(`*⚠️ Coloca el número de la fuente y el texto.*\n> *\`Ejemplo:\`* ${usedPrefix + command} 1 Hola Mundo`)
   }
 
   const index = parseInt(match[1]) - 1
   const texto = match[2]
 
   if (index < 0 || index >= fuentes.length) {
-    return m.reply(`✖️ Número inválido. Solo hay \`${fuentes.length}\` fuentes disponibles.`)
+    return m.reply(`*✖️ Número inválido. Solo hay \`${fuentes.length}\` fuentes disponibles.*`)
   }
 
   const fuente = fuentes[index]
   const salida = convertirFuente(texto, fuente.map)
-  m.reply(`*${fuente.name}:*\n${salida}`)
+  m.reply(`${salida}`)
 }
 
 handler.help = ['font']
