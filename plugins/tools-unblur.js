@@ -1,4 +1,4 @@
-
+/*
 import axios from 'axios';
 import FormData from 'form-data';
 
@@ -36,4 +36,4 @@ handler.help = ['unblur'];
 handler.tags = ['tools'];
 handler.command = ['unblur'];
 
-export default handler;
+export default handler;*/
