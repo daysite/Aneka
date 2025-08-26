@@ -1,86 +1,110 @@
-// tebakhero.js
-// Handler estilo Shadow — comando: /tebakhero, /hero, /revelarhero
+// tebakhero.js mejorado con XP reward
 import fetch from 'node-fetch';
+
+const TIMEOUT = 30 * 1000; // 30 segundos
+const REWARD_XP = 5000;    // XP por acertar
 
 let handler = async (m, { conn, command, usedPrefix }) => {
   try {
-    // aseguramos estructura de DB mínima
     global.db = global.db || { data: { chats: {}, users: {} } };
     global.db.data.chats = global.db.data.chats || {};
-
+    global.db.data.users = global.db.data.users || {};
     const chatId = m.chat;
 
-    // Comando para revelar la respuesta guardada (si existe)
+    // Revelar respuesta si hay partida activa
     if (/^(revelarhero|revelar|respuestahero)$/i.test(command)) {
       const state = global.db.data.chats[chatId]?.tebakhero;
       if (!state || !state.answer) {
-        return conn.sendMessage(chatId, { text: '❌ No hay ninguna partida activa. Usa *' + usedPrefix + 'tebakhero* para iniciar.' }, { quoted: m });
+        return conn.sendMessage(chatId, { text: `❌ No hay juego activo.\nUsa *${usedPrefix}tebakhero* para iniciar.` }, { quoted: m });
       }
-      // Mostrar respuesta y eliminar estado
-      const replyText = `乂  TEBAK HERO - RESPUESTA 乂\n\nRespuesta: *${state.answer}*\n\n> Shadow Ultra MD`;
+
+      if (Date.now() - state.timestamp > TIMEOUT) {
+        delete global.db.data.chats[chatId].tebakhero;
+        return conn.sendMessage(chatId, { text: `⌛ El tiempo se agotó (30s).\nLa respuesta era: *${state.answer}*` }, { quoted: m });
+      }
+
       delete global.db.data.chats[chatId].tebakhero;
-      return conn.sendMessage(chatId, { text: replyText }, { quoted: m });
+      return conn.sendMessage(chatId, { text: `✔ La respuesta era: *${state.answer}*` }, { quoted: m });
     }
 
-    // Si llegamos aquí: comando para iniciar partida (tebakhero / hero)
-    // Llamada a la API
+    // Si ya hay un juego activo
+    const active = global.db.data.chats[chatId]?.tebakhero;
+    if (active && Date.now() - active.timestamp < TIMEOUT) {
+      return conn.sendMessage(chatId, { text: `⚠ Ya hay un juego en curso.\nResponde al mensaje del héroe o espera a que acabe (30s).` }, { quoted: m });
+    }
+
+    // Llamar API
     const res = await fetch('https://api.vreden.my.id/api/tebakhero');
     if (!res.ok) throw new Error('API no responde: ' + res.status);
     const json = await res.json();
-
-    // estructura esperada:
-    // { status: 200, creator: "...", result: { jawaban: "ZILONG", img: "https://..." } }
-    const answer = (json?.result?.jawaban || '').toString().trim().toUpperCase();
+    const answer = (json?.result?.jawaban || '').trim().toUpperCase();
     const imageUrl = json?.result?.img;
+    if (!imageUrl) throw new Error('API no devolvió imagen.');
 
-    if (!imageUrl) throw new Error('La API no devolvió imagen.');
-
-    // Guardar estado en la DB
-    global.db.data.chats[chatId].tebakhero = {
-      answer,
-      timestamp: Date.now()
-    };
-
-    // Texto estilo Shadow para el caption
     const caption =
 `乂  TEBAK HERO 乂
 
 Adivina el héroe de la imagen.
-Envía tu respuesta en el chat (texto).
+📌 Responde a este mensaje con tu respuesta.
 
-• Para revelar la respuesta usa: ${usedPrefix}revelarhero
-• Para otra imagen pulsa "Otro"
+⌛ Tiempo: *30 segundos*
+• Revelar respuesta: ${usedPrefix}revelarhero
 
 > Shadow Ultra MD`;
 
-    // Botones: "Mostrar respuesta" y "Otro"
-    // Estructura compatible con baileys v4: message with buttons
-    const buttons = [
-      { buttonId: usedPrefix + 'revelarhero', buttonText: { displayText: 'Mostrar respuesta' }, type: 1 },
-      { buttonId: usedPrefix + 'tebakhero', buttonText: { displayText: 'Otro' }, type: 1 }
-    ];
-
-    // Enviar la imagen con botones
-    // Ajusta si tu conn tiene helpers como conn.sendButton o conn.sendFile
-    await conn.sendMessage(chatId, {
+    // Enviar mensaje con imagen
+    const msg = await conn.sendMessage(chatId, {
       image: { url: imageUrl },
       caption,
-      footer: '乂 TEBAK HERO • Shadow Ultra • MD 乂',
-      buttons,
-      headerType: 4
+      footer: '乂 TEBAK HERO • Shadow Ultra • MD 乂'
     }, { quoted: m });
+
+    // Guardar estado
+    global.db.data.chats[chatId].tebakhero = {
+      answer,
+      timestamp: Date.now(),
+      msgId: msg.key.id
+    };
 
   } catch (err) {
     console.error(err);
-    const eMessage = '⚠️ Ocurrió un error al obtener la imagen. Intenta de nuevo más tarde.';
-    await conn.sendMessage(m.chat, { text: eMessage }, { quoted: m });
+    conn.sendMessage(m.chat, { text: '⚠ Error, intenta de nuevo más tarde.' }, { quoted: m });
   }
 };
 
-// metadata para integración con cargador de plugins/handlers
+// Interceptor de respuestas
+handler.before = async (m, { conn }) => {
+  const chatId = m.chat;
+  const state = global.db.data.chats[chatId]?.tebakhero;
+  if (!state || !state.answer) return false;
+
+  // Solo si responde al mensaje del héroe
+  if (!m.quoted || m.quoted.id !== state.msgId) return false;
+
+  // Tiempo agotado
+  if (Date.now() - state.timestamp > TIMEOUT) {
+    delete global.db.data.chats[chatId].tebakhero;
+    return conn.sendMessage(chatId, { text: `⌛ El tiempo se agotó (30s).\nLa respuesta era: *${state.answer}*` }, { quoted: m });
+  }
+
+  // Validar respuesta
+  const guess = m.text.trim().toUpperCase();
+  if (guess === state.answer) {
+    delete global.db.data.chats[chatId].tebakhero;
+
+    // Dar XP al jugador
+    global.db.data.users[m.sender] = global.db.data.users[m.sender] || {};
+    global.db.data.users[m.sender].exp = (global.db.data.users[m.sender].exp || 0) + REWARD_XP;
+
+    return conn.sendMessage(chatId, { text: `🎉 ¡Correcto! El héroe es *${state.answer}*\n\n✨ Recompensa: +${REWARD_XP} XP` }, { quoted: m });
+  } else {
+    return conn.sendMessage(chatId, { text: `❌ Incorrecto, intenta otra vez.` }, { quoted: m });
+  }
+};
+
 handler.help = ['tebakhero', 'hero', 'revelarhero'];
-handler.tags = ['game', 'fun'];
+handler.tags = ['game'];
 handler.command = /^(tebakhero|hero|revelarhero|revelar|respuestahero)$/i;
-handler.limit = 1; // opcional: limitar uso por usuario (ajusta según tu sistema)
+handler.limit = 1;
 
 export default handler;
