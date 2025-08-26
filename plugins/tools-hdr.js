@@ -33,7 +33,6 @@ const handler = async (m, { conn }) => {
     const hdrUrl = await hdrProcess(uploaded)
     if (!hdrUrl) throw new Error('*No se pudo procesar la imagen en HDR*')
 
-    // Enviar resultado
     await conn.sendFile(m.chat, hdrUrl, 'hdr.jpg', `° *HDR - RESULTADO*\n\n✅ Imagen mejorada con éxito.\n\n> ${club}`, m)
 
   } catch (err) {
