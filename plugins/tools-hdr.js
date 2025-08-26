@@ -34,7 +34,7 @@ const handler = async (m, { conn }) => {
     if (!hdrUrl) throw new Error('*No se pudo procesar la imagen en HDR*')
 
     // Enviar resultado
-    await conn.sendFile(m.chat, hdrUrl, 'hdr.jpg', `° *HDR - RESULTADO*\n\n✅ Imagen mejorada con éxito.\n\n> Shadow Ultra MD`, m)
+    await conn.sendFile(m.chat, hdrUrl, 'hdr.jpg', `° *HDR - RESULTADO*\n\n✅ Imagen mejorada con éxito.\n\n> ${club}`, m)
 
   } catch (err) {
     conn.reply(m.chat, `❌ Error: ${err.message}\n> Shadow Ultra MD`, m)
@@ -47,7 +47,6 @@ handler.command = ['hdr']
 
 export default handler
 
-// Función para subir imagen
 async function uploadToUguu(filePath) {
   const form = new FormData()
   form.append("files[]", fs.createReadStream(filePath))
@@ -68,7 +67,6 @@ async function uploadToUguu(filePath) {
   }
 }
 
-// Función para procesar HDR
 async function hdrProcess(url) {
   const apiUrl = `https://api.vreden.my.id/api/artificial/hdr?url=${encodeURIComponent(url)}&pixel=4`
   const res = await fetch(apiUrl)
