@@ -1,91 +1,45 @@
+// Comando HDR - Shadow Bot
+// By: Criss Escobar
 
-/*
-// By WillZek
-import yts from 'yt-search';
+import fetch from 'node-fetch'
 
-const estados = {};
-const TIEMPO_ESPERA = 120000;
-
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-  if (!text) return m.reply(`*${xdownload} Por favor, ingresa un texto para buscar en YouTube.*\n> Ejemplo: ${usedPrefix + command} shadow garden edits`);
-
-  const search = await yts(text);
-  const video = search.videos[0];
-  if (!video) return m.reply('❌ Video no encontrado.');
-
-  if (estados[m.sender]) clearTimeout(estados[m.sender].timeout);
-
-  estados[m.sender] = {
-    step: 'esperando_tipo',
-    videoInfo: video,
-    command,
-    intentos: 0,
-    timeout: setTimeout(() => {
-      delete estados[m.sender];
-    }, TIEMPO_ESPERA)
-  };
-
-  let info = `\`\`\`◜YouTube - Download◞\`\`\`
-
-${video.title}
-
-≡ *☕ \`Autor:\`* ${video.author.name}
-≡ *🍮 \`Duración:\`* ${video.timestamp}
-≡ *🥞 \`Fecha:\`* ${video.ago}
-≡ *☁️ \`Vistas:\`* ${video.views.toLocaleString()}
-≡ *📡 \`Canal:\`* ${video.author?.url?.replace('https://', '') || 'Desconocido'}
-
-> » Responde 1 para Audio
-> » Responde 2 para Vídeo`;
-
-  await conn.sendMessage(m.chat, { image: { url: video.thumbnail }, caption: info }, { quoted: m });
-};
-
-handler.before = async (m, { conn, usedPrefix }) => {
-  const estado = estados[m.sender];
-  if (!estado) return false;
-
-  if (estado.step === 'esperando_tipo') {
-    const resp = (m.text || '').trim();
-
-    if (resp === '1' || resp === '1️⃣') {
-      clearTimeout(estado.timeout);
-      await conn.sendMessage(m.chat, { react: { text: "🎶", key: m.key } });
-      await conn.fakeReply(
-        m.chat,
-        `#ytmp3 ${estado.videoInfo.url}`,
-        m.sender,
-        'Procesando audio 🎶'
-      );
-      delete estados[m.sender];
-      return true;
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  try {
+    // Verificar si hay imagen
+    let q = m.quoted ? m.quoted : m
+    let mime = (q.msg || q).mimetype || ''
+    if (!/image/.test(mime)) {
+      return m.reply(`乂 *HDR - MEJORAR CALIDAD*\n\n✨ Responde a una imagen o envíala junto con el comando:\n\n> *Ejemplo:* ${usedPrefix + command} (respondiendo a una imagen)\n\n> Shadow Ultra MD`)
     }
 
-    if (resp === '2' || resp === '2️⃣') {
-      clearTimeout(estado.timeout);
-      await conn.sendMessage(m.chat, { react: { text: "📹", key: m.key } });
-      await conn.fakeReply(
-        m.chat,
-        `#ytmp4 ${estado.videoInfo.url}`,
-        m.sender,
-        'Procesando vídeo 📹'
-      );
-      delete estados[m.sender];
-      return true;
-    }
+    // Descargar imagen
+    let img = await q.download?.()
+    if (!img) throw 'No se pudo descargar la imagen'
 
-    estado.intentos = (estado.intentos || 0) + 1;
-    if (estado.intentos <= 1) {
-      await m.reply('☁️ Por favor responde con 1 (audio) o 2 (vídeo), o reacciona con 1️⃣ o 2️⃣.');
-    }
-    return true;
+    // Subir a Uguu temporalmente (para pasarle la URL a la API)
+    let form = new FormData()
+    form.append('files[]', img, 'image.jpg')
+    let up = await fetch('https://uguu.se/upload.php', { method: 'POST', body: form })
+    let uploaded = await up.json()
+    let imageUrl = uploaded.files[0].url
+
+    // Usar API HDR
+    let apiUrl = `https://api.vreden.my.id/api/artificial/hdr?url=${imageUrl}&pixel=4`
+    let res = await fetch(apiUrl)
+    let data = await res.json()
+
+    if (data?.result?.data?.downloadUrls?.length === 0) throw 'No se pudo mejorar la imagen'
+
+    let hdrUrl = data.result.data.downloadUrls[0]
+
+    // Enviar imagen mejorada
+    await conn.sendFile(m.chat, hdrUrl, 'hdr.jpg', `乂 *HDR - RESULTADO*\n\n✅ Imagen mejorada con éxito\n📂 Tamaño: ${(data.result.data.filesize/1024/1024).toFixed(2)} MB\n📸 Formato: ${data.result.data.imagemimetype}\n\n> Shadow Ultra MD`, m)
+
+  } catch (e) {
+    console.error(e)
+    m.reply('❌ Ocurrió un error al procesar la imagen')
   }
+}
 
-  return false;
-};
-
-handler.command = ['playtes', 'musicdl'];
-
-export default handler;*/
-
-
+handler.command = /^(hdr)$/i
+export default handler
