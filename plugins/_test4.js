@@ -105,6 +105,6 @@ handler.before = async (m, { conn }) => {
 handler.help = ['tebakhero', 'hero', 'revelarhero'];
 handler.tags = ['game'];
 handler.command = /^(tebakhero|hero|revelarhero|revelar|respuestahero)$/i;
-handler.limit = 1;
+//handler.limit = 1;
 
 export default handler;
