@@ -77,6 +77,6 @@ let handler = async (m, { conn }) => {
 
 handler.help = ['read']
 handler.tags = ['tools']
-handler.command = ['readviewonce', 'read', 'readvo', 'ver'] 
+handler.command = ['v'] 
 
 export default handler;
