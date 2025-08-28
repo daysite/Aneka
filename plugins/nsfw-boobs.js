@@ -9,7 +9,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     m.react('🫦');
 
     let txt = 'Tetas 🍒';
-    let img = 'https://delirius-apiofc.vercel.app/nsfw/girls';
+    let img = 'https://delirius-apiofc.vercel.app/nsfw/boobs';
 
     let buttons = [
         {
