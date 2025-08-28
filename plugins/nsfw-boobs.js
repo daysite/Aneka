@@ -13,7 +13,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     let buttons = [
         {
-            buttonId: `.pack`,
+            buttonId: `.tetas`,
             buttonText: { displayText: "Ver más" },
             type: 1
         }
