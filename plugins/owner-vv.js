@@ -23,8 +23,8 @@ let handler = async (m, { conn }) => {
 
     await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } }); // reacción de éxito
   } catch (e) {
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } }); // reacción de error
-    conn.reply(m.chat, '*Ocurrió un error al procesar el mensaje.*', m);
+    await conn.sendMessage(m.chat, { react: { text: '🗣️', key: m.key } }); // reacción de error
+    conn.reply(m.chat, ':v', m);
     console.error(e);
   }
 }
