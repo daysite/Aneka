@@ -41,7 +41,7 @@ let { say } = cfonts
 
 console.log(chalk.bold.redBright(`\n💻 Iniciando Sistema...\n`))
 
-say('Aneka', {
+say('Aneka\nAi\nMD', {
   font: 'chrome',
   align: 'center',
   gradient: ['red', 'magenta']
