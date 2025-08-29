@@ -1,5 +1,5 @@
 {
-"name": "ShadowUltra-MD",
+"name": "Aneka",
 "version": "2.3.0",
 "description": "WhatsApp Bot Multi Device",
 "index": "index.js",
@@ -18,16 +18,16 @@
 "eslint": "eslint .",
 "eslintfix": "eslint --fix ."
 },
-"homepage": "https://github.com/CrxstianEscobar/ShadowUltra-MD",
+"homepage": "https://github.com/daysite/aneka",
 "author": {
-"name": "Cristian Escobar"
+"name": "lucxxs.qzy"
 },
 "repository": {
 "type": "git",
-"url": "git+https://github.com/CrxstianEscobar/ShadowUltra-MD.git"
+"url": "git+https://github.com/daysite/aneka.git"
 },
 "bugs": {
-"url": "https://github.com/CrxstianEscobar/ShadowUltra-MD/issues"
+"url": "https://github.com/daysite/aneka/issues"
 },
 "license": "GPL-3.0-or-later",
 "dependencies": {
