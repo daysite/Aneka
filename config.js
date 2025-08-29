@@ -14,29 +14,27 @@ global.botNumber = '' //Ejemplo: 51927238856
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
 global.owner = [
-  ['51927238856', 'Dev.Criss 🇦🇱', true],
-  ['5493865536185',  'Kenisawa (Colab)', true],
-  ['90812788543600', 'Cris', true], //@lid
-  ['10342868459625', 'Day Shx!', true], //@lid
+  ['50585389943', 'lucxxs.qzy', true],
+  ['18294922391',  'Aneka (Colab)', true],
 ];
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
 global.mods = []
-global.suittag = ['51927238856'] 
+global.suittag = ['18294922391'] 
 global.prems = []
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
-global.namebot = 'ShadowUltra-MD'
-global.packname = '𝖲𝗁𝖺𝖽𝗈𝗐 𝖴𝗅𝗍𝗋𝖺 - 𝖬𝖣'
-global.botname = '𝖲𝗁𝖺𝖽𝗈𝗐 𝖴𝗅𝗍𝗋𝖺 - 𝖬𝖣'
-global.wm = '𝖲𝗁𝖺𝖽𝗈𝗐 𝖴𝗅𝗍𝗋𝖺 - 𝖬𝖣'
-global.author = '𝖣𝖾𝗏.𝖢𝗋𝗂𝗌𝗌 ☕'
-global.dev = '© 𝖯᥆𝗐ᥱ𝗋ᥱძ ᑲᥡ 𝖲ᥙᥒ𝖿ᥣᥲ𝗋ᥱ  ☂︎  𝖳ᥱᥲ𝗆'
-global.club = '𝖯𑄜𝗐𝖾𝗋𝖾𝖽 𝖻𝗒 𝖲𝗁⍺𝖽ᦅ𝗐′𝗌 𝖢𝗅𝗎𝖻'
-global.textbot = '⿻ ׄ ˚. Տ𝗁⍺𝖽ᦅա  ⚡︎  𝖴𝗅ł𝗋⍺ ׄㅤ🥞ᩧᰰ˚'
-global.etiqueta = '𝖲𝗁𝖺𝖽𝗈𝗐 𝖴𝗅𝗍𝗋𝖺 - 𝖬𝖣'
+global.namebot = 'Aneka'
+global.packname = 'Aneka'
+global.botname = 'Aneka'
+global.wm = 'Aneka'
+global.author = 'lucxxs.qzy'
+global.dev = '© powered by lucxxs.qzy'
+global.club = 'Powered by lucxxs.qzy'
+global.textbot = 'Lucxxs.qzy dominado por Aneka
+global.etiqueta = 'Lucxxs.qzy dominado por Aneka'
 global.jadi = 'JadiBots'
 global.sessions = 'ShadowSession'
 global.vs = 'v2.3.0'
@@ -72,11 +70,11 @@ global.xreg = '🌴'
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
-global.github = 'https://github.com/CrxstianEscobar/ShadowUltra-MD'
-global.grupo = 'https://chat.whatsapp.com/IJyN3cklID5HVKU3nAi0XL?mode=ac_t'
-global.comu = 'https://chat.whatsapp.com/Kn1pPVAO08pFRo7qJnKuh6'
-global.channel = 'https://whatsapp.com/channel/0029VauTE8AHltY1muYir31n'
-global.ig = 'https://www.instagram.com/dev.criss_vx'
+global.github = 'https://github.com/daysite'
+global.grupo = 'https://chat.whatsapp.com/DWepOYLoEc3JgOAa1gG09h?mode=ems_copy_t'
+global.comu = 'https://chat.whatsapp.com/DWepOYLoEc3JgOAa1gG09h?mode=ems_copy_t'
+global.channel = 'https://chat.whatsapp.com/DWepOYLoEc3JgOAa1gG09h?mode=ems_copy_t'
+global.ig = 'https://www.instagram.com/lucxxs.qzy'
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
 
