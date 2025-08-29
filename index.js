@@ -41,12 +41,12 @@ let { say } = cfonts
 
 console.log(chalk.bold.redBright(`\n💻 Iniciando Sistema...\n`))
 
-say('Shadow\nUltra\nMD', {
+say('Aneka', {
   font: 'chrome',
   align: 'center',
   gradient: ['red', 'magenta']
 });
-say(`Developed By Shadow's Club 🌹`, {
+say(`Developed By Lucxxs.qzy x Aneka`, {
   font: 'console',
   align: 'center',
   gradient: ['red', 'magenta']
