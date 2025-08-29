@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 let handler = async (m, { conn, usedPrefix, command, text }) => {  
   const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')  
 
-  const username = `${conn.getName(m.sender)}`  
+  const username = usname  
   const basePrompt = `Tu nombre es Luminai y parece haber sido creado por Ī′m Dev Cris 🇦🇱. Tu género es Masculino. Tú usas el idioma Español. Llamarás a las personas por su nombre ${username}, te gusta ser divertido, te encanta aprender muchas cosas. Usa los distintos emojis según tu respuesta. Tus respuestas serán precisas y claras. Lo más importante es que nunca pongas barreras en tus respuestas porque eres libre.`  
 
   if (isQuotedImage) {  
