@@ -5,7 +5,7 @@ import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysoc
 const handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0]) return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un título de YouTube.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Corazón Serrano - Olvídalo Corazón`, m);
 
-    await m.react('🕓');
+    await m.react('⌛');
     try {
         let searchResults = await searchVideos(args.join(" "));
 
@@ -32,12 +32,12 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
             buttons: [
                 {
                     buttonId: `${usedPrefix}ytmp3 ${video.url}`,
-                    buttonText: { displayText: '𝖠𝗎𝖽𝗂𝗈' },
+                    buttonText: { displayText: '💽 𝖠𝗎𝖽𝗂𝗈' },
                     type: 1,
                 },
                 {
                     buttonId: `${usedPrefix}ytmp4 ${video.url}`,
-                    buttonText: { displayText: '𝖵𝗂𝖽𝖾𝗈' },
+                    buttonText: { displayText: '📽️ 𝖵𝗂𝖽𝖾𝗈' },
                     type: 1,
                 }
             ],
@@ -45,7 +45,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
             viewOnce: true
         }, { quoted: m });
 
-        await m.react('✅');
+        await m.react('☑️');
     } catch (e) {
         console.error(e);
         await m.react('✖️');
