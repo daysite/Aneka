@@ -94,18 +94,16 @@ for (let key in emojis) {
     let defaultMenu = {
 
 
-    before: `ㅤㅤ   ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁ㅤㅤ𑁯🤍ᰍㅤㅤ⩁꯭ ͡  ͡ᩚ꯭ ꯭⩁
-೯ ׅ 👤 ¡Hᴏʟᴀ! ¿Cᴏᴍᴏ Esᴛᴀ́s? ׄ ᦡᦡ
-ㅤ꒰͜͡${taguser}
-ㅤㅤ♡𑂳ᩙㅤ ּ ${saludo} ׄ ㅤタス
+    before: `ㅤ
+*Hola mi nombre es Aneka 🍟* ¿Como estas ${taguser}?
+ㅤㅤㅤ ּ ${saludo} ׄ humano
 
 🥞 𝖠𝖼𝗍𝗂𝗏𝗈: ${uptime}
 👥 𝖴𝗌𝗎𝖺𝗋𝗂𝗈𝗌: ${totalreg}
 🥧 𝖵𝖾𝗋𝗌𝗂𝗈́𝗇: ${vs}
 ☕ 𝖢𝗋𝖾𝖺𝖽𝗈𝗋: @${creadorN}
 
-
-ㅤ ㅤ  \`乂 ⺀ Comands List ⺀ 乂\`
+ㅤ ㅤ \`乂 ⺀ Comands List ⺀ 乂\`
 `,
 
       header: category => ` ${category}`,
