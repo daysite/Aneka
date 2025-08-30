@@ -15,7 +15,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         let thumbnail = await (await fetch(video.miniatura)).buffer();
 
         let messageText = `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n`;
-        messageText += `›Titulo: ${video.titulo}*\n\n`;
+        messageText += `›Titulo: ${video.titulo}*\n`;
         messageText += `›Duración: ${video.duracion || 'No disponible'}\n`;
         messageText += `›Autor:* ${video.canal || 'Desconocido'}\n`;
         messageText += `›Url:* ${video.url}\n\n`
