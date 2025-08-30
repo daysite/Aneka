@@ -103,10 +103,10 @@ for (let key in emojis) {
 
  ${saludo} ׄ humano 👋🏻
 
-🥞 𝖠𝖼𝗍𝗂𝗏𝗈: ${uptime}
-👥 𝖴𝗌𝗎𝖺𝗋𝗂𝗈𝗌: ${totalreg}
-🥧 𝖵𝖾𝗋𝗌𝗂𝗈́𝗇: ${vs}
-☕ 𝖢𝗋𝖾𝖺𝖽𝗈𝗋: @${creadorN}
+\`🍭 Activo:\` ${uptime}
+\`🗣️ Usuarios:\` ${totalreg}
+\`🍟 Versión:\` ${vs}
+\`💌 Creador:\` @${creadorN}
 
 ㅤ ㅤ \`乂 ⺀ Comands List ⺀ 乂\`
 `,
