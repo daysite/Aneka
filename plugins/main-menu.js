@@ -97,9 +97,11 @@ for (let key in emojis) {
     before: `ㅤ
 *꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷*
 
-*Hello como se encuentra el dia de hoy? ${taguser}
+*Hello como se encuentra el dia de hoy?* ${taguser}
 
-ㅤㅤㅤ ּ ${saludo} ׄ humano 👋🏻
+*꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷*
+
+ ${saludo} ׄ humano 👋🏻
 
 🥞 𝖠𝖼𝗍𝗂𝗏𝗈: ${uptime}
 👥 𝖴𝗌𝗎𝖺𝗋𝗂𝗈𝗌: ${totalreg}
