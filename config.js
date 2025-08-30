@@ -16,8 +16,8 @@ global.botNumber = '' //Ejemplo: 51927238856
 global.owner = [
   ['50585389943', 'lucxxs.qzy', true],
   ['18294922391',  'Aneka (Colab)', true],
-  //['90812788543600', 'Cris', true], //@lid
-  //['10342868459625', 'Day Shx!', true], //lid
+  ['219386963087569', 'Cris', true], //@lid
+  ['64304955007210', 'Day Shx!', true], //lid
 ];
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
