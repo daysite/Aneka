@@ -9,9 +9,9 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
 
     // VCARD
     let list = [{
-        displayName: "Cristian Escobar",
+        displayName: "lucxxs.qzy",
         vcard: `BEGIN:VCARD\nVERSION:3.0\nFN: Cristian Escobar
-\nitem1.TEL;waid=51927238856:51927238856\nitem1.X-ABLabel:Número\nitem2.EMAIL;type=INTERNET: cristianescobar.vx@gmail.com\nitem2.X-ABLabel:Email\nitem3.URL:https://www.instagram.com/dev.criss_vx\nitem3.X-ABLabel:Internet\nitem4.ADR:;; Perú 🇵🇪;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
+\nitem1.TEL;waid=50585389943:50585389943\nitem1.X-ABLabel:Número\nitem2.EMAIL;type=INTERNET: lucxxs.qzy.vx@gmail.com\nitem2.X-ABLabel:Email\nitem3.URL:https://www.instagram.com/lucxxs.qzy\nitem3.X-ABLabel:Internet\nitem4.ADR:;; ESPAÑA 🇪🇸;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`,
     }];
 
     await conn.sendMessage(m.chat, {
@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
         quoted: m
     });
 
-    let txt = `👋 *Hola \`${username}\` este es*\n*el contacto de mi desarrollador*`;
+    let txt = `🍭 *Hola \`${username}\` este es*\n*el contacto de mi desarrollador (no hablar laikas Aneka me domina*`;
 
     await conn.sendMessage(m.chat, { text: txt }, { quoted: m });
 };
