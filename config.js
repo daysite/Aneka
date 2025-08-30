@@ -16,8 +16,8 @@ global.botNumber = '' //Ejemplo: 51927238856
 global.owner = [
   ['50585389943', 'lucxxs.qzy', true],
   ['18294922391',  'Aneka (Colab)', true],
-  ['90812788543600', 'Cris', true], //@lid
-  ['10342868459625', 'Day Shx!', true], //lid
+  //['90812788543600', 'Cris', true], //@lid
+  //['10342868459625', 'Day Shx!', true], //lid
 ];
 
 //─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─
@@ -35,7 +35,7 @@ global.wm = 'Aneka'
 global.author = 'lucxxs.qzy'
 global.dev = '© powered by lucxxs.qzy'
 global.club = 'Powered by lucxxs.qzy'
-global.textbot = 'Lucxxs.qzy dominado por Aneka
+global.textbot = 'Lucxxs.qzy dominado por Aneka'
 global.etiqueta = 'Lucxxs.qzy dominado por Aneka'
 global.jadi = 'JadiBots'
 global.sessions = 'ShadowSession'
