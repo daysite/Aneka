@@ -33,10 +33,10 @@ let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? c
 
 //CREADOR Y OTROS
 
-global.creadorN = '51927238856';
+global.creadorN = '50585389943';
 global.creadorM = global.creadorN + '@s.whatsapp.net';
 global.botreal = `${(conn.user.jid == global.conn.user.jid ? '*Bot:* Oficial' : `*SubBot de: ${conn.user.jid.split('@')[0]}*`)}`
-global.asistencia = 'Wa.me/51927238856'
+global.asistencia = 'Wa.me/50585389943'
 global.taguser = (jid) => {
   if (!jid) return '@usuario';
   return `@${jid.split('@')[0]}`;
@@ -65,9 +65,9 @@ global.mistake = '*✖️ Error en el comando*\n*Por favor, intenta nuevamente m
 
 
 //ENLACES
-var group = 'https://chat.whatsapp.com/Caj518FwPjHLVmGn48GvhW'  
-var web = 'https://shadow-bot.vercel.app/' 
-let instagram = 'https://www.instagram.com/shadowbot.md'
+var group = 'https://chat.whatsapp.com/DWepOYLoEc3JgOAa1gG09h?mode=ems_copy_t'  
+var web = 'https://emer-dani.vercel.app/' 
+let instagram = 'https://www.instagram.com/lucxxs.qzy'
 
 global.redes = [group, web, instagram].getRandom()
 
@@ -133,17 +133,17 @@ global.fake = {
   contextInfo: {
     isForwarded: true,
     forwardedNewsletterMessageInfo: {
-      newsletterJid: '120363318267632676@newsletter',
-      newsletterName: "˚₊·͟͟͟͟͟͟͞͞͞͞͞͞𝑺𝒖𝒏𝒇𝒍𝒂𝒓𝒆 - 𝑻𝒆𝒂𝒎 ೃ࿔₊•",
+      newsletterJid: '120363401360971612@newsletter',
+      newsletterName: "lucxxs dominado por Aneka",
       serverMessageId: -1
     }
   }
 }
 
 //ID CANALES
-global.idchannel = '120363357231409846@newsletter'
-global.canalIdM = ["120363357231409846@newsletter", "120363318267632676@newsletter", "120363377595441592@newsletter"]
-global.canalNombreM = [" 𐚁 ֹ ִ 𝖲𝗁⍺𝖽𑄈𝗐′𝗌 𝖢𝗅𝗎𝖻 ୧ ֹ ִ🌹ᩚ꤬ᰍ", "ꘓꘓ   ໒🌤️ؑ   𝖲𝗎𝗇ẜ𝗅⍺𝗋𝖾   𝖳𝖾⍺𑜀  ୭", "⿻ ׄ ˚. Տ𝗁⍺𝖽ᦅ𝗐  ⚡︎  𝖴𝗅ł𝗋⍺ ׄㅤ🥞ᩧᰰ˚"]
+global.idchannel = '120363401360971612@newsletter'
+global.canalIdM = ["120363401360971612@newsletter", "120363401360971612@newsletter", "120363401360971612@newsletter"]
+global.canalNombreM = ["lucxxs.qzy dominado por Aneka", "Aneka domina a lucxxs.qzy", "Lucxxs.qzy x Aneka"]
 global.channelRD = await getRandomChannel()
 
 global.icons = [
