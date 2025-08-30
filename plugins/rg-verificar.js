@@ -53,10 +53,10 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
 👤 \`Nombre:\` ${user.name}
 📅 \`Edad:\` ${user.age} años
 
-> 𝖢𝗈𝗅𝗈𝖼𝖺 *#profile* 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 𝗍𝗎 𝗉𝖾𝗋𝖿𝗂𝗅`.trim()
+> 𝖢𝗈𝗅𝗈𝖼𝖺 *#Menu* 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 el menu del bot`.trim()
 
   await conn.sendLuffy(m.chat, shortText, dev, fullText, img, img, 'https://instagram.com/dev.criss_vx', fkontak)
-  await m.react('✅')
+  await m.react('☑️')
 }
 
 handler.help = ['reg']
