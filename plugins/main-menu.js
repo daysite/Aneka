@@ -96,7 +96,8 @@ for (let key in emojis) {
 
     before: `ㅤ
 *Hola mi nombre es Aneka 🍟* ¿Como estas ${taguser}?
-ㅤㅤㅤ ּ ${saludo} ׄ humano
+
+ㅤㅤㅤ ּ ${saludo} ׄ humano 👋🏻
 
 🥞 𝖠𝖼𝗍𝗂𝗏𝗈: ${uptime}
 👥 𝖴𝗌𝗎𝖺𝗋𝗂𝗈𝗌: ${totalreg}
