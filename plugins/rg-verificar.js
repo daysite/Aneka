@@ -46,8 +46,9 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   const img = await (await fetch(perfil)).buffer()
   const sn = createHash('md5').update(m.sender).digest('hex')
 
-  const shortText = `\`\`\`REGISTRO COMPLETO\`\`\``
+  const shortText = `Aneka x Lucxss.qzy`
   const fullText = `
+    \`\`\`VERIFICADO CORRECTAMENTE\`\`\`
   
 👤 \`Nombre:\` ${user.name}
 📅 \`Edad:\` ${user.age} años
