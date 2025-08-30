@@ -151,7 +151,7 @@ for (let key in emojis) {
                 isForwarded: true,
                 forwardingScore: 999,
                 externalAdReply: {
-                    title: '⏤͟͞ू⃪ ፝͜⁞Sʜᴀᴅᴏᴡ✰⃔࿐\nNᴜᴇᴠᴀ Vᴇʀsɪᴏɴ Uʟᴛʀᴀ ☁️',
+                    title: 'luccxs.qzy x aneka\nno se copien pe',
                     thumbnailUrl: perfil,
                     mediaType: 1,
                     renderLargerThumbnail: false,
