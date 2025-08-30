@@ -17,9 +17,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         let messageText = `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n`;
         messageText += `›Titulo: ${video.titulo}*\n`;
         messageText += `›Duración: ${video.duracion || 'No disponible'}\n`;
-        messageText += `›Autor:* ${video.canal || 'Desconocido'}\n`;
-        messageText += `›Url:* ${video.url}\n\n`
-        messageText += `🚩 Selecciona un boton para descargar.`;
+        messageText += `›Autor: ${video.canal || 'Desconocido'}\n`;
+        messageText += `›Url: ${video.url}\n\n`
+        messageText += `> 🚩 Selecciona un boton para descargar.`;
 
         await conn.sendMessage(m.chat, {
             image: thumbnail,
