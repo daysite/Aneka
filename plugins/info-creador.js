@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
         quoted: m
     });
 
-    let txt = `🍭 *Hola \`${username}\` este es*\n*el contacto de mi desarrollador* (no hablar laikas Aneka me domina)`;
+    let txt = `🍭 *Hola \`${username}\` este es*\n*el contacto de mi desarrollador* (no hablar laikas Aneka me pega)`;
 
     await conn.sendMessage(m.chat, { text: txt }, { quoted: m });
 };
