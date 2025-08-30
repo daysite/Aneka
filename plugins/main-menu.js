@@ -21,7 +21,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered).length
     const readMore = '\u200b'.repeat(850)
 
-    await m.react('⚡')
+    await m.react('🍟')
 
     let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     let perfil = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://files.catbox.moe/ninsr8.jpg')
@@ -109,7 +109,7 @@ for (let key in emojis) {
 🥠 𝖭𝗂𝗏𝖾𝗅: ${level}
 🍙 𝖱𝖺𝗇𝗀𝗈: ${role}
 
-ㅤ ㅤ   乂 *ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs* 乂
+ㅤ ㅤ  \`乂 ⺀ Comands List ⺀ 乂\`
 `,
 
       header: category => ` ${category}`,
