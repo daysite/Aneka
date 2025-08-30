@@ -17,10 +17,10 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   const Reg = /^(.*?)[.|] *?(\d{1,3})$/i
 
   if (user.registered === true)
-    return m.reply(`*🍚 Ya te encuentras registrado en mi base de datos.*\n*Si deseas eliminar tu registro usa la función \`#unreg\`*`)
+    return m.reply(`🍭 Ya te encuentras registrado en mi base de datos.\nSi deseas eliminar tu registro usa la función \`#unreg\``)
 
   if (!Reg.test(text))
-    return m.reply(`*🍚 Por favor, ingresa tu nombre y edad para registrarte en mi base de datos.*\n> *\`Ejemplo:\`*\n> ${usedPrefix + command} ${name2}.20`)
+    return m.reply(`🍭 Por favor, ingresa tu nombre y edad para registrarte en mi base de datos.🍭\n> *\`Ejemplo:\`*\n> ${usedPrefix + command} ${name2}.20`)
 
   let [_, name, ageStr] = text.match(Reg) || []
   if (!name) return m.reply('*⚠️ El nombre no puede estar vacío.*')
@@ -31,7 +31,7 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   if (isNaN(age)) return m.reply('*👴🏻 Qué haces acá, no deberías estar en el cementerio?*')
   if (age < 5 || age > 100) return m.reply('*👶🏻 Mira el nenito quiere jugar al bot*')
 
-  await m.react('💌')
+  await m.react('🍟')
 
   Object.assign(user, {
     name: name.trim(),
@@ -46,18 +46,11 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   const img = await (await fetch(perfil)).buffer()
   const sn = createHash('md5').update(m.sender).digest('hex')
 
-  const shortText = `෫໋ׅׄ𝆬🍃ິ⃨ 𝖱𝖾𝗀𝗂𝗌𝗍𝗋𝗈 - 𝖲𝗁𝖺𝖽𝗈𝗐 ׅ𝖴𝗅𝗍𝗋𝖺  ׄ ׄ𑁍̵ ֕︵۪۪۪۪᷼ ּ`
-  const fullText = `𐙚ㅤ *𝖱𝖾︩𝗀𝗂𝗌𝗍𝗋𝗈* ㅤﾉㅤ *𝖢𝗈𝗆𝗉𝗅𝖾ł𝗈* ㅤᗝ̵
-ㅤ꒰       ֹ      ﹙᷼͝sʜᴀᴅᴏᴡ᷼͝﹚       ִ       ꒱
-
-✿᷎︩︪͡⪧ \`Nombre:\` ${user.name}
-✿᷎︩︪͡⪧ \`Edad:\` ${user.age} años
-
-𐔌𐔌  *𝖱𝖾𝖼໊𝗈𝗆͟𝗉͟𝖾͟𝗇͟𝗌͟𝖺𝗌 ࣲ* ׅ  ☕ᩨ   ׄ
-
-ᦷᩘᦷ     ݂   🪙 ፡ \`\`\`15 Coins\`\`\`
-ᦷᩘᦷ     ݂   🍸 ፡ \`\`\`245 Xp\`\`\`
-ᦷᩘᦷ     ݂   🎫 ፡ \`\`\`12 Tokens\`\`\`
+  const shortText = `\`\`\`REGISTRO COMPLETO\`\`\``
+  const fullText = `
+  
+👤 \`Nombre:\` ${user.name}
+📅 \`Edad:\` ${user.age} años
 
 > 𝖢𝗈𝗅𝗈𝖼𝖺 *#profile* 𝗉𝖺𝗋𝖺 𝗏𝖾𝗋 𝗍𝗎 𝗉𝖾𝗋𝖿𝗂𝗅`.trim()
 
