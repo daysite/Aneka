@@ -1,10 +1,9 @@
 let handler = async (m, { usedPrefix, command }) => {
   let uptime = process.uptime()
   let runtime = `${textbot}
-> 💌 ${club}
 
-*☁️ Tiempo activo:* \`${rTime(uptime)}\`
-*⏰ Hora actual:* \`\`\`${hora}\`\`\``
+*📅 Tiempo activo:* \`${rTime(uptime)}\`
+*⌚ Hora:* \`\`\`${hora}\`\`\``
 
   conn.reply(m.chat, runtime, m)
 }
