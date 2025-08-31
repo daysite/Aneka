@@ -11,11 +11,11 @@ const handler = async (m, { args, conn }) => {
     const data = res.data;
 
     for (let media of data) {
-      await conn.sendFile(m.chat, media.url, 'instagram.mp4', `🍟Tu reels fue descargado correctamente`, m);
-    await m.react('☑️);
+      await conn.sendFile(m.chat, media.url, 'instagram.mp4', `🍟 Reels descargado correctamente`, m);
+    await m.react('☑️');
     }
   } catch (e) {
-    return conn.reply(m.chat, `🍭 Error`, m);
+    return conn.reply(m.chat, `🍭 Ocurrió un error en el mundo virtual. ¡Inténtalo de nuevo!`, m);
     await m.react('❎');
   }
 };
