@@ -15,7 +15,7 @@ const handler = async (m, { args, conn }) => {
     await m.react('☑️);
     }
   } catch (e) {
-    return conn.reply(m.chat, `🎤💙 ¡Gomen! Ocurrió un error en el mundo virtual. ¡Inténtalo de nuevo! ✨💫`, m);
+    return conn.reply(m.chat, `🍭 Error`, m);
     await m.react('❎');
   }
 };
