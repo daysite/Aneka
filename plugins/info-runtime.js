@@ -1,6 +1,6 @@
 let handler = async (m, { usedPrefix, command }) => {
   let uptime = process.uptime()
-  let runtime = `${textbot}
+  let runtime = `> ${textbot}
 
 *📅 Tiempo activo:* \`${rTime(uptime)}\`
 *⌚ Hora:* \`\`\`${hora}\`\`\``
