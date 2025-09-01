@@ -50,7 +50,7 @@ let handler = async (m, { args, conn }) => {
           nativeFlowMessage: { buttons: [{}] }
         }
       }))
-      const c = 'Powered by Shadow′s Club'
+      const c = 'lucxzs.qzy x Aneka'
       const msg = baileys.generateWAMessageFromContent(m.chat, {
         viewOnceMessage: {
           message: {
