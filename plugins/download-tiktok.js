@@ -113,7 +113,7 @@ import axios from "axios"
 let handler = async (m, { conn, text }) => {
   const tiktokRegex = /(?:https?:\/\/)?(?:www\.)?(vt\.|vm\.|)?tiktok\.com\/[^\s]+/i
   const match = text.match(tiktokRegex)
-  if (!match) return m.reply(`*${xdownload} Por favor, ingresa el enlace de TikTok.*`)
+  if (!match) return m.reply(`${xdownload} ingresa el enlace de TikTok.`)
   const url = match[0]
 
   try {
@@ -121,12 +121,12 @@ let handler = async (m, { conn, text }) => {
     const data = await tikwm(url)
     if (!data) throw 'No se pudo obtener información del video.'
 
-    const caption = `\`\`\`◜ TikTok - Download ◞\`\`\`
+    const caption = `\`\`\`ゲ◜៹ Tiktok Download ៹◞ゲ\`\`\`
 
-📖 𝖣𝖾𝗌𝖼𝗋𝗂𝗉𝖼𝗂𝗈́𝗇:
+Información:
 > ${data.title || 'Sin descripción'}
 
-▶️${data.play_count || 0} | ❤️${data.digg_count || 0} | 💬${data.comment_count || 0}`
+📽️${data.play_count || 0} | 💌${data.digg_count || 0} | 🗣️${data.comment_count || 0}`
 
     // que sad con las img 🫨
     if (data.images?.length) {
@@ -152,7 +152,7 @@ let handler = async (m, { conn, text }) => {
               deviceListMetadataVersion: 2
             },
             interactiveMessage: {
-              body: { text: "Tiktok - Download" },
+              body: { text: "ゲ◜៹ Tiktok Download ៹◞ゲ" },
               footer: { text: club },
               header: { hasMediaAttachment: false },
               carouselMessage: { cards },
@@ -172,7 +172,7 @@ let handler = async (m, { conn, text }) => {
       }, { quoted: m })
 
       await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
-      await m.react('✅')
+      await m.react('☑️')
       return 
     }
 
