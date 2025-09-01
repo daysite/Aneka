@@ -275,9 +275,9 @@ case 'antivirus':
       break
     default:
       if (!/[01]/.test(command)) return conn.reply(m.chat, `
-\`𝗙𝘂𝗻𝗰𝗶𝗼𝗻𝗲𝘀 𝗗𝗶𝘀𝗽𝗼𝗻𝗶𝗯𝗹𝗲𝘀\`
+\`ENABLE - DISABLE\`
 
-*ゲ◜៹ 𝖠𝖽𝗆𝗂𝗇𝗂𝗌𝗍𝗋𝖺𝖽𝗈𝗋𝖾𝗌 ៹◞ゲ*
+\`ゲ◜៹ ADMINISTRACIÓN  ៹◞ゲ\`
 
 ${usedPrefix + command} welcome 
 ${usedPrefix + command} antibot
@@ -293,7 +293,7 @@ ${usedPrefix + command} audios
 ${usedPrefix + command} detect
 ${usedPrefix + command} chatbot
 
-*ゲ◜៹ 𝖣𝖾𝗌𝖺𝗋𝗋𝗈𝗅𝗅𝖺𝖽𝗈𝗋 ៹◞ゲ*
+\`ゲ◜៹ Creador - Owner ៹◞ゲ\`
 
 ${usedPrefix + command} antispam
 ${usedPrefix + command} antiprivado
@@ -304,7 +304,7 @@ ${usedPrefix + command} subbots`, fkontak)
       throw false
   }
 
-  conn.reply(m.chat, `☕ 𝖫𝖺 𝗈𝗉𝖼𝗂𝗈́𝗇 *${type}* 𝗌𝖾 *${isEnable ? 'activó' : 'desactivó'}* ${isAll ? '𝗉𝖺𝗋𝖺 𝖾𝗌𝗍𝖾 𝖡𝗈𝗍' : isUser ? '' : '𝗉𝖺𝗋𝖺 𝖾𝗌𝗍𝖾 𝖢𝗁𝖺𝗍'}`, fkontak)
+  conn.reply(m.chat, `🍭 𝖫𝖺 𝗈𝗉𝖼𝗂𝗈́𝗇 ${type} se ${isEnable ? 'activó' : 'desactivó'} ${isAll ? 'para este bot' : isUser ? '' : 'para este chat'}`, fkontak)
 }
 
 handler.help = ['enable', 'disable', 'on', 'off']
