@@ -275,9 +275,9 @@ case 'antivirus':
       break
     default:
       if (!/[01]/.test(command)) return conn.reply(m.chat, `
-\`ENABLE - DISABLE\`
+\`🍟 ENABLE - DISABLE\`
 
-\`ゲ◜៹ ADMINISTRACIÓN  ៹◞ゲ\`
+\`ゲ◜៹ Administración  ៹◞ゲ\`
 
 ${usedPrefix + command} welcome 
 ${usedPrefix + command} antibot
