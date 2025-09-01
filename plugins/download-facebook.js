@@ -5,12 +5,12 @@ const handler = async (m, { text, conn, args, usedPrefix, command }) => {
     return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un link de Facebook.*`, m);
   }
 
-  await m.react('🕒');
+  await m.react('⌛');
   let res;
   try {
     res = await igdl(args[0]);
   } catch (error) {
-    return conn.reply(m.chat, '*❌ Error al obtener el video, verifique que el enlace sea correcto*', m);
+    return conn.reply(m.chat, '🍭 Error al obtener el video, verifique que el enlace sea correcto', m);
   }
 
   let result = res.data;
@@ -29,11 +29,11 @@ const handler = async (m, { text, conn, args, usedPrefix, command }) => {
     return conn.reply(m.chat, '*⚠️ No se encontró una resolución adecuada.*', m);
   }
 
-  await m.react('✅');
+  await m.react('☑️');
   let video = data.url;
   
   try {
-    await conn.sendMessage(m.chat, { video: { url: video }, caption: '\`\`\`◜Facebook - Download◞\`\`\`\n\n> © Powered by Shadow Ultra\n> Video downloaded successfully', fileName: 'fb.mp4', mimetype: 'video/mp4' }, { quoted: fkontak });
+    await conn.sendMessage(m.chat, { video: { url: video }, caption: '\`🍟 Descargado correctamente\`', fileName: 'fb.mp4', mimetype: 'video/mp4' }, { quoted: fkontak });
   } catch (error) {
     return conn.reply(m.chat, '*⚠️ La URL está corrupta, intenta con otra URL.*', m);
   await m.react('❌');
