@@ -1,10 +1,10 @@
 let handler = async (m, { conn, usedPrefix, command}) => {
-let pp = 'https://files.catbox.moe/482poc.mp4'
-let pp2 = 'https://files.catbox.moe/482poc.mp4'
+let pp = 'https://files.catbox.moe/yrjd2v.mp4'
+let pp2 = 'https://files.catbox.moe/yrjd2v.mp4'
 let who
 if (m.isGroup) who = m.mentionedJid[0]
 else who = m.chat
-if (!who) return conn.reply(m.chat, '✦ Menciona al usuario con *@user*', m)
+if (!who) return conn.reply(m.chat, '🍭 Menciona al usuario con *@user*', m)
 let name2 = conn.getName(who)
 let name = conn.getName(m.sender)
 
