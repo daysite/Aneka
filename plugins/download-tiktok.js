@@ -1,37 +1,56 @@
-import fg from 'api-dylux';
+import fetch from 'node-fetch'
 
-const handler = async (m, { conn, text, args, usedPrefix, command }) => {
-    try {
-        if (!args[0]) {
-            return conn.reply(m.chat, `🥀 Ingresa un enlace válido de TikTok.`, m);
-        }
+let handler = async (m, { conn, args }) => {
+let tiktokUrl = args[0]
 
-        if (!/(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(text)) {
-            return conn.reply(m.chat, `❎ Enlace de TikTok inválido.`, m);
-        }
+if (!tiktokUrl || !tiktokUrl.includes("tiktok.com")) {
+return m.reply('Ingresa un link de tiktok');
+}
 
-        m.react('🕒');
+try {
+let api = await fetch(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(tiktokUrl)}`)
+let json = await api.json()
 
-        let data = await fg.tiktok(`${args[0]}`);
-        let { title, play, duration } = data.result;
-        let { nickname } = data.result.author;
+let txt = `- *Video de :* _${json.author.name || "Desconocido"}_ ( @${json.author.unique_id || "N/A"})
+- *Likes :* ${json.stats.likeCount || 0}
+- *Comentarios :* ${json.stats.commentCount || 0}
+- *Compartidos :* ${json.stats.shareCount || 0}
+- *Reproducciones*: ${json.stats.playCount || 0}
+- *Guardados*: ${json.stats.saveCount || 0}
 
-        let caption = `
-  乂 TikTok Download
+Responde con:
 
-  ◦ 👤 *Autor:* ${nickname}
-  ◦ 📌 *Título:* ${title}
-  ◦ ⏱️ *Duración:* ${duration}`;
+- *1* (Calidad mediana)  
+- *2* (Calidad alta)  
+- *3* (audio)`
 
-        await conn.sendFile(m.chat, play, `tiktok.mp4`, caption, m);
+let enviarvid = await conn.sendMessage(m.chat, { video: { url: json.video.noWatermark }, caption: txt }, { quoted: m })
+let msgID = enviarvid.key.id
 
-        m.react('✅');
-    } catch (e) {
-        return conn.reply(m.chat, `❌ *Error:* ${e.message}`, m);
-    }
-};
+conn.ev.on("messages.upsert", async (update) => {
+let mensajeRecibido = update.messages[0]
+if (!mensajeRecibido.message) return
 
-handler.help = ["tiktok"];
-handler.tags = ["download"];
-handler.command = ["tt", "tiktok", "ttdl"];
-export default handler;
+let respuestaTXT = mensajeRecibido.message.conversation || mensajeRecibido.message.extendedTextMessage?.text
+let chatId = mensajeRecibido .key.remoteJid
+let RespuestaMSG = mensajeRecibido.message.extendedTextMessage?.contextInfo?.stanzaId === msgID
+
+if (RespuestaMSG) {
+await conn.sendMessage(chatId, { react: { text: '⬇️', key: mensajeRecibido.key, } })
+if (respuestaTXT === '1') {
+await conn.sendMessage(chatId, {video: { url: json.video.noWatermark }, caption: "Video Calidad Mediana",}, { quoted: mensajeRecibido })
+} else if (respuestaTXT === '2') {
+await conn.sendMessage(chatId, {video: { url: json.video.watermark }, caption: "Video Calidad Alta",}, { quoted: mensajeRecibido })
+} else if (respuestaTXT === '3') {
+await conn.sendMessage(chatId, {audio: { url: json.video.watermark }, caption: "Video Calidad Alta",}, { quoted: mensajeRecibido })
+} else {
+await conn.sendMessage(chatId, "✿ Solo puedes responder con 1,2,3", m)
+}}})
+      
+} catch (error) {
+console.error(error)
+}}
+
+handler.command = ['tiktok']
+
+export default handler
