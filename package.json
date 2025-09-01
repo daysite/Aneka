@@ -33,6 +33,7 @@
 "dependencies": {
 "@vitalets/google-translate-api": "^9.2.0",
 "@whiskeysockets/baileys": "npm:@izumi-xyz/meta",
+"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "google-libphonenumber": "latest",
 "@adiwajshing/keyed-db": "^0.2.4",
 "@bochilteam/scraper": "^5.0.1",
