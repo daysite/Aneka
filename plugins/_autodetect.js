@@ -16,11 +16,11 @@ edit = `*${usuario}*\n*Ha permitido que ${m.messageStubParameters[0] == 'on' ? '
 
 newlink = `*⛓️‍💥 El enlace del grupo ha sido restablecido por:*\n*${usuario}*`
 
-status = `*☕ El grupo ha sido ${m.messageStubParameters[0] == 'on' ? '`cerrado` 🔒' : '`abierto` 🔓'}*\n*Por: ${usuario}*\n\n🌷 Ahora ${m.messageStubParameters[0] == 'on' ? '*solo admins*' : '*todos*'} pueden enviar mensaje...`
+status = `*🍟 El grupo ha sido ${m.messageStubParameters[0] == 'on' ? '`cerrado` 🔒' : '`abierto` 🔓'}*\n*Por: ${usuario}*\n\n Ahora ${m.messageStubParameters[0] == 'on' ? '*solo admins*' : '*todos*'} pueden enviar mensaje...`
 
-admingp = `*@${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo. 👻*\n\n*☕ Acción hecha por:*\n*${usuario}*`
+admingp = `*🍟 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.*\n\n*Acción hecha por:*\n*${usuario}*`
 
-noadmingp =  `*@${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo. 🥱*\n\n*☕ Acción hecha por:*\n*${usuario}*`
+noadmingp =  `*🍟 @${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo.*\n\n*Acción hecha por:*\n*${usuario}*`
 
 aceptar = `*¡Ha llegado un nuevo participante al grupo!*\n\n◦ ✐ Grupo: *${groupMetadata.subject}*\n\n> ◦ ⚘ Bienvenido/a: @${m.messageStubParameters[0].split('@')[0]}\n\n> ◦ ✦ Aceptado por:
  @${m.sender.split('@')[0]}` 
