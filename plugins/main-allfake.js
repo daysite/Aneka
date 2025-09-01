@@ -121,8 +121,8 @@ global.usname = user.registered && user.name ? user.name : gname
 const more = String.fromCharCode(8206)
 global.readMore = more.repeat(850)
 
-global.packN = `∿ 協会  Sʜʌᴅᴏᴡ′s Cʟᴜʙ  閲覧 ࣪ ˖ 
-↳ @shadowsclub.xyz\n\n🍮 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐁𝐲:\n↳ @${usnamebot}\n🦦 𝐔𝐬𝐮𝐚𝐫𝐢𝐨:
+global.packN = `licxxs.qzy x Aneka ˖ 
+↳ @lucxxs.qzy\n\nPowered By:\n↳ @${usnamebot}\nUsuario:
 ↳ @${usname}`;
 global.authN = `\n\n${club}`;
 
