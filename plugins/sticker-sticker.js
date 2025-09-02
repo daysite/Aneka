@@ -98,7 +98,7 @@ let handler = async (m, { conn, args }) => {
       if (!isValidUrl(args[0])) return conn.reply(m.chat, '❌ La *URL* es inválida.', m)
       stiker = await sticker(false, args[0], global.packN, global.authN)
     } else {
-      return conn.reply(m.chat, mensajeError, m, rcanal)
+      return conn.reply(m.chat, mensajeError, m)
     }
 
   } catch (e) {
