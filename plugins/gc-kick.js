@@ -1,7 +1,7 @@
 let handler = async (m, { conn, participants, usedPrefix, command, isROwner }) => {
   if (!global.db.data.settings[conn.user.jid].restrict)
 {
-return m.reply('*☕ El owner tiene restringido está opción*');
+return m.reply('🍭 El owner tiene restringido está opción');
 }
     let kickte = `*${xgc} Menciona algún participante que desea eliminar del grupo.*`
 
@@ -15,7 +15,7 @@ return m.reply('*☕ El owner tiene restringido está opción*');
     let owner = groupMetadata.owner
 
     if (user === owner) {
-        return m.reply(`*🌵 No puedes eliminar al Creador del Grupo!*`)
+        return m.reply(`🍭 No puedes eliminar al Creador del Grupo`)
     }
 
     await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
@@ -23,7 +23,7 @@ return m.reply('*☕ El owner tiene restringido está opción*');
     m.reply(`*ℹ️ El participante fue eliminado.*`)
 }*/
 
-m.reply(`*🌵 El participante @${user.split('@')[0]} fue eliminado.*`, m.chat, {
+m.reply(`🍟 El participante @${user.split('@')[0]} lo desaparecieron.`, m.chat, {
   mentions: [user]
 })
 }
