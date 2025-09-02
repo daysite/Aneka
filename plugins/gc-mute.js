@@ -34,7 +34,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
     mutedUsers.add(user);
     guardarMuteos();
-    conn.reply(m.chat, `🚫 El usuario *@${user.split('@')[0]}* fue muteado.\n> Sus mensajes serán eliminados`, fkontak, { mentions: [user] });
+    conn.reply(m.chat, `🚫 El usuario *@${user.split('@')[0]}* fue muteado.\n\n> Sus mensajes serán eliminados`, fkontak, { mentions: [user] });
 
   } else if (command === "unmute") {
     if (!mutedUsers.has(user)) {
@@ -42,7 +42,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
     mutedUsers.delete(user);
     guardarMuteos();
-    conn.reply(m.chat, `🔊 El usuario *@${user.split('@')[0]}* fue desmuteado.\n> Sus mensajes ya no serán eliminados.`, fkontak, { mentions: [user] });
+    conn.reply(m.chat, `🔊 El usuario *@${user.split('@')[0]}* fue desmuteado.\n\n> Sus mensajes ya no serán eliminados.`, fkontak, { mentions: [user] });
   }
 };
 
