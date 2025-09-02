@@ -50,7 +50,7 @@ let handler = async (m, { conn, args }) => {
 
 handler.help = ['comprar <item> <cantidad>']
 handler.tags = ['juegos']
-handler.command = ['comprar']
+handler.command = ['comprarpoke']
 handler.register = true
 
 export default handler
