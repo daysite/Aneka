@@ -1,8 +1,6 @@
 import fs from 'fs'
 
 const usuariosPath = './src/database/usuarios.json'
-const pokemonesPath = './src/database/pokemones.json'
-
 
 function cargarJSON(ruta, valorDefault = {}) {
   try {
@@ -14,58 +12,45 @@ function cargarJSON(ruta, valorDefault = {}) {
   }
 }
 
-
 function guardarJSON(ruta, data) {
   fs.writeFileSync(ruta, JSON.stringify(data, null, 2))
 }
 
-let handler = async (m, { conn }) => {
+const precios = {
+  pocion: 20,
+  comida: 15,
+  revivir: 50
+}
+
+let handler = async (m, { conn, args }) => {
   const userId = m.sender.replace(/[^0-9]/g, '')
   const usuarios = cargarJSON(usuariosPath)
-  const pokemones = cargarJSON(pokemonesPath, [])
+  const user = usuarios[userId]
 
-  if (!Array.isArray(pokemones) || pokemones.length === 0) {
-    return m.reply('⚠️ La lista de pokemones está vacía.')
+  if (!user) return m.reply('😢 No tienes perfil. Usa *.atrapar* primero.')
+  if (!args[0]) return m.reply('❓ ¿Qué quieres comprar? Usa *.tienda* para ver opciones.')
+  
+  const item = args[0].toLowerCase()
+  const cantidad = Math.max(1, parseInt(args[1]) || 1)
+
+  if (!precios[item]) return m.reply('❌ Ese objeto no existe. Usa *.tienda* para ver opciones.')
+
+  const costo = precios[item] * cantidad
+  if (user.dinero < costo) {
+    return m.reply(`💸 No tienes suficientes monedas.\nTienes: ${user.dinero} – Necesitas: ${costo}`)
   }
 
-  if (usuarios[userId]?.pokemon) {
-    return m.reply(`🧢 Ya tienes un Pokémon: *${usuarios[userId].pokemon.nombre}*.\nUsa *.perfil* para verlo.`)
-  }
-
-  const ataques = pokeData?.ataques?.length
-    ? pokeData.ataques.map(a => `• ${a}`).join('\n')
-    : 'No tiene ataques definidos.'
-
-  const pokemon = pokemones[Math.floor(Math.random() * pokemones.length)]
-
-  usuarios[userId] = {
-    nombre: (await conn.getName(m.sender)) || 'Entrenador',
-    pokemon: {
-      id: pokemon.id,
-      nombre: pokemon.nombre,
-      alias: pokemon.nombre,
-      nivel: 1,
-      dinero: 5, 
-      vida: pokemon.vidaBase,
-      vidaMax: pokemon.vidaBase,
-      fechaCaptura: new Date().toISOString()
-    }
-  }
+  user.dinero -= costo
+  user[item] = (user[item] || 0) + cantidad
 
   guardarJSON(usuariosPath, usuarios)
 
-  const texto = `🎉 Lanzaste una Pokébola y atrapaste a *${pokemon.nombre}*!\n\n` +
-                `📛 Tipo: ${pokemon.tipo.join(', ')}\n` +
-                `❤️ Vida: ${pokemon.vidaBase}\n\n` +
-                `🗡️ *Ataques:*\n${ataques}` +
-                `Usa *.perfil* para ver a tu mascota.`
-
-  await conn.sendFile(m.chat, pokemon.imagen, 'pokemon.jpg', texto, m)
+  return m.reply(`✅ Compraste *${cantidad} ${item}* por 💰 ${costo} monedas.\nMonedas restantes: ${user.dinero}`)
 }
 
-handler.help = ['atrapar']
+handler.help = ['comprar <item> <cantidad>']
 handler.tags = ['juegos']
-handler.command = ['atrapar']
+handler.command = ['comprar']
 handler.register = true
 
 export default handler
