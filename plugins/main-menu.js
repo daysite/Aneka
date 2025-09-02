@@ -27,9 +27,9 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     let perfil = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://files.catbox.moe/ninsr8.jpg')
 
     const vid = [
-      'https://files.catbox.moe/39rx3n.mp4',
-      'https://files.catbox.moe/5fbi9s.mp4',
-      'https://files.catbox.moe/biggyj.mp4'
+      'https://files.catbox.moe/9e5773.mp4',
+      'https://files.catbox.moe/9e5773.mp4',
+      'https://files.catbox.moe/9e5773.mp4'
     ]
 
 let tags = {};
