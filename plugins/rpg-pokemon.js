@@ -57,7 +57,6 @@ let handler = async (m, { conn }) => {
   const texto = `🎉 Lanzaste una Pokébola y atrapaste a *${pokemon.nombre}*!\n\n` +
                 `📛 Tipo: ${pokemon.tipo.join(', ')}\n` +
                 `❤️ Vida: ${pokemon.vidaBase}\n\n` +
-                `🗡️ *Ataques:*\n${ataques}` +
                 `Usa *.perfil* para ver a tu mascota.`
 
   await conn.sendFile(m.chat, pokemon.imagen, 'pokemon.jpg', texto, m)
