@@ -18,7 +18,7 @@ newlink = `🍟 El enlace del grupo ha sido restablecido por:\n\n*${usuario}*`
 
 status = `🍟 El grupo fue ${m.messageStubParameters[0] == 'on' ? '`cerrado` 🔒' : '`abierto` 🔓'}\n\nPor el usuario: ${usuario}`
 
-admingp = `🍟 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.*\n\nPor el usuario:\n*${usuario}*`
+admingp = `🍟 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.\n\nPor el usuario:\n*${usuario}*`
 
 noadmingp =  `🍟 @${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo.\n\nPor el usuario:\n*${usuario}*`
 
