@@ -40,7 +40,7 @@ await m.react('📭');
       const buttons = [
         {
           buttonId: `${usedPrefix}apk_download`,
-          buttonText: { displayText: "📥 Descargar" },
+          buttonText: { displayText: "Descargar apk" },
           type: 1
         }
       ];
