@@ -23,10 +23,10 @@ const handler = async (m, {conn, usedPrefix, text}) => {
   } finally {
     const groupMetadata = await conn.groupMetadata(m.chat);
     if (user === groupMetadata.owner) {
-      return conn.reply(m.chat, `*🌵 No puedes degradar al Creador del Grupo!*`, m);
+      return conn.reply(m.chat, `🍟 No puedes degradar al Creador del Grupo`, m);
     }
     conn.groupParticipantsUpdate(m.chat, [user], 'demote');
-    conn.reply(m.chat, `*🌵 El usuario fue degradado.*`, m);
+    conn.reply(m.chat, `🍟 El usuario fue degradado de administrador.`, m);
   }
 };
 
