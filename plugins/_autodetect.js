@@ -16,7 +16,7 @@ edit = `*${usuario}*\n*Ha permitido que ${m.messageStubParameters[0] == 'on' ? '
 
 newlink = `*⛓️‍💥 El enlace del grupo ha sido restablecido por:*\n*${usuario}*`
 
-status = `🍟 El grupo fue ${m.messageStubParameters[0] == 'on' ? '`cerrado` 🔒' : '`abierto` 🔓'}\nPor el usuario: ${usuario}`
+status = `🍟 El grupo fue ${m.messageStubParameters[0] == 'on' ? '`cerrado` 🔒' : '`abierto` 🔓'}\n\nPor el usuario: ${usuario}`
 
 admingp = `*🍟 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.*\n\n*Acción hecha por:*\n*${usuario}*`
 
