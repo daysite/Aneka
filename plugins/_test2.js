@@ -50,7 +50,7 @@ handler.before = async function (m, { conn }) {
 
 handler.command = /^quiensoy$/i;
 handler.help = ['quiensoy'];
-handler.tags = ['juegos'];
+handler.tags = ['fun'];
 handler.register = true;
 
 export default handler;
