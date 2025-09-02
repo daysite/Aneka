@@ -70,12 +70,12 @@ let handler = async (m, { conn, args }) => {
   let stiker = false
   let q = m.quoted || m
   let mime = (q.msg || q).mimetype || q.mediaType || ''
-  const mensajeError = `*${xsticker} responde a una imagen o video.*`
+  const mensajeError = `${xsticker} responde a una imagen o video.`
 
   try {
     if (mime.startsWith('image/') || mime.startsWith('video/') || mime === 'image/webp') {
       let media = await q.download?.()
-      if (!media) return conn.reply(m.chat, mensajeError, m, rcanal)
+      if (!media) return conn.reply(m.chat, mensajeError, m)
 
       try {
         stiker = await sticker(media, false, global.packN, global.authN)
