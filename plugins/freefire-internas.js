@@ -55,8 +55,8 @@ const handler = async (m, { text, conn, args, usedPrefix, command }) => {
         case 'inmixto4':
         case 'internamixto4':
             titulo = 'INTERNA MIXTO';
-            iconosA = ['🍁', '🍁', '🍁', '🍁'];
-            iconosB = ['🍃', '🍃', '🍃', '🍃'];
+            iconosA = ['🍆', '🍆', '🍆', '🍆'];
+            iconosB = ['🍑', '🍑', '🍑', '🍑'];
             break;
         case 'inmasc4':
         case 'internamasc4':
@@ -67,7 +67,7 @@ const handler = async (m, { text, conn, args, usedPrefix, command }) => {
         case 'infem4':
         case 'internafem4':
             titulo = 'INTERNA FEM';
-            iconosA = ['🪱', '🪱', '🪱', '🪱'];
+            iconosA = ['🪷', '🪷', '🪷', '🪷'];
             iconosB = ['🦋', '🦋', '🦋', '🦋'];
             break;
         case 'inmixto6':
