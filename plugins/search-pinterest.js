@@ -118,10 +118,10 @@ const pins = async (judul) => {
 };
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`*${xsearch} Por favor, ingresa un texto para buscar en Pinterest.*\n> *\`Ejemplo:\`* .pinterest Gatos Hermosos`);
+  if (!text) return m.reply(`*${xsearch} ingresa un texto para buscar en Pinterest.*`);
 
   try {
-    m.react('🕒');
+    m.react('⌛');
     const results = await pins(text);
     if (!results || results.length === 0) return conn.reply(m.chat, `\`\`\`⚠️ No se encontraron resultados para esa búsqueda.\`\`\``, m);
 
