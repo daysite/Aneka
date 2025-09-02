@@ -20,7 +20,7 @@ status = `🍟 El grupo fue ${m.messageStubParameters[0] == 'on' ? '`cerrado` �
 
 admingp = `*🍟 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.*\n\n*Acción hecha por:*\n*${usuario}*`
 
-noadmingp =  `*🍟 @${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo.*\n\n*Acción hecha por:*\n*${usuario}*`
+noadmingp =  `🍟 @${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo.\n\nPor el usuario:\n*${usuario}*`
 
 aceptar = `*¡Ha llegado un nuevo participante al grupo!*\n\n◦ ✐ Grupo: *${groupMetadata.subject}*\n\n> ◦ ⚘ Bienvenido/a: @${m.messageStubParameters[0].split('@')[0]}\n\n> ◦ ✦ Aceptado por:
  @${m.sender.split('@')[0]}` 
