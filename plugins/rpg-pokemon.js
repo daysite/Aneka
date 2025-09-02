@@ -29,7 +29,7 @@ let handler = async (m, { conn }) => {
   }
 
   if (usuarios[userId]?.pokemon) {
-    return m.reply(`🧢 Ya tienes un Pokémon: *${usuarios[userId].pokemon.nombre}*.\nUsa *.perfil* para verlo.`)
+    return m.reply(`🧢 Ya tienes un Pokémon: *${usuarios[userId].pokemon.nombre}*.\nUsa *.pokedex* para verlo.`)
   }
 
   /*const ataques = pokeData?.ataques?.length
