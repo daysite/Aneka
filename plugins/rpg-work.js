@@ -6,19 +6,18 @@ let handler = async (m, { conn, usedPrefix, command }) => {
    const tiempoEspera = 5 * 60 // 5 minutos
   if (cooldowns[m.sender] && Date.now() - cooldowns[m.sender] < tiempoEspera * 1000) {
     const tiempoRestante = segundosAHMS(Math.ceil((cooldowns[m.sender] + tiempoEspera * 1000 - Date.now()) / 1000))
-    m.reply(`*⏰ Espera \`${tiempoRestante}\` para volver a Trabajar.*`)
+    m.reply(`🕜 Espera *${tiempoRestante}* para volver a Trabajar.`)
     return
   }
    let work = works.getRandom()
    user.limit += amount
-   await m.reply(`*${work} \`${amount} Diamantes.\` 💎*`)
+   await m.reply(`${work} *${amount} 🍬 Dulces.*`)
    cooldowns[m.sender] = Date.now()
 }
 
 handler.help = ['work']
 handler.tags = ['rpg']
 handler.command = ['work', 'trabajar', 'w']
-handler.group = true
 handler.register = true 
 export default handler
 
@@ -30,8 +29,8 @@ function segundosAHMS(segundos) {
 
 // Thanks to FG98
 const works = [
-   "Ayudaste a violar al que dijo que los bots se crean por termux ganaste",
-   "Trabaja para una empresa militar privada, ganando",
+   "Mataste al que dijo que los bots se crean por termux",
+   "Mataste al que dijo que editar un bot es igual que crear",
    "Organiza un evento de cata de vinos y obtienes",
    "Limpias la chimenea y encuentras",
    "Desarrollas juegos para ganarte la vida y ganas",
@@ -63,4 +62,4 @@ const works = [
    "Trabajas como zoólogo y ganas",
    "Vendiste sándwiches de pescado y obtuviste",
    "Reparas las máquinas recreativas y recibes",
-]
+] 
