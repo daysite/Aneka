@@ -93,7 +93,7 @@ await m.react('📭');
         document: { url: downloadUrl },
         mimetype: "application/vnd.android.package-archive",
         fileName: `${app.name}.apk`,
-        caption: `> Shadow Ultra - MD`
+        caption: `Aneka x Lucxxs.qzy`
       },
       { quoted: m }
     );
@@ -107,7 +107,7 @@ await m.react('📭');
     let example = `${usedPrefix}apk WhatsApp`;
     return conn.sendMessage(
       m.chat,
-      { text: `*${xdownload} Ingresa el nombre de una Apk que deseas descargar.*\n> *\`Ejemplo:\`* ${example}` },
+      { text: `*${xdownload} Ingresa el nombre de una Apk que deseas descargar.` },
       { quoted: m }
     );
   }
