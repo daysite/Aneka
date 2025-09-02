@@ -21,8 +21,8 @@ let handler = async (m, { conn, text }) => {
   try {
     let stdout = execSync('git pull' + (m.fromMe && text ? ' ' + text : '')).toString().trim()
     let mensaje = stdout.includes('Already up to date') 
-      ? '*☁️ Aún no hay actualizaciones pendientes.*' 
-      : '*💻 Se actualizó exitosamente el sistema de Shadow Ultra.*\n\n' + stdout
+      ? '🍟 Aún no hay actualizaciones pendientes.' 
+      : '🍭 Se actualizó exitosamente el sistema\n\n' + stdout
 
     await conn.reply(m.chat, mensaje, m)
     await m.react('✅')
