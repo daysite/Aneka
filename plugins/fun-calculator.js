@@ -142,13 +142,13 @@ const handler = async (m, { conn, command, args }) => {
   const percentage = Math.floor(Math.random() * 501);
 
   const emojis = {
-    gay: '🏳️‍🌈', lesbiana: '🏳️‍🌈', pajero: '😏💦', pajera: '😏💦', puto: '🔥🥵',
+    kabrazo: '🏳️‍🌈', lesbiana: '🏳️‍🌈', pajero: '😏💦', pajera: '😏💦', puto: '🔥🥵',
     puta: '🔥🥵', manco: '🎮💀', manca: '🎮💀', rata: '🐁🧀', prostituto: '🫦💋',
     prostituta: '🫦💋', sinpoto: '😂', sintetas: '😿', chipi: '😹🫵🏻'
   };
 
   const descriptions = {
-    gay: [
+    kabrazo: [
       "💙 Parece que solo te gusta un poco la fiesta arcoíris.",
       "🖤 Tú no eres amigo... ¡Tú eres amigue! 💀",
       "💜 ¡Nivel DIOS! Ya ni necesitas salir del clóset, lo rompiste amige."
