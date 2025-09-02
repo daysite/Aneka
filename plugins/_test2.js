@@ -31,7 +31,7 @@ let handler = async (m, { conn }) => {
     ? pokeData.ataques.map(a => `• ${a}`).join('\n')
     : 'No tiene ataques definidos.'*/
 
-  const texto = `👤 Perfil de *${user.nombre}*\n\n` +
+  const txt = `👤 Perfil de *${user.nombre}*\n\n` +
                 `🎒 Pokémon: *${poke.nombre}*\n` +
                 `🧬 Alias: ${poke.alias}\n` +
                 `📛 Tipo: ${pokeData?.tipo?.join(', ') || 'Desconocido'}\n` +
@@ -39,7 +39,7 @@ let handler = async (m, { conn }) => {
                 `❤️ Vida: ${poke.vida}/${poke.vidaMax}\n` +
                 `📅 Capturado: ${new Date(poke.fechaCaptura).toLocaleDateString()}\n\n` +
 
-  await conn.sendFile(m.chat, pokeData?.imagen || '', 'perfil.jpg', texto, m)
+  await conn.sendFile(m.chat, pokeData?.imagen || '', 'perfil.jpg', txt, m)
 }
 
 handler.help = ['perfil']
