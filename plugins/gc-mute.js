@@ -18,23 +18,23 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     user = m.mentionedJid[0];
   } else {
     const msgError = command === 'mute'
-      ? `*${xgc} Por favor, menciona al usuario que deseas mutear.*`
-      : `*${xgc} Por favor, menciona al usuario que deseas desmutear.*`;
+      ? `${xgc} Por favor, menciona al usuario`
+      : `${xgc} Por favor, menciona al usuario que deseas desmutear`;
     return conn.reply(m.chat, msgError, m);
   }
 
   const ownerBot = global.owner.map(owner => owner[0] + '@s.whatsapp.net');
   if (ownerBot.includes(user)) {
-    return conn.reply(m.chat, `*☁️ No puedo mutear a mi propietario.*`, m);
+    return conn.reply(m.chat, `🍭 No puedo mutear a mis creadores`, m);
   }
 
   if (command === "mute") {
     if (mutedUsers.has(user)) {
-      return conn.reply(m.chat, `*🔇 El usuario* *@${user.split('@')[0]}* *ya está muteado.*`, m, { mentions: [user] });
+      return conn.reply(m.chat, `🚫 El usuario* *@${user.split('@')[0]}* *ya está muteado.*`, m, { mentions: [user] });
     }
     mutedUsers.add(user);
     guardarMuteos();
-    conn.reply(m.chat, `*🔇 El usuario* *@${user.split('@')[0]}* *fue muteado.*\n> *Sus mensajes serán eliminados.*`, fkontak, { mentions: [user] });
+    conn.reply(m.chat, `🚫 El usuario *@${user.split('@')[0]}* fue muteado.\n> Acción realizada por: @${user.split('@')[0]}`, fkontak, { mentions: [user] });
 
   } else if (command === "unmute") {
     if (!mutedUsers.has(user)) {
