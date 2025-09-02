@@ -19,8 +19,8 @@ while (b === a)
     `${toM(a)} ¡Le tocó poner sala a este pobre diablo!`,
     `${toM(a)} ¡Le tocó poner sala al más malo del grupo`,
     `${toM(a)} Le tocó poner la sala bro`,
-    `${toM(a)} Le tocó poner sala al cachudo del grupo`,
-    `${toM(a)} le toco poner sala a la cachuda del grupo`,
+    `${toM(a)} Le tocó poner la sala`,
+    `${toM(a)} le toco poner sala, esperamos el id y contraseña`,
     `*${toM(a)}¡Le tocó poner sala apurate`
 ]
 
