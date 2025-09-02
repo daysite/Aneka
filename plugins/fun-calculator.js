@@ -273,7 +273,7 @@ const handler = async (m, { conn, command, args }) => {
 
 handler.tags = ['fun'];
 handler.group = true;
-handler.command = ['gay', 'lesbiana', 'pajero', 'pajera', 'puto', 'puta', 'manco', 'manca', 'rata', 'prostituto', 'prostituta', 'sinpoto', 'sintetas', 'chipi'];
+handler.command = ['kabrazo', 'lesbiana', 'pajero', 'pajera', 'puto', 'puta', 'manco', 'manca', 'rata', 'prostituto', 'prostituta', 'sinpoto', 'sintetas', 'chipi'];
 handler.help = handler.command;
 
 export default handler;
