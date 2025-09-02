@@ -22,7 +22,7 @@ const handler = async (m, {conn, usedPrefix, text}) => {
   } catch (e) {
   } finally {
     conn.groupParticipantsUpdate(m.chat, [user], 'promote');
-    conn.reply(m.chat, `*🌵 El usuario fue promovido.*`, m);
+    conn.reply(m.chat, `🍟 El usuario fue promovido a administrador`, m);
   }
 };
 handler.help = ['promote'];
