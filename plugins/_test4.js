@@ -1,258 +1,27 @@
-/*
-// tebakhero.js mejorado con XP reward
-import fetch from 'node-fetch';
+import fs from 'fs'
+import fetch from 'node-fetch'
+import axios from 'axios'
 
-const TIMEOUT = 30 * 1000; // 30 segundos
-const REWARD_XP = 5000;    // XP por acertar
+const handler = async (m, { conn, command, text, usedPrefix }) => {
+  if (!text) throw m.reply(`✧ Ejemplo de uso: ${usedPrefix}${command} https://music.apple.com/us/album/glimpse-of-us/1625328890?i=1625328892`);
 
-let handler = async (m, { conn, command, usedPrefix }) => {
-  try {
-    global.db = global.db || { data: { chats: {}, users: {} } };
-    global.db.data.chats = global.db.data.chats || {};
-    global.db.data.users = global.db.data.users || {};
-    const chatId = m.chat;
+await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key }})
+//  await conn.sendMessage(m.chat, { image: { url: thumbnail }, caption: wait }, { quoted: m });
 
-    // Revelar respuesta si hay partida activa
-    if (/^(revelarhero|revelar|respuestahero)$/i.test(command)) {
-      const state = global.db.data.chats[chatId]?.tebakhero;
-      if (!state || !state.answer) {
-        return conn.sendMessage(chatId, { text: `❌ No hay juego activo.\nUsa *${usedPrefix}tebakhero* para iniciar.` }, { quoted: m });
-      }
+    const response = await (await fetch(`https://fastrestapis.fasturl.cloud/downup/applemusicdown?url=${encodeURIComponent(text)}`)).json();;
+    const downloadUrl = response.result.downloadUrl;
 
-      if (Date.now() - state.timestamp > TIMEOUT) {
-        delete global.db.data.chats[chatId].tebakhero;
-        return conn.sendMessage(chatId, { text: `⌛ El tiempo se agotó (30s).\nLa respuesta era: *${state.answer}*` }, { quoted: m });
-      }
-
-      delete global.db.data.chats[chatId].tebakhero;
-      return conn.sendMessage(chatId, { text: `✔ La respuesta era: *${state.answer}*` }, { quoted: m });
-    }
-
-    // Si ya hay un juego activo
-    const active = global.db.data.chats[chatId]?.tebakhero;
-    if (active && Date.now() - active.timestamp < TIMEOUT) {
-      return conn.sendMessage(chatId, { text: `⚠ Ya hay un juego en curso.\nResponde al mensaje del héroe o espera a que acabe (30s).` }, { quoted: m });
-    }
-
-    // Llamar API
-    const res = await fetch('https://api.vreden.my.id/api/tebakhero');
-    if (!res.ok) throw new Error('API no responde: ' + res.status);
-    const json = await res.json();
-    const answer = (json?.result?.jawaban || '').trim().toUpperCase();
-    const imageUrl = json?.result?.img;
-    if (!imageUrl) throw new Error('API no devolvió imagen.');
-
-    const caption =
-`乂  TEBAK HERO 乂
-
-Adivina el héroe de la imagen.
-📌 Responde a este mensaje con tu respuesta.
-
-⌛ Tiempo: *30 segundos*
-• Revelar respuesta: ${usedPrefix}revelarhero
-
-> Shadow Ultra MD`;
-
-    // Enviar mensaje con imagen
-    const msg = await conn.sendMessage(chatId, {
-      image: { url: imageUrl },
-      caption,
-      footer: '乂 TEBAK HERO • Shadow Ultra • MD 乂'
-    }, { quoted: m });
-
-    // Guardar estado
-    global.db.data.chats[chatId].tebakhero = {
-      answer,
-      timestamp: Date.now(),
-      msgId: msg.key.id
-    };
-
-  } catch (err) {
-    console.error(err);
-    conn.sendMessage(m.chat, { text: '⚠ Error, intenta de nuevo más tarde.' }, { quoted: m });
-  }
+    if (!downloadUrl) throw new Error('Audio URL not found');
+    
+ await conn.sendMessage(m.chat, {
+      audio: { url: downloadUrl },
+      mimetype: 'audio/mpeg',
+      fileName: `apple.mp3`,
+    }, { quoted: m })
 };
 
-// Interceptor de respuestas
-handler.before = async (m, { conn }) => {
-  const chatId = m.chat;
-  const state = global.db.data.chats[chatId]?.tebakhero;
-  if (!state || !state.answer) return false;
+handler.help = ['applemusic'].map((v) => v + ' *<link>*');
+handler.tags = ['downloader'];
+handler.command = ['applemusic'];
 
-  // Solo si responde al mensaje del héroe
-  if (!m.quoted || m.quoted.id !== state.msgId) return false;
-
-  // Tiempo agotado
-  if (Date.now() - state.timestamp > TIMEOUT) {
-    delete global.db.data.chats[chatId].tebakhero;
-    return conn.sendMessage(chatId, { text: `⌛ El tiempo se agotó (30s).\nLa respuesta era: *${state.answer}*` }, { quoted: m });
-  }
-
-  // Validar respuesta
-  const guess = m.text.trim().toUpperCase();
-  if (guess === state.answer) {
-    delete global.db.data.chats[chatId].tebakhero;
-
-    // Dar XP al jugador
-    global.db.data.users[m.sender] = global.db.data.users[m.sender] || {};
-    global.db.data.users[m.sender].exp = (global.db.data.users[m.sender].exp || 0) + REWARD_XP;
-
-    return conn.sendMessage(chatId, { text: `🎉 ¡Correcto! El héroe es *${state.answer}*\n\n✨ Recompensa: +${REWARD_XP} XP` }, { quoted: m });
-  } else {
-    return conn.sendMessage(chatId, { text: `❌ Incorrecto, intenta otra vez.` }, { quoted: m });
-  }
-};
-
-handler.help = ['tebakhero', 'hero', 'revelarhero'];
-handler.tags = ['game'];
-handler.command = /^(tebakhero|hero|revelarhero|revelar|respuestahero)$/i;
-//handler.limit = 1;
-
-export default handler;
-
-*/
-
-
-// tebakhero.js mejorado por Shadow Style (Opción 2)
-import fetch from 'node-fetch';
-
-const TIMEOUT = 30 * 1000; // 30 segundos
-const REWARD_XP = 5000;    // XP por acertar
-
-// Normalizar respuestas (quita tildes, mayúsculas, espacios)
-function normalize(str = '') {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toUpperCase();
-}
-
-let handler = async (m, { conn, command, usedPrefix }) => {
-  try {
-    global.db = global.db || { data: { chats: {}, users: {} } };
-    global.db.data.chats = global.db.data.chats || {};
-    global.db.data.users = global.db.data.users || {};
-    const chatId = m.chat;
-
-    // ───────────────
-    // Revelar respuesta
-    if (/^(revelarhero|revelar|respuestahero)$/i.test(command)) {
-      const state = global.db.data.chats[chatId]?.tebakhero;
-      if (!state || !state.answer) {
-        return conn.sendMessage(chatId, { 
-          text: `❌ No hay juego activo.\nUsa *${usedPrefix}tebakhero* para iniciar.` 
-        }, { quoted: m });
-      }
-
-      if (Date.now() - state.timestamp > TIMEOUT) {
-        delete global.db.data.chats[chatId].tebakhero;
-        return conn.sendMessage(chatId, { 
-          text: `⌛ El tiempo se agotó.\nLa respuesta era: *${state.answer}*` 
-        }, { quoted: m });
-      }
-
-      delete global.db.data.chats[chatId].tebakhero;
-      return conn.sendMessage(chatId, { 
-        text: `✔ La respuesta era: *${state.answer}*` 
-      }, { quoted: m });
-    }
-
-    // ───────────────
-    // Iniciar juego
-    const active = global.db.data.chats[chatId]?.tebakhero;
-    if (active && Date.now() - active.timestamp < TIMEOUT) {
-      return conn.sendMessage(chatId, { 
-        text: `⚠ Ya hay un juego en curso.\nResponde al mensaje del héroe o espera a que termine.` 
-      }, { quoted: m });
-    }
-
-    // Llamar API
-    const res = await fetch('https://api.vreden.my.id/api/tebakhero');
-    if (!res.ok) throw new Error('API no responde: ' + res.status);
-    const json = await res.json();
-    const answer = normalize(json?.result?.jawaban || '');
-    const imageUrl = json?.result?.img;
-    if (!imageUrl) throw new Error('API no devolvió imagen.');
-
-    const caption =
-`乂  TEBAK HERO 乂
-
-🎭 Adivina el héroe de la imagen.
-⌛ Tiempo: *30 segundos*
-🧩 Responde citando este mensaje con tu respuesta.
-
-• Revelar respuesta: ${usedPrefix}revelarhero
-
-> Shadow Ultra MD`;
-
-    // Enviar mensaje con imagen
-    const msg = await conn.sendMessage(chatId, {
-      image: { url: imageUrl },
-      caption,
-      footer: '乂 TEBAK HERO • Shadow Ultra • MD 乂'
-    }, { quoted: m });
-
-    // Guardar estado
-    global.db.data.chats[chatId].tebakhero = {
-      answer,
-      timestamp: Date.now(),
-      msgId: msg.key.id
-    };
-
-    // Auto-expirar después de 30s
-    setTimeout(() => {
-      const state = global.db.data.chats[chatId]?.tebakhero;
-      if (state && Date.now() - state.timestamp >= TIMEOUT) {
-        delete global.db.data.chats[chatId].tebakhero;
-        conn.sendMessage(chatId, { 
-          text: `⌛ El tiempo se agotó.\nLa respuesta era: *${answer}*` 
-        });
-      }
-    }, TIMEOUT + 500);
-
-  } catch (err) {
-    console.error(err);
-    conn.sendMessage(m.chat, { text: '⚠ Error, intenta de nuevo más tarde.' }, { quoted: m });
-  }
-};
-
-// Interceptor de respuestas
-handler.before = async (m, { conn }) => {
-  const chatId = m.chat;
-  const state = global.db.data.chats[chatId]?.tebakhero;
-  if (!state || !state.answer) return false;
-
-  // Solo si responde al mensaje del héroe
-  if (!m.quoted || m.quoted.id !== state.msgId) return false;
-
-  // Tiempo agotado
-  if (Date.now() - state.timestamp > TIMEOUT) {
-    delete global.db.data.chats[chatId].tebakhero;
-    return conn.sendMessage(chatId, { 
-      text: `⌛ El tiempo se agotó.\nLa respuesta era: *${state.answer}*` 
-    }, { quoted: m });
-  }
-
-  // Validar respuesta
-  const guess = normalize(m.text);
-  if (guess === state.answer) {
-    delete global.db.data.chats[chatId].tebakhero;
-
-    // Dar XP al jugador
-    global.db.data.users[m.sender] = global.db.data.users[m.sender] || {};
-    global.db.data.users[m.sender].exp = (global.db.data.users[m.sender].exp || 0) + REWARD_XP;
-
-    return conn.sendMessage(chatId, { 
-      text: `🎉 ¡Correcto! El héroe es *${state.answer}*\n\n✨ Recompensa: +${REWARD_XP} XP` 
-    }, { quoted: m });
-  } else {
-    return conn.sendMessage(chatId, { text: `❌ Incorrecto, intenta otra vez.` }, { quoted: m });
-  }
-};
-
-handler.help = ['tebakhero', 'hero', 'revelarhero'];
-handler.tags = ['game'];
-handler.command = /^(tebakhero|hero|revelarhero|revelar|respuestahero)$/i;
-
-export default handler;
+export default handler
