@@ -1,5 +1,5 @@
 let handler = async (m, { conn, command, text }) => {
-if (!text) return conn.reply(m.chat, `🍟 error al usar el comando\nEjemplo de uso:\n*.${command}* sera la próxima guerra`, m)
+if (!text) return conn.reply(m.chat, `🍟 Error al usar el comando\nEjemplo de uso:\n\n*.${command}* sera la próxima guerra`, m)
   conn.reply(m.chat, `
 *Pregunta:* ${command} ${text}?
 *Respuesta:* Dentro de ${Math.floor(Math.random() * 10)} ${pickRandom(['Segundos', 'Minutos', 'Horas', 'Dias', 'Semanas', 'Meses', 'Años', 'Decadas', 'Siglos'])} ...
