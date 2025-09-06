@@ -37,6 +37,35 @@ const tiendaDefault = {
   ]
 }
 
+// Función para obtener los Pokémon de un usuario (compatible con ambos sistemas)
+function obtenerPokemonesUsuario(user) {
+  // Si tiene el sistema antiguo (user.pokemon como objeto individual)
+  if (user.pokemon && typeof user.pokemon === 'object' && !Array.isArray(user.pokemon)) {
+    return [user.pokemon] // Convertir a array con un elemento
+  }
+  
+  // Si tiene el sistema nuevo (user.pokemones como array)
+  if (user.pokemones && Array.isArray(user.pokemones)) {
+    return user.pokemones
+  }
+  
+  // Si no tiene Pokémon
+  return []
+}
+
+// Función para guardar los Pokémon en el formato correcto
+function guardarPokemonesUsuario(user, pokemones) {
+  // Si originalmente tenía el sistema antiguo, mantener compatibilidad
+  if (user.pokemon && !Array.isArray(user.pokemon)) {
+    user.pokemon = pokemones[0] || null // Tomar el primero si existe
+  }
+  
+  // Siempre guardar también en el nuevo formato
+  user.pokemones = pokemones
+  
+  return user
+}
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const usuarios = cargarJSON(usuariosPath)
   let tienda = cargarJSON(tiendaPath, tiendaDefault)
@@ -53,8 +82,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   // Verificar si el usuario existe
   if (!user) return m.reply('❌ No estás registrado en el sistema. Usa *.registrar* primero.')
   
+  // Obtener Pokémon usando la función compatible
+  const pokemones = obtenerPokemonesUsuario(user)
+  
   // Verificar si el usuario tiene Pokémon
-  if (!user.pokemones || user.pokemones.length === 0) {
+  if (pokemones.length === 0) {
     return m.reply('😢 No tienes Pokémon en tu equipo. Atrapa alguno primero.')
   }
   
@@ -105,16 +137,22 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
     
     // Si solo tiene un Pokémon, aplicarlo directamente
-    if (user.pokemones.length === 1) {
-      const pokemon = user.pokemones[0]
+    if (pokemones.length === 1) {
+      const pokemon = pokemones[0]
       let mensajeEfecto = `✅ ¡Compra exitosa!\n\n`
       mensajeEfecto += `Has comprado: ${item.nombre}\n`
       mensajeEfecto += `Gastaste: $${item.precio}\n\n`
       mensajeEfecto += aplicarEfectoItem(pokemon, item)
       
+      // Actualizar el Pokémon en el array
+      pokemones[0] = pokemon
+      
+      // Guardar en el formato correcto
+      const userActualizado = guardarPokemonesUsuario(user, pokemones)
+      
       // Restar dinero y guardar cambios
-      user.dinero -= item.precio
-      usuarios[userId] = user
+      userActualizado.dinero -= item.precio
+      usuarios[userId] = userActualizado
       guardarJSON(usuariosPath, usuarios)
       
       return m.reply(mensajeEfecto)
@@ -126,13 +164,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     listaPokemones += `📝 Efecto: ${item.descripcion}\n\n`
     listaPokemones += `📋 *TUS POKÉMON*:\n\n`
     
-    user.pokemones.forEach((poke, index) => {
+    pokemones.forEach((poke, index) => {
       listaPokemones += `*${index + 1}.* ${poke.nombre} - Nivel ${poke.nivel}\n`
       listaPokemones += `   ❤️ Vida: ${poke.vida}/${poke.vidaMax} | ⭐ Exp: ${poke.experiencia || 0}\n\n`
     })
     
     listaPokemones += `\nResponde con el *número* del Pokémon que quieres alimentar.\n`
-    listaPokemones += `Ejemplo: *1* para elegir a ${user.pokemones[0].nombre}`
+    listaPokemones += `Ejemplo: *1* para elegir a ${pokemones[0].nombre}`
     
     // Guardar estado temporal de la compra
     if (!user.compraTemporal) user.compraTemporal = {}
@@ -147,8 +185,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!isNaN(action) && user.compraTemporal) {
     const seleccion = parseInt(action) - 1
     
-    if (seleccion < 0 || seleccion >= user.pokemones.length) {
-      return m.reply(`❌ Número inválido. Debe ser entre 1 y ${user.pokemones.length}.`)
+    if (seleccion < 0 || seleccion >= pokemones.length) {
+      return m.reply(`❌ Número inválido. Debe ser entre 1 y ${pokemones.length}.`)
     }
     
     // Verificar que la compra no sea muy antigua (5 minutos)
@@ -177,22 +215,28 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio} pero solo tienes $${user.dinero}.`)
     }
     
-    const pokemon = user.pokemones[seleccion]
+    const pokemon = pokemones[seleccion]
     let mensajeEfecto = `✅ ¡Compra exitosa!\n\n`
     mensajeEfecto += `Has comprado: ${item.nombre}\n`
     mensajeEfecto += `Gastaste: $${item.precio}\n`
     mensajeEfecto += `Pokémon alimentado: ${pokemon.nombre}\n\n`
     mensajeEfecto += aplicarEfectoItem(pokemon, item)
     
+    // Actualizar el Pokémon en el array
+    pokemones[seleccion] = pokemon
+    
+    // Guardar en el formato correcto
+    const userActualizado = guardarPokemonesUsuario(user, pokemones)
+    
     // Restar dinero y limpiar compra temporal
-    user.dinero -= item.precio
-    delete user.compraTemporal
+    userActualizado.dinero -= item.precio
+    delete userActualizado.compraTemporal
     
     // Inicializar inventario si no existe y agregar item
-    if (!user.inventario) user.inventario = []
-    user.inventario.push(item.id)
+    if (!userActualizado.inventario) userActualizado.inventario = []
+    userActualizado.inventario.push(item.id)
     
-    usuarios[userId] = user
+    usuarios[userId] = userActualizado
     guardarJSON(usuariosPath, usuarios)
     
     return m.reply(mensajeEfecto)
@@ -256,16 +300,25 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply('❌ Este item ya no está disponible y fue removido de tu inventario.')
     }
     
+    // Obtener Pokémon actualizado
+    const pokemonesActual = obtenerPokemonesUsuario(user)
+    
     // Si solo tiene un Pokémon, aplicarlo directamente
-    if (user.pokemones.length === 1) {
-      const pokemon = user.pokemones[0]
+    if (pokemonesActual.length === 1) {
+      const pokemon = pokemonesActual[0]
       let mensajeEfecto = `✅ ¡Item usado!\n\n`
       mensajeEfecto += `Has usado: ${item.nombre}\n\n`
       mensajeEfecto += aplicarEfectoItem(pokemon, item)
       
+      // Actualizar el Pokémon en el array
+      pokemonesActual[0] = pokemon
+      
+      // Guardar en el formato correcto
+      const userActualizado = guardarPokemonesUsuario(user, pokemonesActual)
+      
       // Remover item del inventario
-      user.inventario.splice(itemIndex, 1)
-      usuarios[userId] = user
+      userActualizado.inventario.splice(itemIndex, 1)
+      usuarios[userId] = userActualizado
       guardarJSON(usuariosPath, usuarios)
       
       return m.reply(mensajeEfecto)
@@ -276,13 +329,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     listaPokemones += `📝 Efecto: ${item.descripcion}\n\n`
     listaPokemones += `📋 *TUS POKÉMON*:\n\n`
     
-    user.pokemones.forEach((poke, index) => {
+    pokemonesActual.forEach((poke, index) => {
       listaPokemones += `*${index + 1}.* ${poke.nombre} - Nivel ${poke.nivel}\n`
       listaPokemones += `   ❤️ Vida: ${poke.vida}/${poke.vidaMax} | ⭐ Exp: ${poke.experiencia || 0}\n\n`
     })
     
     listaPokemones += `\nResponde con el *número* del Pokémon que quieres alimentar.\n`
-    listaPokemones += `Ejemplo: *1* para elegir a ${user.pokemones[0].nombre}`
+    listaPokemones += `Ejemplo: *1* para elegir a ${pokemonesActual[0].nombre}`
     
     // Guardar estado temporal del uso de item
     if (!user.usoItemTemporal) user.usoItemTemporal = {}
@@ -297,8 +350,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!isNaN(action) && user.usoItemTemporal) {
     const seleccion = parseInt(action) - 1
     
-    if (seleccion < 0 || seleccion >= user.pokemones.length) {
-      return m.reply(`❌ Número inválido. Debe ser entre 1 and ${user.pokemones.length}.`)
+    // Obtener Pokémon actualizado
+    const pokemonesActual = obtenerPokemonesUsuario(user)
+    
+    if (seleccion < 0 || seleccion >= pokemonesActual.length) {
+      return m.reply(`❌ Número inválido. Debe ser entre 1 and ${pokemonesActual.length}.`)
     }
     
     // Verificar que el uso no sea muy antiguo (5 minutos)
@@ -322,17 +378,23 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply('❌ Este item ya no está disponible y fue removido de tu inventario.')
     }
     
-    const pokemon = user.pokemones[seleccion]
+    const pokemon = pokemonesActual[seleccion]
     let mensajeEfecto = `✅ ¡Item usado!\n\n`
     mensajeEfecto += `Has usado: ${item.nombre}\n`
     mensajeEfecto += `Pokémon alimentado: ${pokemon.nombre}\n\n`
     mensajeEfecto += aplicarEfectoItem(pokemon, item)
     
-    // Remover item del inventario y limpiar estado temporal
-    user.inventario.splice(itemIndex, 1)
-    delete user.usoItemTemporal
+    // Actualizar el Pokémon en el array
+    pokemonesActual[seleccion] = pokemon
     
-    usuarios[userId] = user
+    // Guardar en el formato correcto
+    const userActualizado = guardarPokemonesUsuario(user, pokemonesActual)
+    
+    // Remover item del inventario y limpiar estado temporal
+    userActualizado.inventario.splice(itemIndex, 1)
+    delete userActualizado.usoItemTemporal
+    
+    usuarios[userId] = userActualizado
     guardarJSON(usuariosPath, usuarios)
     
     return m.reply(mensajeEfecto)
