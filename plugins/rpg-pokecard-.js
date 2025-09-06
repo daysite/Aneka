@@ -3,89 +3,113 @@ import { createCanvas } from 'canvas'
 
 const usuariosPath = './src/database/usuarios.json'
 
-// Función para cargar JSON
+// Función para cargar JSON con mejor manejo de errores
 function cargarJSON(ruta, valorDefault = {}) {
   try {
-    if (!fs.existsSync(ruta)) fs.writeFileSync(ruta, JSON.stringify(valorDefault, null, 2))
+    if (!fs.existsSync(ruta)) {
+      fs.writeFileSync(ruta, JSON.stringify(valorDefault, null, 2))
+      console.log(`Archivo ${ruta} creado exitosamente`)
+    }
     const data = fs.readFileSync(ruta, 'utf-8').trim()
     return data ? JSON.parse(data) : valorDefault
   } catch (e) {
-    console.error('Error al cargar JSON:', e)
+    console.error('Error crítico al cargar JSON:', e)
     return valorDefault
   }
 }
 
-// Colores según el tipo de Pokémon
-const coloresTipos = {
-  agua: '#6890F0', fuego: '#F08030', eléctrico: '#F8D030', planta: '#78C850',
-  veneno: '#A040A0', volador: '#A890F0', normal: '#A8A878', lucha: '#C03028',
-  psíquico: '#F85888', roca: '#B8A038', tierra: '#E0C068', hielo: '#98D8D8',
-  bicho: '#A8B820', fantasma: '#705898', dragón: '#7038F8', siniestro: '#705848',
-  acero: '#B8B8D0', hada: '#EE99AC'
-}
-
-// Función para obtener los Pokémon de un usuario
+// Función para obtener Pokémon (compatible con todos los formatos)
 function obtenerPokemonesUsuario(user) {
-  if (user.pokemon && typeof user.pokemon === 'object' && !Array.isArray(user.pokemon)) {
-    return [user.pokemon]
+  if (!user) return []
+  
+  // Diferentes formatos que podría tener la base de datos
+  if (user.pokemon) {
+    if (Array.isArray(user.pokemon)) return user.pokemon
+    if (typeof user.pokemon === 'object') return [user.pokemon]
   }
-  if (user.pokemones && Array.isArray(user.pokemones)) {
-    return user.pokemones
-  }
+  
+  if (user.pokemones && Array.isArray(user.pokemones)) return user.pokemones
+  if (user.pokemons && Array.isArray(user.pokemons)) return user.pokemons
+  if (user.poke && Array.isArray(user.poke)) return user.poke
+  
   return []
 }
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
+    console.log(`Comando recibido: ${command}, Argumentos: ${args}`)
+    
     const usuarios = cargarJSON(usuariosPath)
     const userId = m.sender.replace(/[^0-9]/g, '')
     const user = usuarios[userId]
 
-    // Verificar si el usuario existe
     if (!user) {
+      console.log(`Usuario ${userId} no encontrado en la base de datos`)
       return m.reply('❌ No estás registrado en el sistema. Usa *.registrar* primero.')
     }
     
-    // Obtener Pokémon del usuario
-    const pokemones = obtenerPokemonesUsuario(user)
+    console.log(`Usuario encontrado: ${user.nombre || userId}`)
     
-    // Verificar si el usuario tiene Pokémon
+    const pokemones = obtenerPokemonesUsuario(user)
+    console.log(`Pokémon encontrados: ${pokemones.length}`)
+    
     if (pokemones.length === 0) {
       return m.reply('😢 No tienes Pokémon en tu equipo. Atrapa alguno primero.')
     }
 
-    const action = args[0] ? args[0].toLowerCase() : ''
-
-    // Mostrar lista de Pokémon si no se especifica cuál
-    if (!action || action === 'lista' || action === 'list') {
-      let lista = `📋 *TUS POKÉMON* 📋\n\n`
+    // MOSTRAR AYUDA SI NO HAY ARGUMENTOS
+    if (args.length === 0) {
+      let lista = `🎴 *SISTEMA DE POKÉCARDS* 🎴\n\n`
+      lista += `📋 *TUS POKÉMON* (${pokemones.length}):\n\n`
       
       pokemones.forEach((poke, index) => {
-        lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel}\n`
-        lista += `   ❤️ ${poke.vida}/${poke.vidaMax} | ⭐ Exp: ${poke.experiencia || 0}\n\n`
+        lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
+        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 20} | ⭐ Exp: ${poke.experiencia || 0}\n\n`
       })
       
-      lista += `Usa *${usedPrefix}pokecard [número]* para ver la tarjeta de un Pokémon.\n`
-      lista += `Ejemplo: *${usedPrefix}pokecard 1*`
+      lista += `\n🃏 *USO:*\n`
+      lista += `• *${usedPrefix}pokecard* - Ver esta lista\n`
+      lista += `• *${usedPrefix}pokecard 1* - Ver tarjeta del 1er Pokémon\n`
+      lista += `• *${usedPrefix}pcard 2* - Ver tarjeta del 2do Pokémon\n`
+      lista += `• *${usedPrefix}pokecard all* - Ver todas las tarjetas`
       
       return m.reply(lista)
     }
 
-    // Generar pokecard específica
+    const action = args[0].toLowerCase()
+    
+    // MOSTRAR TODAS LAS TARJETAS
+    if (action === 'all' || action === 'todos' || action === 'todas') {
+      for (let i = 0; i < pokemones.length; i++) {
+        const pokemon = pokemones[i]
+        try {
+          const imageBuffer = await crearPokecardSimple(pokemon, user.nombre || 'Entrenador')
+          await conn.sendMessage(m.chat, {
+            image: imageBuffer,
+            caption: `🃏 ${pokemon.nombre} - Nvl ${pokemon.nivel} (${i + 1}/${pokemones.length})`
+          }, { quoted: m })
+          // Pequeña pausa entre mensajes
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        } catch (error) {
+          console.error(`Error con Pokémon ${i}:`, error)
+          m.reply(`❌ Error al crear tarjeta para ${pokemon.nombre}`)
+        }
+      }
+      return
+    }
+    
+    // MOSTRAR TARJETA ESPECÍFICA
     if (!isNaN(action)) {
       const index = parseInt(action) - 1
       
       if (index < 0 || index >= pokemones.length) {
-        return m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
+        return m.reply(`❌ Número inválido. Tienes ${pokemones.length} Pokémon. Usa del 1 al ${pokemones.length}.`)
       }
       
       const pokemon = pokemones[index]
       
       try {
-        // Crear la pokecard
-        const imageBuffer = await crearPokecard(pokemon, user.nombre || 'Entrenador')
-        
-        // Enviar la imagen
+        const imageBuffer = await crearPokecardSimple(pokemon, user.nombre || 'Entrenador')
         await conn.sendMessage(m.chat, {
           image: imageBuffer,
           caption: `🃏 *POKÉCARD DE ${pokemon.nombre.toUpperCase()}* 🃏\nNivel: ${pokemon.nivel} | Dueño: ${user.nombre || 'Entrenador'}`,
@@ -94,140 +118,115 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         
       } catch (error) {
         console.error('Error al crear pokecard:', error)
-        // Fallback: enviar información en texto si falla la imagen
-        let infoPokemon = `🃏 *POKÉCARD DE ${pokemon.nombre.toUpperCase()}* 🃏\n\n`
-        infoPokemon += `Nivel: ${pokemon.nivel}\n`
-        infoPokemon += `Vida: ${pokemon.vida}/${pokemon.vidaMax}\n`
-        infoPokemon += `Experiencia: ${pokemon.experiencia || 0}\n`
-        infoPokemon += `Tipo: ${pokemon.tipo || 'Normal'}\n`
-        infoPokemon += `Entrenador: ${user.nombre || 'Desconocido'}\n\n`
-        infoPokemon += `*¡Pokémon listo para combatir!*`
+        // Fallback a texto
+        let info = `🃏 *POKÉCARD DE ${pokemon.nombre}* 🃏\n\n`
+        info += `Nivel: ${pokemon.nivel || 1}\n`
+        info += `Vida: ${pokemon.vida || 0}/${pokemon.vidaMax || 20}\n`
+        info += `Experiencia: ${pokemon.experiencia || 0}\n`
+        info += `Entrenador: ${user.nombre || 'Desconocido'}\n\n`
+        info += `*¡Pokémon listo para aventuras!*`
         
-        return m.reply(infoPokemon)
+        m.reply(info)
       }
     } else {
-      // Mostrar ayuda si el comando no es reconocido
-      return m.reply(`❌ Comando no reconocido. Usa:\n• *${usedPrefix}pokecard* para ver la lista\n• *${usedPrefix}pokecard [número]* para una tarjeta específica\n• *${usedPrefix}pokecard lista* para ver todos tus Pokémon`)
+      // COMANDO NO RECONOCIDO - MOSTRAR AYUDA
+      m.reply(`❌ Opción no reconocida. Usa:\n• *${usedPrefix}pokecard* - Ver tus Pokémon\n• *${usedPrefix}pokecard 1* - Ver tarjeta específica\n• *${usedPrefix}pokecard all* - Ver todas las tarjetas`)
     }
     
   } catch (error) {
-    console.error('Error en handler pokecard:', error)
-    return m.reply('❌ Ocurrió un error al procesar el comando. Intenta nuevamente.')
+    console.error('Error grave en handler:', error)
+    m.reply('❌ Error interno del sistema. Contacta al administrador.')
   }
 }
 
-// Función para crear la pokecard
-async function crearPokecard(pokemon, nombreEntrenador) {
-  const canvas = createCanvas(400, 600)
+// Versión simplificada de crearPokecard para mejor compatibilidad
+async function crearPokecardSimple(pokemon, entrenador) {
+  const canvas = createCanvas(300, 450)
   const ctx = canvas.getContext('2d')
   
-  // Color de fondo según el tipo
-  let tipoPokemon = 'normal'
-  if (pokemon.tipo) {
-    tipoPokemon = Array.isArray(pokemon.tipo) ? pokemon.tipo[0].toLowerCase() : pokemon.tipo.toLowerCase()
-  }
-  
-  const colorFondo = coloresTipos[tipoPokemon] || '#A8A878'
-  
-  // Fondo gradiente
-  const gradient = ctx.createLinearGradient(0, 0, 400, 600)
-  gradient.addColorStop(0, colorFondo)
-  gradient.addColorStop(1, '#FFFFFF')
-  ctx.fillStyle = gradient
-  ctx.fillRect(0, 0, 400, 600)
+  // Fondo simple
+  ctx.fillStyle = '#F0F0F0'
+  ctx.fillRect(0, 0, 300, 450)
   
   // Borde
-  ctx.strokeStyle = '#000000'
-  ctx.lineWidth = 5
-  ctx.strokeRect(10, 10, 380, 580)
+  ctx.strokeStyle = '#3366CC'
+  ctx.lineWidth = 3
+  ctx.strokeRect(5, 5, 290, 440)
   
-  // Logo Pokémon
-  ctx.font = 'bold 28px Arial'
-  ctx.fillStyle = '#000000'
+  // Título
+  ctx.fillStyle = '#3366CC'
+  ctx.font = 'bold 20px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('POKÉMON', 200, 50)
+  ctx.fillText('POKÉCARD', 150, 30)
   
-  // Círculo para la imagen del Pokémon
+  // Nombre Pokémon
+  ctx.fillStyle = '#000000'
+  ctx.font = 'bold 24px Arial'
+  ctx.fillText(pokemon.nombre, 150, 70)
+  
+  // Círculo para Pokémon
   ctx.fillStyle = '#FFFFFF'
   ctx.beginPath()
-  ctx.arc(200, 180, 80, 0, Math.PI * 2)
+  ctx.arc(150, 120, 40, 0, Math.PI * 2)
   ctx.fill()
   ctx.strokeStyle = '#000000'
-  ctx.lineWidth = 3
+  ctx.lineWidth = 2
   ctx.stroke()
   
-  // Nombre del Pokémon en el círculo
-  ctx.fillStyle = '#000000'
-  ctx.font = 'bold 20px Arial'
-  ctx.fillText(pokemon.nombre, 200, 185)
-  
-  // Información del Pokémon
+  // Información
+  ctx.font = '16px Arial'
   ctx.textAlign = 'left'
-  ctx.font = 'bold 18px Arial'
-  ctx.fillText('NIVEL:', 50, 250)
-  ctx.font = '16px Arial'
-  ctx.fillText(pokemon.nivel.toString(), 120, 250)
+  ctx.fillText(`Nivel: ${pokemon.nivel || 1}`, 30, 170)
+  ctx.fillText(`Vida: ${pokemon.vida || 0}/${pokemon.vidaMax || 20}`, 30, 200)
+  ctx.fillText(`Exp: ${pokemon.experiencia || 0}`, 30, 230)
   
-  ctx.font = 'bold 18px Arial'
-  ctx.fillText('VIDA:', 50, 280)
-  ctx.font = '16px Arial'
-  ctx.fillText(`${pokemon.vida}/${pokemon.vidaMax}`, 120, 280)
-  
-  ctx.font = 'bold 18px Arial'
-  ctx.fillText('EXPERIENCIA:', 50, 310)
-  ctx.font = '16px Arial'
-  ctx.fillText((pokemon.experiencia || 0).toString(), 180, 310)
-  
-  // Tipo del Pokémon
-  ctx.font = 'bold 18px Arial'
-  ctx.fillText('TIPO:', 50, 340)
-  ctx.font = '16px Arial'
-  
-  if (pokemon.tipo) {
-    const tipos = Array.isArray(pokemon.tipo) ? pokemon.tipo : [pokemon.tipo]
-    tipos.forEach((tipo, i) => {
-      ctx.fillText(tipo.charAt(0).toUpperCase() + tipo.slice(1), 120 + (i * 80), 340)
-    })
-  } else {
-    ctx.fillText('Normal', 120, 340)
-  }
+  // Tipo
+  ctx.fillText('Tipo:', 30, 260)
+  ctx.textAlign = 'center'
+  ctx.fillText(pokemon.tipo || 'Normal', 150, 260)
   
   // Barra de experiencia
-  const expMax = pokemon.nivel * 100
+  const expMax = (pokemon.nivel || 1) * 100
   const expActual = pokemon.experiencia || 0
   const expPercentage = Math.min(expActual / expMax, 1)
   
-  ctx.font = 'bold 16px Arial'
-  ctx.fillText('PROGRESO:', 50, 380)
-  
+  ctx.textAlign = 'left'
+  ctx.fillText('Progreso:', 30, 300)
   ctx.fillStyle = '#DDDDDD'
-  ctx.fillRect(50, 400, 300, 20)
+  ctx.fillRect(30, 320, 240, 15)
   ctx.fillStyle = '#FFCC00'
-  ctx.fillRect(50, 400, 300 * expPercentage, 20)
+  ctx.fillRect(30, 320, 240 * expPercentage, 15)
   ctx.strokeStyle = '#000000'
-  ctx.strokeRect(50, 400, 300, 20)
+  ctx.strokeRect(30, 320, 240, 15)
   
   ctx.fillStyle = '#000000'
-  ctx.font = '14px Arial'
-  ctx.fillText(`${expActual}/${expMax}`, 160, 415)
-  
-  // Información del entrenador
-  ctx.textAlign = 'center'
-  ctx.font = 'italic 16px Arial'
-  ctx.fillText(`Entrenador: ${nombreEntrenador}`, 200, 470)
-  
   ctx.font = '12px Arial'
-  ctx.fillText('Carta oficial de Pokémon - No para venta', 200, 550)
+  ctx.fillText(`${expActual}/${expMax}`, 120, 332)
   
-  // Convertir canvas a buffer
+  // Entrenador
+  ctx.textAlign = 'center'
+  ctx.font = 'italic 14px Arial'
+  ctx.fillText(`Entrenador: ${entrenador}`, 150, 380)
+  
+  ctx.font = '10px Arial'
+  ctx.fillText('Generado por Bot Pokémon', 150, 420)
+  
   return canvas.toBuffer('image/png')
 }
 
-// Configuración mejorada del handler
-handler.help = ['pokecard [número|lista]']
-handler.tags = ['pokemon', 'fun', 'rpg']
-handler.command = /^(pokecard|pcard|cartapokémon|cartapokemon|pokétarjeta|poketarjeta)$/i
+// CONFIGURACIÓN MEJORADA DEL HANDLER
+handler.help = ['pokecard [número|all]']
+handler.tags = ['pokemon', 'rpg', 'fun']
+handler.command = /^(pokecard|pcard|poketarjeta|cartapokemon|verpokemon|mispokemon)$/i
 handler.register = true
-handler.limit = true
+handler.limit = false
+
+// Añadir esto para diagnóstico
+handler.before = async (m, { conn, usedPrefix, command }) => {
+  console.log(`[DIAGNÓSTICO] Comando intentado: ${m.text}`)
+  console.log(`[DIAGNÓSTICO] Prefijo usado: ${usedPrefix}`)
+  console.log(`[DIAGNÓSTICO] Comando detectado: ${command}`)
+  return false
+}
 
 export default handler
