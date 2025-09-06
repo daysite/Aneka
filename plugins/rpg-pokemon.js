@@ -1,70 +1,46 @@
-import fs from 'fs'
+import fs from 'fs';
+import axios from 'axios';
 
-const usuariosPath = './src/database/usuarios.json'
-const pokemonesPath = './src/database/pokemones.json'
-
+const usuariosPath = './src/database/usuarios.json';
 
 function cargarJSON(ruta, valorDefault = {}) {
   try {
-    if (!fs.existsSync(ruta)) fs.writeFileSync(ruta, JSON.stringify(valorDefault, null, 2))
-    const data = fs.readFileSync(ruta, 'utf-8').trim()
-    return data ? JSON.parse(data) : valorDefault
+    if (!fs.existsSync(ruta)) fs.writeFileSync(ruta, JSON.stringify(valorDefault, null, 2));
+    const data = fs.readFileSync(ruta, 'utf-8').trim();
+    return data ? JSON.parse(data) : valorDefault;
   } catch (e) {
-    return valorDefault
+    return valorDefault;
   }
 }
 
-
 function guardarJSON(ruta, data) {
-  fs.writeFileSync(ruta, JSON.stringify(data, null, 2))
+  fs.writeFileSync(ruta, JSON.stringify(data, null, 2));
 }
 
 let handler = async (m, { conn }) => {
-  const userId = m.sender.replace(/[^0-9]/g, '')
-  const usuarios = cargarJSON(usuariosPath)
-  const pokemones = cargarJSON(pokemonesPath, [])
+  const userId = m.sender.replace(/[^0-9]/g, '');
+  const usuarios = cargarJSON(usuariosPath);
 
-  if (!Array.isArray(pokemones) || pokemones.length === 0) {
-    return m.reply('⚠️ La lista de pokemones está vacía.')
-  }
-
-  if (usuarios[userId]?.pokemon) {
-    return m.reply(`🧢 Ya tienes un Pokémon: *${usuarios[userId].pokemon.nombre}*.\nUsa *.pokedex* para verlo.`)
-  }
-
-  /*const ataques = pokeData?.ataques?.length
-    ? pokeData.ataques.map(a => `• ${a}`).join('\n')
-    : 'No tiene ataques definidos.'*/
-
-  const pokemon = pokemones[Math.floor(Math.random() * pokemones.length)]
-
-  usuarios[userId] = {
-    nombre: (await conn.getName(m.sender)) || 'Entrenador',
-    pokemon: {
-      id: pokemon.id,
-      nombre: pokemon.nombre,
-      alias: pokemon.nombre,
-      nivel: 1,
-      dinero: 5, 
-      vida: pokemon.vidaBase,
-      vidaMax: pokemon.vidaBase,
-      fechaCaptura: new Date().toISOString()
+  try {
+    if (!usuarios[userId] || !usuarios[userId].pokemones || usuarios[userId].pokemones.length === 0) {
+      await conn.reply(m.chat, 'No has capturado ningún Pokémon', m);
+      return;
     }
+
+    let texto = 'Tus Pokémon capturados:\n\n';
+    usuarios[userId].pokemones.forEach((pokemon, index) => {
+      texto += `${index + 1}. ${pokemon.nombre} (Nivel ${pokemon.nivel})\n`;
+    });
+
+    await conn.reply(m.chat, texto, m);
+  } catch (error) {
+    console.error(error);
+    await conn.reply(m.chat, `Error al mostrar Pokémon: ${error.message}`, m);
   }
+};
 
-  guardarJSON(usuariosPath, usuarios)
+handler.tags = ['pokemon'];
+handler.help = ['verpokemones'];
+handler.command = ['verpokemones', 'mipokemon'];
 
-  const texto = `🎉 Lanzaste una Pokébola y atrapaste a *${pokemon.nombre}*!\n\n` +
-                `📛 Tipo: ${pokemon.tipo.join(', ')}\n` +
-                `❤️ Vida: ${pokemon.vidaBase}\n\n` +
-                `Usa *.perfil* para ver a tu mascota.`
-
-  await conn.sendFile(m.chat, pokemon.imagen, 'pokemon.jpg', texto, m)
-}
-
-handler.help = ['atrapar']
-handler.tags = ['juegos']
-handler.command = ['atrapar']
-handler.register = true
-
-export default handler
+export default handler;
