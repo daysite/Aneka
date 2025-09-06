@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const pokemon = async (m, { conn }) => {
+let handler = async (m, { conn }) => {
   try {
     const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1000');
     const pokemons = response.data.results;
@@ -11,10 +11,11 @@ const pokemon = async (m, { conn }) => {
 
     await conn.sendFile(m.chat, pokemonImage, 'pokemon.png', `¡Felicidades! Has capturado a ${pokemonName}`, m);
   } catch (error) {
-    await conn.reply(m.chat, 'Error al capturar Pokémon', m);
+    m.reply(error)
   }
 };
 
 handler.tags = ['pokemon'];
 handler.help = ['pokemon'];
 handler.command = ['pokemon', 'capturar'];
+export default handler
