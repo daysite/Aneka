@@ -1,4 +1,6 @@
-import axios from 'axios';
+import fs from 'fs'
+
+const usuariosPath = './src/database/usuarios.json'
 
 let handler = async (m, { conn }) => {
   try {
