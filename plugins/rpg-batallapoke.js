@@ -399,6 +399,6 @@ export async function all(m, { conn, usedPrefix }) {
 handler.help = ['pelear @usuario', 'pelear lista', 'pelear cancelar']
 handler.tags = ['pokemon', 'rpg', 'battle']
 handler.command = /^(pelear|batalla|battle|desafiar|challenge)$/i
-handler.register = true
+handler.register = false
 
 export default handler
