@@ -15,6 +15,6 @@ const pokemon = async (m, { conn }) => {
   }
 };
 
-pokemon.tags = ['pokemon'];
-pokemon.help = ['pokemon'];
-pokemon.command = ['pokemon', 'capturar'];
+handler.tags = ['pokemon'];
+handler.help = ['pokemon'];
+handler.command = ['pokemon', 'capturar'];
