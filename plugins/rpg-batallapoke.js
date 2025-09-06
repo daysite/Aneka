@@ -23,41 +23,70 @@ function guardarJSON(ruta, data) {
   }
 }
 
-// Función mejorada para obtener Pokémon
+// FUNCIÓN MEJORADA para obtener Pokémon (compatible con todos los plugins)
 function obtenerPokemonesUsuario(user) {
   if (!user) return []
   
-  // Buscar en múltiples formatos posibles
-  if (user.pokemones && Array.isArray(user.pokemones) && user.pokemones.length > 0) {
-    return user.pokemones
-  }
-  if (user.pokemons && Array.isArray(user.pokemons) && user.pokemons.length > 0) {
-    return user.pokemons
-  }
-  if (user.poke && Array.isArray(user.poke) && user.poke.length > 0) {
-    return user.poke
-  }
-  if (user.mis_pokemones && Array.isArray(user.mis_pokemones) && user.mis_pokemones.length > 0) {
-    return user.mis_pokemones
+  // Buscar en TODOS los formatos posibles que puedan existir
+  const formatos = [
+    'pokemones', 'pokemons', 'poke', 'mis_pokemones', 
+    'pokemon_capturados', 'mispokemons', 'pokedex'
+  ]
+  
+  for (const formato of formatos) {
+    if (user[formato] && Array.isArray(user[formato]) && user[formato].length > 0) {
+      return user[formato]
+    }
   }
   
-  // Formato antiguo: objeto único
+  // Formato antiguo: objeto único (compatibilidad con plugins viejos)
   if (user.pokemon) {
-    if (Array.isArray(user.pokemon) && user.pokemon.length > 0) return user.pokemon
-    if (typeof user.pokemon === 'object' && user.pokemon.nombre) return [user.pokemon]
+    if (Array.isArray(user.pokemon) && user.pokemon.length > 0) {
+      return user.pokemon
+    }
+    if (typeof user.pokemon === 'object' && user.pokemon.nombre) {
+      return [user.pokemon]
+    }
   }
   
   return []
 }
 
+// Función para FORZAR formato consistente
+function estandarizarFormatoPokemon(user) {
+  const pokemones = obtenerPokemonesUsuario(user)
+  
+  if (pokemones.length > 0) {
+    // Guardar en el formato estándar que todos los plugins deben usar
+    user.pokemones = pokemones
+    
+    // Limpiar formatos antiguos para evitar duplicados
+    const formatosAntiguos = [
+      'pokemons', 'poke', 'mis_pokemones', 
+      'pokemon_capturados', 'mispokemons', 'pokedex'
+    ]
+    
+    for (const formato of formatosAntiguos) {
+      if (user[formato]) delete user[formato]
+    }
+    
+    // Si tenía el formato de objeto único, mantenerlo por compatibilidad
+    if (!user.pokemon || typeof user.pokemon !== 'object') {
+      user.pokemon = pokemones.length === 1 ? pokemones[0] : pokemones
+    }
+  }
+  
+  return user
+}
+
 // Función para calcular poder
 function calcularPoder(pokemon) {
   if (!pokemon) return 0
-  return (pokemon.vidaMax || 20) + 
+  return (pokemon.vidaMax || pokemon.hp || 20) + 
          (pokemon.nivel || 1) * 5 + 
-         (pokemon.ataque || 10) + 
-         (pokemon.defensa || 5) +
-         (pokemon.experiencia || 0) / 10
+         (pokemon.ataque || pokemon.attack || 10) + 
+         (pokemon.defensa || pokemon.defense || 5) +
+         (pokemon.experiencia || pokemon.exp || 0) / 10
 }
 
 // Función para simular batalla
@@ -119,7 +148,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const usuarios = cargarJSON(usuariosPath)
     const userId = m.sender.replace(/[^0-9]/g, '')
     
-    // Crear usuario si no existe en lugar de rechazar
+    // Crear usuario si no existe
     if (!usuarios[userId]) {
       usuarios[userId] = {
         nombre: conn.getName(m.sender),
@@ -130,7 +159,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
     
     const user = usuarios[userId]
-    const pokemonesUser = obtenerPokemonesUsuario(user)
+    
+    // ESTANDARIZAR formato de Pokémon para este usuario
+    const userEstandarizado = estandarizarFormatoPokemon(user)
+    if (userEstandarizado !== user) {
+      usuarios[userId] = userEstandarizado
+      guardarJSON(usuariosPath, usuarios)
+    }
+    
+    const pokemonesUser = obtenerPokemonesUsuario(userEstandarizado)
     
     if (pokemonesUser.length === 0) {
       return m.reply('😢 No tienes Pokémon. Atrapa alguno primero.')
@@ -141,7 +178,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 20} | ⚡ ${Math.round(calcularPoder(poke))}\n\n`
+        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
       })
       
       lista += `⚔️ *Para pelear:*\n`
@@ -157,7 +194,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 20} | ⚡ ${Math.round(calcularPoder(poke))}\n\n`
+        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
       })
       return m.reply(lista)
     }
@@ -193,23 +230,59 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         dinero: 1000,
         pokemones: []
       }
+      guardarJSON(usuariosPath, usuarios)
     }
     
     const rival = usuarios[rivalId]
-    const pokemonesRival = obtenerPokemonesUsuario(rival)
+    
+    // ESTANDARIZAR formato de Pokémon para el RIVAL también
+    const rivalEstandarizado = estandarizarFormatoPokemon(rival)
+    if (rivalEstandarizado !== rival) {
+      usuarios[rivalId] = rivalEstandarizado
+      guardarJSON(usuariosPath, usuarios)
+    }
+    
+    const pokemonesRival = obtenerPokemonesUsuario(rivalEstandarizado)
+    
+    // DIAGNÓSTICO: Ver qué hay en la base de datos del rival
+    console.log('Rival ID:', rivalId)
+    console.log('Rival data:', rival)
+    console.log('Pokémon encontrados:', pokemonesRival)
     
     if (pokemonesRival.length === 0) {
-      return m.reply('⚠️ El oponente no tiene Pokémon.')
+      // Buscar en formatos alternativos antes de dar error
+      let formatosConPokemon = []
+      for (const key in rival) {
+        if (key.includes('pok') && rival[key] && typeof rival[key] === 'object') {
+          formatosConPokemon.push(key)
+        }
+      }
+      
+      if (formatosConPokemon.length > 0) {
+        // Intentar forzar estandarización
+        const rivalForzado = estandarizarFormatoPokemon(rival)
+        const pokemonesForzados = obtenerPokemonesUsuario(rivalForzado)
+        
+        if (pokemonesForzados.length > 0) {
+          usuarios[rivalId] = rivalForzado
+          guardarJSON(usuariosPath, usuarios)
+          // Continuar con la batalla
+        } else {
+          return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
+        }
+      } else {
+        return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
+      }
     }
 
     // Si no se especificó Pokémon, mostrar selección
     if (pokemonIndex === null) {
-      let lista = `⚔️ *DESAFÍO A ${rival.nombre}* ⚔️\n\n`
+      let lista = `⚔️ *DESAFÍO A ${rival.nombre || 'Entrenador'}* ⚔️\n\n`
       lista += `🎯 *SELECCIONA TU POKÉMON:*\n\n`
       
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 20} | ⚡ ${Math.round(calcularPoder(poke))}\n\n`
+        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
       })
       
       lista += `Responde con el *número* del Pokémon.\n`
@@ -235,7 +308,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const pokemonUser = JSON.parse(JSON.stringify(pokemonesUser[pokemonIndex]))
     
-    // SIMULAR BATALLA INMEDATA (modo simple)
+    // SIMULAR BATALLA
     const pokemonRival = pokemonesRival[Math.floor(Math.random() * pokemonesRival.length)]
     const resultado = simularBatalla(
       pokemonUser,
@@ -330,6 +403,6 @@ export async function before(m, { conn, usedPrefix }) {
 handler.help = ['pelear @usuario', 'pelear [número] @usuario', 'pelear lista']
 handler.tags = ['pokemon', 'rpg', 'battle']
 handler.command = /^(pelear|batalla|battle|desafiar)$/i
-handler.register = false // Ya no requiere registro
+handler.register = false
 
 export default handler
