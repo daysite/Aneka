@@ -3,23 +3,28 @@ import fs from 'fs'
 const usuariosPath = './src/database/usuarios.json'
 const tiendaPath = './src/database/tienda.json'
 
-// Función para cargar JSON (igual que en el plugin anterior)
+// Función para cargar JSON
 function cargarJSON(ruta, valorDefault = {}) {
   try {
     if (!fs.existsSync(ruta)) fs.writeFileSync(ruta, JSON.stringify(valorDefault, null, 2))
     const data = fs.readFileSync(ruta, 'utf-8').trim()
     return data ? JSON.parse(data) : valorDefault
   } catch (e) {
+    console.error('Error al cargar JSON:', e)
     return valorDefault
   }
 }
 
-// Función para guardar JSON (igual que en el plugin anterior)
+// Función para guardar JSON
 function guardarJSON(ruta, data) {
-  fs.writeFileSync(ruta, JSON.stringify(data, null, 2))
+  try {
+    fs.writeFileSync(ruta, JSON.stringify(data, null, 2))
+  } catch (e) {
+    console.error('Error al guardar JSON:', e)
+  }
 }
 
-// Datos predeterminados de la tienda si no existe
+// Datos predeterminados de la tienda
 const tiendaDefault = {
   items: [
     { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "Aumenta 10 puntos de vida máxima" },
@@ -32,7 +37,14 @@ const tiendaDefault = {
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const usuarios = cargarJSON(usuariosPath)
-  const tienda = cargarJSON(tiendaPath, tiendaDefault)
+  let tienda = cargarJSON(tiendaPath, tiendaDefault)
+  
+  // Asegurar que la tienda tenga la estructura correcta
+  if (!tienda.items || !Array.isArray(tienda.items)) {
+    tienda = { ...tiendaDefault, ...tienda }
+    tienda.items = tienda.items || tiendaDefault.items
+  }
+  
   const userId = m.sender.replace(/[^0-9]/g, '')
   const user = usuarios[userId]
 
@@ -43,7 +55,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!user.pokemon) return m.reply('😢 No tienes un Pokémon. Atrapa uno primero.')
   
   // Verificar si el usuario tiene dinero (añadir propiedad si no existe)
-  if (user.dinero === undefined) user.dinero = 1000 // Dinero inicial si no existe
+  if (user.dinero === undefined) user.dinero = 1000
 
   const action = args[0] ? args[0].toLowerCase() : ''
 
@@ -52,6 +64,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`
     listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`
     
+    // Verificación adicional para evitar el error
+    if (!tienda.items || !Array.isArray(tienda.items)) {
+      // Si aún así hay problema, restaurar los items por defecto
+      tienda.items = tiendaDefault.items
+      guardarJSON(tiendaPath, tienda)
+    }
+    
+    // Usar forEach de manera segura
     tienda.items.forEach(item => {
       listaTienda += `*${item.id}.* ${item.nombre} - $${item.precio}\n`
       listaTienda += `   📝 ${item.descripcion}\n\n`
@@ -66,6 +86,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   // Comprar items
   if (action === 'comprar' && args[1]) {
     const itemId = parseInt(args[1])
+    
+    // Verificar que los items existan
+    if (!tienda.items || !Array.isArray(tienda.items)) {
+      tienda.items = tiendaDefault.items
+    }
+    
     const item = tienda.items.find(i => i.id === itemId)
     
     if (!item) return m.reply('❌ ID de artículo no válido. Usa *.comprar tienda* para ver los artículos disponibles.')
@@ -85,17 +111,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     switch(item.efecto) {
       case 'vida':
         pokemon.vidaMax += item.valor
-        pokemon.vida = pokemon.vidaMax // Restaurar vida completa
+        pokemon.vida = pokemon.vidaMax
         mensajeEfecto += `❤️ ${pokemon.nombre} ahora tiene ${pokemon.vidaMax} puntos de vida máxima!`
         break
         
       case 'nivel':
         const nivelAnterior = pokemon.nivel
         pokemon.nivel += item.valor
-        // Aumentar vida máxima al subir de nivel (5 puntos por nivel)
         const nivelesSubidos = item.valor
         pokemon.vidaMax += 5 * nivelesSubidos
-        pokemon.vida = pokemon.vidaMax // Restaurar vida completa
+        pokemon.vida = pokemon.vidaMax
         mensajeEfecto += `🆙 ${pokemon.nombre} subió del nivel ${nivelAnterior} al nivel ${pokemon.nivel}!`
         break
         
@@ -115,10 +140,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           mensajeEfecto += `✨ ${pokemon.nombre} ganó ${item.valor} puntos de experiencia!`
         }
         break
+        
+      default:
+        mensajeEfecto += `✨ ${pokemon.nombre} recibió el efecto de ${item.nombre}!`
     }
     
     // Restar dinero y guardar cambios
     user.dinero -= item.precio
+    
+    // Inicializar inventario si no existe y agregar item
+    if (!user.inventario) user.inventario = []
+    user.inventario.push(item.id)
+    
     usuarios[userId] = user
     guardarJSON(usuariosPath, usuarios)
     
