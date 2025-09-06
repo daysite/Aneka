@@ -9,5 +9,5 @@ mentions: [m.sender]
 
 handler.help = ['preciosbot'];
 handler.tags = ['info'];
-handler.command = ['precios', 'comprar', 'adquirir', 'preciosbot'];
+handler.command = ['precios', 'comprarbot', 'adquirir', 'preciosbot'];
 export default handler;
