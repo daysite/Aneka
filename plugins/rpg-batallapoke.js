@@ -23,28 +23,44 @@ function guardarJSON(ruta, data) {
   }
 }
 
-// FUNCIÓN MEJORADA para obtener Pokémon (compatible con todos los plugins)
+// FUNCIÓN COMPATIBLE con tu estructura de Pokédex
 function obtenerPokemonesUsuario(user) {
   if (!user) return []
   
-  // Buscar en TODOS los formatos posibles que puedan existir
-  const formatos = [
-    'pokemones', 'pokemons', 'poke', 'mis_pokemones', 
+  // PRIMERO: Buscar en la estructura de TU Pokédex (pokemons)
+  if (user.pokemons && Array.isArray(user.pokemons) && user.pokemons.length > 0) {
+    return user.pokemons.map(pokemon => ({
+      // Convertir a formato estándar para batallas
+      nombre: pokemon.name || pokemon.nombre || 'Pokémon',
+      nivel: pokemon.nivel || 1,
+      vida: pokemon.stats?.hp || pokemon.hp || pokemon.vida || 50,
+      vidaMax: pokemon.stats?.hp || pokemon.hp || pokemon.vidaMax || 50,
+      ataque: pokemon.stats?.attack || pokemon.ataque || 10,
+      defensa: pokemon.stats?.defense || pokemon.defensa || 5,
+      experiencia: pokemon.experiencia || pokemon.exp || 0,
+      // Mantener datos originales para compatibilidad
+      _original: pokemon
+    }))
+  }
+  
+  // SEGUNDO: Buscar en otros formatos comunes
+  const formatosComunes = [
+    'pokemones', 'poke', 'mis_pokemones', 
     'pokemon_capturados', 'mispokemons', 'pokedex'
   ]
   
-  for (const formato of formatos) {
+  for (const formato of formatosComunes) {
     if (user[formato] && Array.isArray(user[formato]) && user[formato].length > 0) {
       return user[formato]
     }
   }
   
-  // Formato antiguo: objeto único (compatibilidad con plugins viejos)
+  // TERCERO: Formato antiguo de objeto único
   if (user.pokemon) {
     if (Array.isArray(user.pokemon) && user.pokemon.length > 0) {
       return user.pokemon
     }
-    if (typeof user.pokemon === 'object' && user.pokemon.nombre) {
+    if (typeof user.pokemon === 'object' && (user.pokemon.nombre || user.pokemon.name)) {
       return [user.pokemon]
     }
   }
@@ -52,36 +68,21 @@ function obtenerPokemonesUsuario(user) {
   return []
 }
 
-// Función para FORZAR formato consistente
-function estandarizarFormatoPokemon(user) {
-  const pokemones = obtenerPokemonesUsuario(user)
-  
-  if (pokemones.length > 0) {
-    // Guardar en el formato estándar que todos los plugins deben usar
-    user.pokemones = pokemones
-    
-    // Limpiar formatos antiguos para evitar duplicados
-    const formatosAntiguos = [
-      'pokemons', 'poke', 'mis_pokemones', 
-      'pokemon_capturados', 'mispokemons', 'pokedex'
-    ]
-    
-    for (const formato of formatosAntiguos) {
-      if (user[formato]) delete user[formato]
-    }
-    
-    // Si tenía el formato de objeto único, mantenerlo por compatibilidad
-    if (!user.pokemon || typeof user.pokemon !== 'object') {
-      user.pokemon = pokemones.length === 1 ? pokemones[0] : pokemones
-    }
-  }
-  
-  return user
-}
-
-// Función para calcular poder
+// Función para calcular poder (compatible con tu estructura)
 function calcularPoder(pokemon) {
   if (!pokemon) return 0
+  
+  // Si es de tu estructura Pokédex, usar stats
+  if (pokemon._original && pokemon._original.stats) {
+    const stats = pokemon._original.stats
+    return (stats.hp || 0) + 
+           (stats.attack || 0) + 
+           (stats.defense || 0) +
+           (pokemon.nivel || 1) * 2 +
+           (pokemon.experiencia || 0) / 20
+  }
+  
+  // Para otros formatos
   return (pokemon.vidaMax || pokemon.hp || 20) + 
          (pokemon.nivel || 1) * 5 + 
          (pokemon.ataque || pokemon.attack || 10) + 
@@ -107,33 +108,33 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   const turnos = Math.floor(Math.random() * 2) + 2
   for (let i = 1; i <= turnos; i++) {
     if (Math.random() > 0.4) {
-      resultado += `⏱️ Turno ${i}: ${pokeAtacante.nombre} ataca!\n`
+      resultado += `⏱️ Turno ${i}: ${pokeAtacante.nombre} usa Ataque!\n`
     } else {
-      resultado += `⏱️ Turno ${i}: ${pokeDefensor.nombre} contraataca!\n`
+      resultado += `⏱️ Turno ${i}: ${pokeDefensor.nombre} se defiende!\n`
     }
   }
   
   resultado += `\n🎯 *RESULTADO FINAL*:\n`
   
   const diferencia = Math.abs(poderAtacante - poderDefensor)
-  const esEmpate = diferencia < 15
+  const esEmpate = diferencia < 20
 
   if (esEmpate) {
     resultado += `🤝 ¡Empate! Ambos lucharon valientemente.\n`
-    resultado += `✨ +15 EXP para ambos Pokémon\n`
+    resultado += `✨ +10 EXP para ambos Pokémon\n`
     
-    pokeAtacante.experiencia = (pokeAtacante.experiencia || 0) + 15
-    pokeDefensor.experiencia = (pokeDefensor.experiencia || 0) + 15
+    pokeAtacante.experiencia = (pokeAtacante.experiencia || 0) + 10
+    pokeDefensor.experiencia = (pokeDefensor.experiencia || 0) + 10
     
   } else if (poderAtacante > poderDefensor) {
-    const expGanada = 25 + Math.floor(diferencia / 3)
+    const expGanada = 20 + Math.floor(diferencia / 2)
     pokeAtacante.experiencia = (pokeAtacante.experiencia || 0) + expGanada
     
     resultado += `🎉 ¡${userName} gana la batalla!\n`
     resultado += `✨ ${pokeAtacante.nombre} ganó ${expGanada} EXP\n`
     
   } else {
-    const expGanada = 25 + Math.floor(diferencia / 3)
+    const expGanada = 20 + Math.floor(diferencia / 2)
     pokeDefensor.experiencia = (pokeDefensor.experiencia || 0) + expGanada
     
     resultado += `😵 ¡${rivalName} gana la batalla!\n`
@@ -153,24 +154,22 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       usuarios[userId] = {
         nombre: conn.getName(m.sender),
         dinero: 1000,
-        pokemones: []
+        pokemons: [] // Usar el mismo formato que tu Pokédex
       }
       guardarJSON(usuariosPath, usuarios)
     }
     
     const user = usuarios[userId]
+    const pokemonesUser = obtenerPokemonesUsuario(user)
     
-    // ESTANDARIZAR formato de Pokémon para este usuario
-    const userEstandarizado = estandarizarFormatoPokemon(user)
-    if (userEstandarizado !== user) {
-      usuarios[userId] = userEstandarizado
-      guardarJSON(usuariosPath, usuarios)
-    }
-    
-    const pokemonesUser = obtenerPokemonesUsuario(userEstandarizado)
+    // DIAGNÓSTICO: Ver qué encontró
+    console.log('Usuario:', userId)
+    console.log('Datos usuario:', user)
+    console.log('Pokémon encontrados:', pokemonesUser.length)
+    console.log('Formato detectado:', user.pokemons ? 'pokemons' : 'otros')
     
     if (pokemonesUser.length === 0) {
-      return m.reply('😢 No tienes Pokémon. Atrapa alguno primero.')
+      return m.reply('😢 No tienes Pokémon capturados. Usa *.pokemon* para capturar alguno.')
     }
 
     // Mostrar lista si no hay argumentos
@@ -178,7 +177,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
+        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 0} | ⚡ ${Math.round(calcularPoder(poke))}\n\n`
       })
       
       lista += `⚔️ *Para pelear:*\n`
@@ -194,7 +193,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
+        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 0}\n\n`
       })
       return m.reply(lista)
     }
@@ -228,51 +227,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       usuarios[rivalId] = {
         nombre: 'Entrenador',
         dinero: 1000,
-        pokemones: []
+        pokemons: [] // Mismo formato que tu Pokédex
       }
       guardarJSON(usuariosPath, usuarios)
     }
     
     const rival = usuarios[rivalId]
+    const pokemonesRival = obtenerPokemonesUsuario(rival)
     
-    // ESTANDARIZAR formato de Pokémon para el RIVAL también
-    const rivalEstandarizado = estandarizarFormatoPokemon(rival)
-    if (rivalEstandarizado !== rival) {
-      usuarios[rivalId] = rivalEstandarizado
-      guardarJSON(usuariosPath, usuarios)
-    }
-    
-    const pokemonesRival = obtenerPokemonesUsuario(rivalEstandarizado)
-    
-    // DIAGNÓSTICO: Ver qué hay en la base de datos del rival
+    // DIAGNÓSTICO del rival
     console.log('Rival ID:', rivalId)
-    console.log('Rival data:', rival)
-    console.log('Pokémon encontrados:', pokemonesRival)
+    console.log('Datos rival:', rival)
+    console.log('Pokémon del rival:', pokemonesRival.length)
     
     if (pokemonesRival.length === 0) {
-      // Buscar en formatos alternativos antes de dar error
-      let formatosConPokemon = []
-      for (const key in rival) {
-        if (key.includes('pok') && rival[key] && typeof rival[key] === 'object') {
-          formatosConPokemon.push(key)
-        }
-      }
-      
-      if (formatosConPokemon.length > 0) {
-        // Intentar forzar estandarización
-        const rivalForzado = estandarizarFormatoPokemon(rival)
-        const pokemonesForzados = obtenerPokemonesUsuario(rivalForzado)
-        
-        if (pokemonesForzados.length > 0) {
-          usuarios[rivalId] = rivalForzado
-          guardarJSON(usuariosPath, usuarios)
-          // Continuar con la batalla
-        } else {
-          return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
-        }
-      } else {
-        return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
-      }
+      return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
     }
 
     // Si no se especificó Pokémon, mostrar selección
@@ -282,7 +251,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       pokemonesUser.forEach((poke, index) => {
         lista += `*${index + 1}.* ${poke.nombre} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.vida || poke.hp || 0}/${poke.vidaMax || poke.hp || 20}\n\n`
+        lista += `   ❤️ ${poke.vida || 0}/${poke.vidaMax || 0}\n\n`
       })
       
       lista += `Responde con el *número* del Pokémon.\n`
@@ -317,9 +286,25 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       rival.nombre || 'Rival'
     )
     
-    // Actualizar experiencia
-    pokemonesUser[pokemonIndex] = pokemonUser
-    user.pokemones = pokemonesUser
+    // Actualizar experiencia (en el formato original)
+    if (user.pokemons && Array.isArray(user.pokemons)) {
+      // Para tu formato de Pokédex
+      const pokemonOriginal = user.pokemons[pokemonIndex]
+      if (pokemonOriginal) {
+        if (!pokemonOriginal.experiencia) pokemonOriginal.experiencia = 0
+        pokemonOriginal.experiencia = pokemonUser.experiencia
+        user.pokemons[pokemonIndex] = pokemonOriginal
+      }
+    } else {
+      // Para otros formatos
+      const pokemonesActualizados = obtenerPokemonesUsuario(user)
+      pokemonesActualizados[pokemonIndex] = pokemonUser
+      // Actualizar en el formato que corresponda
+      if (user.pokemones) user.pokemones = pokemonesActualizados
+      else if (user.pokemon) user.pokemon = pokemonesActualizados.length === 1 ? pokemonesActualizados[0] : pokemonesActualizados
+      else user.pokemons = pokemonesActualizados // Default to your format
+    }
+    
     usuarios[userId] = user
     guardarJSON(usuariosPath, usuarios)
     
@@ -386,10 +371,15 @@ export async function before(m, { conn, usedPrefix }) {
     )
     
     // Actualizar experiencia
-    pokemonesUser[pokemonIndex] = pokemonUser
-    user.pokemones = pokemonesUser
-    delete user.batallaTemporal
+    if (user.pokemons && Array.isArray(user.pokemons)) {
+      const pokemonOriginal = user.pokemons[pokemonIndex]
+      if (pokemonOriginal) {
+        pokemonOriginal.experiencia = pokemonUser.experiencia
+        user.pokemons[pokemonIndex] = pokemonOriginal
+      }
+    }
     
+    delete user.batallaTemporal
     usuarios[userId] = user
     guardarJSON(usuariosPath, usuarios)
     
