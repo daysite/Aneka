@@ -23,7 +23,16 @@ let handler = async (m, { conn, args }) => {
       }, { quoted: m });
     }
 
-    const userPokemons = usuarios[sender].pokemons;
+    // FILTRAR POKÉMON VÁLIDOS - CORRECCIÓN APPLICADA
+    const userPokemons = usuarios[sender].pokemons.filter(p => p && p.name && p.name !== 'undefined' && p.name !== undefined);
+    
+    if (userPokemons.length === 0) {
+      return await conn.sendMessage(m.chat, {
+        text: '❌ *No tienes Pokémon válidos en tu inventario.*\n\n🎯 Usa *.pokemon* para capturar nuevos Pokémon!',
+        contextInfo: { mentionedJid: [sender] }
+      }, { quoted: m });
+    }
+
     const numeroPokemon = parseInt(args[0]);
 
     if (!isNaN(numeroPokemon) && numeroPokemon > 0 && numeroPokemon <= userPokemons.length) {
