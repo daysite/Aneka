@@ -41,40 +41,42 @@ function guardarUsuarios(usuarios) {
   }
 }
 
-// Función para leer tienda
-function leerTienda() {
+// TIENDA POR DEFECTO - SIEMPRE DISPONIBLE
+const tiendaDefault = {
+  items: [
+    { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima" },
+    { id: 2, nombre: "🍖 Caramelo Raro", precio: 100, efecto: "nivel", valor: 1, descripcion: "+1 nivel" },
+    { id: 3, nombre: "🧁 Pastel Pokémon", precio: 80, efecto: "experiencia", valor: 50, descripcion: "+50 experiencia" },
+    { id: 4, nombre: "🍯 Miel Dorada", precio: 150, efecto: "vida", valor: 25, descripcion: "+25 vida máxima" },
+    { id: 5, nombre: "⭐ Caramelo XL", precio: 200, efecto: "nivel", valor: 2, descripcion: "+2 niveles" },
+    { id: 6, nombre: "🍬 Caramelo Energía", precio: 120, efecto: "vida", valor: 15, descripcion: "+15 vida máxima" },
+    { id: 7, nombre: "🎂 Tarta Experiencia", precio: 180, efecto: "experiencia", valor: 100, descripcion: "+100 experiencia" }
+  ]
+}
+
+// Función para obtener items de la tienda (SIEMPRE devuelve items)
+function obtenerItemsTienda() {
   try {
     asegurarDirectorio(tiendaPath)
     
     if (!fs.existsSync(tiendaPath)) {
-      // Crear tienda por defecto si no existe
-      const tiendaDefault = {
-        items: [
-          { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima" },
-          { id: 2, nombre: "🍖 Caramelo Raro", precio: 100, efecto: "nivel", valor: 1, descripcion: "+1 nivel" },
-          { id: 3, nombre: "🧁 Pastel Pokémon", precio: 80, efecto: "experiencia", valor: 50, descripcion: "+50 experiencia" },
-          { id: 4, nombre: "🍯 Miel Dorada", precio: 150, efecto: "vida", valor: 25, descripcion: "+25 vida máxima" },
-          { id: 5, nombre: "⭐ Caramelo XL", precio: 200, efecto: "nivel", valor: 2, descripcion: "+2 niveles" },
-          { id: 6, nombre: "🍬 Caramelo Energía", precio: 120, efecto: "vida", valor: 15, descripcion: "+15 vida máxima" },
-          { id: 7, nombre: "🎂 Tarta Experiencia", precio: 180, efecto: "experiencia", valor: 100, descripcion: "+100 experiencia" }
-        ]
-      }
+      // Crear archivo de tienda con datos por defecto
       fs.writeFileSync(tiendaPath, JSON.stringify(tiendaDefault, null, 2))
-      return tiendaDefault
+      return tiendaDefault.items
     }
     
     const data = fs.readFileSync(tiendaPath, 'utf8')
-    return JSON.parse(data) || {}
-  } catch (error) {
-    console.error('Error al leer tienda:', error)
-    // Devolver tienda por defecto en caso de error
-    return {
-      items: [
-        { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima" },
-        { id: 2, nombre: "🍖 Caramelo Raro", precio: 100, efecto: "nivel", valor: 1, descripcion: "+1 nivel" },
-        { id: 3, nombre: "🧁 Pastel Pokémon", precio: 80, efecto: "experiencia", valor: 50, descripcion: "+50 experiencia" }
-      ]
+    const tienda = JSON.parse(data)
+    
+    // Si la tienda no tiene items, usar los por defecto
+    if (!tienda || !tienda.items || !Array.isArray(tienda.items) || tienda.items.length === 0) {
+      return tiendaDefault.items
     }
+    
+    return tienda.items
+  } catch (error) {
+    console.error('Error al leer tienda, usando items por defecto:', error)
+    return tiendaDefault.items
   }
 }
 
@@ -138,7 +140,7 @@ function aplicarEfectoItem(pokemon, item) {
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     const usuarios = leerUsuarios()
-    const tienda = leerTienda()
+    const itemsTienda = obtenerItemsTienda() // Siempre obtiene items
     const userId = m.sender
     
     if (!usuarios[userId]) {
@@ -159,26 +161,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`
       listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`
       
-      if (!tienda.items || tienda.items.length === 0) {
-        listaTienda += '❌ No hay items disponibles en la tienda.'
-      } else {
-        tienda.items.forEach(item => {
-          listaTienda += `*${item.id}.* ${item.nombre} - $${item.precio}\n`
-          listaTienda += `   📝 ${item.descripcion}\n\n`
-        })
-      }
+      // MOSTRAR ITEMS (siempre debería haber items)
+      itemsTienda.forEach(item => {
+        listaTienda += `*${item.id}.* ${item.nombre} - $${item.precio}\n`
+        listaTienda += `   📝 ${item.descripcion}\n\n`
+      })
       
-      listaTienda += `\n💡 Usa: *${usedPrefix}comprar <número>* para comprar un item\n`
+      listaTienda += `💡 Usa: *${usedPrefix}comprar <número>* para comprar un item\n`
       listaTienda += `Ejemplo: *${usedPrefix}comprar 1*`
       
-      // Enviar imagen de tienda Pokémon
-      try {
-        await conn.sendFile(m.chat, 'https://i.imgur.com/8Zz0W3p.png', 'tienda.png', listaTienda, m)
-      } catch (e) {
-        // Si falla la imagen, enviar solo texto
-        m.reply(listaTienda)
-      }
-      return
+      // SOLO TEXTO - SIN IMAGEN
+      return m.reply(listaTienda)
     }
     
     // Verificar si el usuario tiene Pokémon
@@ -188,10 +181,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     
     // Comprar item
     const itemId = parseInt(args[0])
-    const item = tienda.items.find(i => i.id === itemId)
+    const item = itemsTienda.find(i => i.id === itemId)
     
     if (!item) {
-      return m.reply(`❌ Item no válido. Usa *${usedPrefix}comprar* para ver los items.`)
+      return m.reply(`❌ Item no válido. Usa *${usedPrefix}comprar* para ver los items disponibles.`)
     }
     
     // Verificar si tiene suficiente dinero
@@ -253,7 +246,7 @@ export async function before(m, { conn }) {
   
   try {
     const usuarios = leerUsuarios()
-    const tienda = leerTienda()
+    const itemsTienda = obtenerItemsTienda()
     const userId = m.sender
     const user = usuarios[userId]
     
@@ -277,7 +270,7 @@ export async function before(m, { conn }) {
       return true
     }
     
-    const item = tienda.items.find(i => i.id === user.compraTemporal.itemId)
+    const item = itemsTienda.find(i => i.id === user.compraTemporal.itemId)
     if (!item) {
       delete user.compraTemporal
       guardarUsuarios(usuarios)
