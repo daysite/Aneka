@@ -41,7 +41,7 @@ function guardarUsuarios(usuarios) {
   }
 }
 
-// TIENDA POR DEFECTO - SIEMPRE DISPONIBLE
+// TIENDA POR DEFECTO
 const tiendaDefault = {
   items: [
     { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima" },
@@ -54,13 +54,12 @@ const tiendaDefault = {
   ]
 }
 
-// Función para obtener items de la tienda (SIEMPRE devuelve items)
+// Función para obtener items de la tienda
 function obtenerItemsTienda() {
   try {
     asegurarDirectorio(tiendaPath)
     
     if (!fs.existsSync(tiendaPath)) {
-      // Crear archivo de tienda con datos por defecto
       fs.writeFileSync(tiendaPath, JSON.stringify(tiendaDefault, null, 2))
       return tiendaDefault.items
     }
@@ -68,14 +67,13 @@ function obtenerItemsTienda() {
     const data = fs.readFileSync(tiendaPath, 'utf8')
     const tienda = JSON.parse(data)
     
-    // Si la tienda no tiene items, usar los por defecto
     if (!tienda || !tienda.items || !Array.isArray(tienda.items) || tienda.items.length === 0) {
       return tiendaDefault.items
     }
     
     return tienda.items
   } catch (error) {
-    console.error('Error al leer tienda, usando items por defecto:', error)
+    console.error('Error al leer tienda:', error)
     return tiendaDefault.items
   }
 }
@@ -83,28 +81,13 @@ function obtenerItemsTienda() {
 // Función para obtener Pokémon de usuario
 function obtenerPokemonesUsuario(user) {
   if (!user) return []
-  
-  // Compatibilidad con diferentes estructuras
-  if (user.pokemons && Array.isArray(user.pokemons)) {
-    return user.pokemons
-  }
-  
-  if (user.pokemones && Array.isArray(user.pokemones)) {
-    return user.pokemones
-  }
-  
-  if (user.pokemon && typeof user.pokemon === 'object') {
-    return [user.pokemon]
-  }
-  
-  return []
+  return user.pokemons || user.pokemones || (user.pokemon ? [user.pokemon] : [])
 }
 
 // Función para aplicar efectos de items
 function aplicarEfectoItem(pokemon, item) {
   let mensaje = ''
   
-  // Asegurar que el Pokémon tenga las propiedades necesarias
   if (!pokemon.vidaMax) pokemon.vidaMax = 100
   if (!pokemon.vida) pokemon.vida = pokemon.vidaMax
   if (!pokemon.nivel) pokemon.nivel = 1
@@ -137,6 +120,9 @@ function aplicarEfectoItem(pokemon, item) {
   return mensaje
 }
 
+// Variable global para almacenar compras temporales
+const comprasTemporales = new Map()
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     const usuarios = leerUsuarios()
@@ -148,15 +134,57 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
     
     const user = usuarios[userId]
-    
-    // Asegurar que el usuario tenga dinero
-    if (user.dinero === undefined || user.dinero === null) {
-      user.dinero = 1000
-    }
+    if (user.dinero === undefined || user.dinero === null) user.dinero = 1000
     
     const pokemones = obtenerPokemonesUsuario(user)
     
-    // Mostrar tienda si no hay argumentos
+    // VERIFICAR SI HAY UNA COMPRA PENDIENTE PARA ESTE USUARIO
+    if (comprasTemporales.has(userId) && args.length === 0) {
+      const compra = comprasTemporales.get(userId)
+      const seleccion = m.text ? m.text.trim() : args[0]
+      
+      if (seleccion) {
+        const seleccionIdx = parseInt(seleccion) - 1
+        
+        // Validar selección
+        if (isNaN(seleccionIdx) || seleccionIdx < 0 || seleccionIdx >= pokemones.length) {
+          comprasTemporales.delete(userId)
+          return m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
+        }
+        
+        const item = itemsTienda.find(i => i.id === compra.itemId)
+        if (!item) {
+          comprasTemporales.delete(userId)
+          return m.reply('❌ Error: El artículo ya no está disponible.')
+        }
+        
+        if (user.dinero < item.precio) {
+          comprasTemporales.delete(userId)
+          return m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
+        }
+        
+        // Aplicar el efecto al Pokémon seleccionado
+        const pokemon = pokemones[seleccionIdx]
+        let mensaje = `✅ ¡Compra exitosa!\n`
+        mensaje += `📦 ${item.nombre} - $${item.precio}\n`
+        mensaje += `🐾 Para: ${pokemon.name}\n\n`
+        mensaje += aplicarEfectoItem(pokemon, item)
+        
+        // Actualizar el Pokémon
+        pokemones[seleccionIdx] = pokemon
+        user.pokemons = pokemones
+        user.dinero -= item.precio
+        
+        // Guardar cambios
+        usuarios[userId] = user
+        guardarUsuarios(usuarios)
+        
+        comprasTemporales.delete(userId)
+        return m.reply(mensaje)
+      }
+    }
+    
+    // MOSTRAR TIENDA SI NO HAY ARGUMENTOS
     if (args.length === 0) {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`
       listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`
@@ -172,43 +200,38 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply(listaTienda)
     }
     
-    // Verificar si el usuario tiene Pokémon
+    // VERIFICAR POKÉMON
     if (pokemones.length === 0) {
       return m.reply('😢 No tienes Pokémon. Atrapa uno primero.')
     }
     
-    // Comprar item
+    // COMPRAR ITEM
     const itemId = parseInt(args[0])
     const item = itemsTienda.find(i => i.id === itemId)
     
     if (!item) {
-      return m.reply(`❌ Item no válido. Usa *${usedPrefix}comprar* para ver los items disponibles.`)
+      return m.reply(`❌ Item no válido. Usa *${usedPrefix}comprar* para ver los items.`)
     }
     
-    // Verificar si tiene suficiente dinero
     if (user.dinero < item.precio) {
       return m.reply(`❌ No tienes suficiente dinero.\nNecesitas: $${item.precio}\nTienes: $${user.dinero}`)
     }
     
-    // Si solo tiene un Pokémon, aplicarlo directamente
+    // SI SOLO TIENE UN POKÉMON
     if (pokemones.length === 1) {
       const pokemon = pokemones[0]
       let mensaje = `✅ ¡Compra exitosa!\n`
       mensaje += `📦 ${item.nombre} - $${item.precio}\n`
-      mensaje += `🐾 Para: ${pokemon.name || 'Pokémon'}\n\n`
+      mensaje += `🐾 Para: ${pokemon.name}\n\n`
       mensaje += aplicarEfectoItem(pokemon, item)
       
-      // Actualizar dinero
       user.dinero -= item.precio
-      
-      if (!guardarUsuarios(usuarios)) {
-        return m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
-      }
+      guardarUsuarios(usuarios)
       
       return m.reply(mensaje)
     }
     
-    // Si tiene múltiples Pokémon, mostrar opciones
+    // SI TIENE MÚLTIPLES POKÉMON
     let listaPokemones = `🎯 *¿Qué Pokémon quieres alimentar?* 🎯\n\n`
     listaPokemones += `📦 Item: ${item.nombre} - $${item.precio}\n\n`
     listaPokemones += `*TUS POKÉMON:*\n`
@@ -220,28 +243,20 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     listaPokemones += `\nResponde con el *número* del Pokémon.\n`
     listaPokemones += `Ejemplo: *1* para ${pokemones[0].name}`
     
-    // Guardar estado temporal
-    user.compraTemporal = {
+    // GUARDAR COMPRA TEMPORAL EN MEMORIA
+    comprasTemporales.set(userId, {
       itemId: item.id,
       timestamp: Date.now()
-    }
+    })
     
-    usuarios[userId] = user // Actualizar el usuario en el objeto
-    if (!guardarUsuarios(usuarios)) {
-      return m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
-    }
-    
-    // Enviar mensaje y configurar el handler de respuesta
-    await m.reply(listaPokemones)
-    
-    // Configurar un timeout para limpiar la compra temporal después de 5 minutos
+    // Configurar timeout para limpiar compra temporal (5 minutos)
     setTimeout(() => {
-      const usuariosTemp = leerUsuarios()
-      if (usuariosTemp[userId] && usuariosTemp[userId].compraTemporal) {
-        delete usuariosTemp[userId].compraTemporal
-        guardarUsuarios(usuariosTemp)
+      if (comprasTemporales.has(userId)) {
+        comprasTemporales.delete(userId)
       }
     }, 300000)
+    
+    await m.reply(listaPokemones)
     
   } catch (error) {
     console.error('Error en comando comprar:', error)
@@ -249,95 +264,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 }
 
-// Handler para procesar las respuestas de selección de Pokémon
-export async function before(m, { conn }) {
-  if (!m.text || m.isBaileys || m.fromMe) return false
-  
-  try {
-    const usuarios = leerUsuarios()
-    const itemsTienda = obtenerItemsTienda()
-    const userId = m.sender
-    const user = usuarios[userId]
-    
-    // Verificar si el usuario tiene una compra temporal pendiente
-    if (!user || !user.compraTemporal) return false
-    
-    const selection = m.text.trim()
-    const seleccionIdx = parseInt(selection) - 1
-    const pokemones = obtenerPokemonesUsuario(user)
-    
-    console.log('Procesando selección:', {
-      userId,
-      selection,
-      seleccionIdx,
-      tieneCompraTemporal: !!user.compraTemporal,
-      numPokemones: pokemones.length
-    })
-    
-    // Validar selección
-    if (isNaN(seleccionIdx) || seleccionIdx < 0 || seleccionIdx >= pokemones.length) {
-      await m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
-      // Limpiar estado temporal si la selección es inválida
-      delete user.compraTemporal
-      guardarUsuarios(usuarios)
-      return true
-    }
-    
-    // Verificar que la compra no sea muy antigua (5 minutos)
-    if (Date.now() - user.compraTemporal.timestamp > 300000) {
-      await m.reply('❌ Tiempo agotado. Realiza la compra nuevamente.')
-      delete user.compraTemporal
-      guardarUsuarios(usuarios)
-      return true
-    }
-    
-    const item = itemsTienda.find(i => i.id === user.compraTemporal.itemId)
-    if (!item) {
-      await m.reply('❌ Error: El artículo ya no está disponible.')
-      delete user.compraTemporal
-      guardarUsuarios(usuarios)
-      return true
-    }
-    
-    // Verificar si todavía tiene suficiente dinero
-    if (user.dinero < item.precio) {
-      await m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
-      delete user.compraTemporal
-      guardarUsuarios(usuarios)
-      return true
-    }
-    
-    // Aplicar el efecto al Pokémon seleccionado
-    const pokemon = pokemones[seleccionIdx]
-    let mensaje = `✅ ¡Compra exitosa!\n`
-    mensaje += `📦 ${item.nombre} - $${item.precio}\n`
-    mensaje += `🐾 Para: ${pokemon.name}\n\n`
-    mensaje += aplicarEfectoItem(pokemon, item)
-    
-    // Actualizar el Pokémon en la lista
-    pokemones[seleccionIdx] = pokemon
-    
-    // Actualizar dinero y limpiar estado temporal
-    user.dinero -= item.precio
-    user.pokemons = pokemones // Asegurar que se guarde la lista actualizada
-    delete user.compraTemporal
-    
-    // Guardar cambios
-    usuarios[userId] = user
-    if (!guardarUsuarios(usuarios)) {
-      await m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
-      return true
-    }
-    
-    await m.reply(mensaje)
-    return true
-    
-  } catch (error) {
-    console.error('Error en before comprar:', error)
-    await m.reply('❌ Error al procesar la compra. Intenta nuevamente.')
-    return true
-  }
-}
+// ELIMINAR EL HANDLER BEFORE - TODO SE MANEJA EN EL HANDLER PRINCIPAL
 
 handler.help = ['comprar [número]']
 handler.tags = ['pokemon', 'economy']
