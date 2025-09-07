@@ -165,7 +165,7 @@ function usarItemInventario(user, indexItem, indexPokemon) {
   
   return { 
     success: true, 
-    message: `✅ ¡${item.emoji} ${item.nombre} usado en ${pokemon.name}!\n${mensajeEfecto}` 
+    message: `✅ ¡${item.emoji || '📦'} ${item.nombre} usado en ${pokemon.name}!\n${mensajeEfecto}` 
   }
 }
 
@@ -184,7 +184,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     
     const pokemones = obtenerPokemonesUsuario(user)
     
-    // COMANDO INVENTARIO
+    // COMANDO INVENTARIO - CORREGIDO
     if (command === 'inventario') {
       const inventario = verInventarioUsuario(user)
       
@@ -195,15 +195,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let mensaje = '🎒 *TU INVENTARIO* 🎒\n\n'
       
       inventario.forEach((item, index) => {
-        mensaje += `${index + 1}. ${item.emoji} *${item.nombre}* x${item.cantidad}\n`
+        // CORRECCIÓN: Usar emoji del item o emoji por defecto si es undefined
+        const emoji = item.emoji || '📦'
+        mensaje += `${index + 1}. ${emoji} *${item.nombre}* x${item.cantidad}\n`
         mensaje += `   📝 ${item.descripcion || 'Sin descripción'}\n`
-        if (item.efecto) {
+        if (item.efecto && item.valor) {
           mensaje += `   ⚡ Efecto: ${item.efecto} +${item.valor}\n`
         }
         mensaje += '\n'
       })
       
-      mensaje += `💡 *Para usar un item:*\n`
+      mensaje += `💡 *Para usar an item:*\n`
       mensaje += `*${usedPrefix}usar <item_num> <pokemon_num>*\n\n`
       mensaje += `📌 *Ejemplos:*\n`
       mensaje += `• ${usedPrefix}usar 1 1 - Usar el primer item en el primer Pokémon\n`
@@ -327,7 +329,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       user.inventario = []
     }
     
-    // AGREGAR ITEM AL INVENTARIO
+    // AGREGAR ITEM AL INVENTARIO - ASEGURAR QUE TODOS LOS CAMPOS ESTÉN PRESENTES
     const itemExistente = user.inventario.find(i => i.id === item.id)
     if (itemExistente) {
       itemExistente.cantidad += 1
@@ -335,8 +337,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       user.inventario.push({
         id: item.id,
         nombre: item.nombre,
-        emoji: item.emoji,
-        descripcion: item.descripcion,
+        emoji: item.emoji || '📦', // Asegurar que siempre haya un emoji
+        descripcion: item.descripcion || `Item ${item.nombre}`,
         efecto: item.efecto,
         valor: item.valor,
         cantidad: 1
