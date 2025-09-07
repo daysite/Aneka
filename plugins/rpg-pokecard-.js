@@ -119,12 +119,12 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
     const searchTerm = text.toLowerCase().trim();
     const englishName = POKEMON_TRANSLATIONS[searchTerm] || searchTerm;
     
-    // Diferentes estrategias de búsqueda
+    // Diferentes estrategias de búsqueda - SOLO POKÉMON
     const searchStrategies = [
-      `name:"${englishName}"`,           // Búsqueda exacta
-      `name:${englishName}*`,            // Que comience con
-      `name:*${englishName}*`,           // Que contenga
-      `subtypes:${englishName}`          // Por subtipo
+      `name:"${englishName}" supertype:pokemon`,           // Búsqueda exacta, solo Pokémon
+      `name:${englishName}* supertype:pokemon`,            // Que comience con, solo Pokémon
+      `name:*${englishName}* supertype:pokemon`,           // Que contenga, solo Pokémon
+      `subtypes:${englishName} supertype:pokemon`          // Por subtipo, solo Pokémon
     ];
     
     let cards = [];
