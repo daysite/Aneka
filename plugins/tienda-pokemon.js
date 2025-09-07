@@ -42,6 +42,9 @@ function guardarUsuarios(usuarios) {
   }
 }
 
+// LÍMITE DE POKÉMON POR USUARIO
+const LIMITE_POKEMONES = 5; // Cambiado a 5 como solicitaste
+
 // TIENDA POKÉMON POR DEFECTO
 const tiendaPokemonDefault = {
   pokemones: [
@@ -84,46 +87,6 @@ const tiendaPokemonDefault = {
       imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
       rareza: "común",
       stats: { hp: 44, attack: 48, defense: 65, speed: 43 }
-    },
-    {
-      id: 5,
-      nombre: "Eevee",
-      precio: 400,
-      nivel: 4,
-      tipos: ["normal"],
-      imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
-      rareza: "raro",
-      stats: { hp: 55, attack: 55, defense: 50, speed: 55 }
-    },
-    {
-      id: 6,
-      nombre: "Gengar",
-      precio: 800,
-      nivel: 8,
-      tipos: ["fantasma", "veneno"],
-      imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png",
-      rareza: "épico",
-      stats: { hp: 60, attack: 65, defense: 60, speed: 110 }
-    },
-    {
-      id: 7,
-      nombre: "Dragonite",
-      precio: 1500,
-      nivel: 15,
-      tipos: ["dragón", "volador"],
-      imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png",
-      rareza: "legendario",
-      stats: { hp: 91, attack: 134, defense: 95, speed: 80 }
-    },
-    {
-      id: 8,
-      nombre: "Mewtwo",
-      precio: 3000,
-      nivel: 20,
-      tipos: ["psíquico"],
-      imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png",
-      rareza: "legendario",
-      stats: { hp: 106, attack: 110, defense: 90, speed: 130 }
     }
   ]
 };
@@ -163,7 +126,7 @@ function obtenerEmojiRareza(rareza) {
   }
 }
 
-// Función para obtener Pokémon aleatorio de la API (para renovar stock)
+// Función para obtener Pokémon aleatorio de la API
 async function obtenerPokemonAleatorio() {
   try {
     const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1000');
@@ -171,11 +134,13 @@ async function obtenerPokemonAleatorio() {
     const randomPokemon = pokemons[Math.floor(Math.random() * pokemons.length)];
     const pokemonData = await axios.get(randomPokemon.url);
     
+    const nombre = pokemonData.data.name.charAt(0).toUpperCase() + pokemonData.data.name.slice(1);
+    
     return {
       id: pokemonData.data.id,
-      nombre: pokemonData.data.name.charAt(0).toUpperCase() + pokemonData.data.name.slice(1),
-      precio: Math.floor(Math.random() * 2000) + 100, // Precio entre 100-2100
-      nivel: Math.floor(Math.random() * 20) + 1, // Nivel entre 1-20
+      nombre: nombre,
+      precio: Math.floor(Math.random() * 2000) + 100,
+      nivel: Math.floor(Math.random() * 20) + 1,
       tipos: pokemonData.data.types.map(t => t.type.name),
       imagen: pokemonData.data.sprites.other['official-artwork']?.front_default || 
               pokemonData.data.sprites.front_default,
@@ -193,7 +158,7 @@ async function obtenerPokemonAleatorio() {
   }
 }
 
-// Función para determinar rareza basada en stats
+// Función para determinar rareza
 function determinarRareza(pokemonData) {
   const totalStats = pokemonData.stats.reduce((acc, stat) => acc + stat.base_stat, 0);
   
@@ -216,30 +181,51 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const user = usuarios[userId];
     if (user.dinero === undefined || user.dinero === null) user.dinero = 1000;
     
-    // Inicializar array de Pokémon si no existe
-    if (!user.pokemons) {
+    // Inicializar array de Pokémon si no existe y asegurar que no sea undefined
+    if (!user.pokemons || !Array.isArray(user.pokemons)) {
       user.pokemons = [];
     }
 
     // COMANDO: tiendapokemon (mostrar tienda)
     if (command === 'tiendapokemon' && args.length === 0) {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`;
-      listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`;
+      listaTienda += `💵 Tu dinero: $${user.dinero}\n`;
+      listaTienda += `📦 Pokémon actuales: ${user.pokemons.length}/${LIMITE_POKEMONES}\n\n`;
       
-      pokemonTienda.forEach((poke, index) => {
+      // FILTRAR POKÉMON VÁLIDOS (sin undefined)
+      const pokemonesValidos = pokemonTienda.filter(poke => poke && poke.nombre);
+      
+      if (pokemonesValidos.length === 0) {
+        listaTienda += '❌ No hay Pokémon disponibles en la tienda.\n';
+        listaTienda += `Usa *${usedPrefix}renovartienda* para agregar nuevos Pokémon.`;
+        return m.reply(listaTienda);
+      }
+      
+      pokemonesValidos.forEach((poke, index) => {
+        if (!poke || !poke.nombre) return; // Saltar Pokémon inválidos
+        
         const emojiRareza = obtenerEmojiRareza(poke.rareza);
         listaTienda += `${index + 1}. ${emojiRareza} *${poke.nombre}* - $${poke.precio}\n`;
-        listaTienda += `   📊 Nivel: ${poke.nivel} | 🎯 ${poke.tipos.join('/').toUpperCase()}\n`;
-        listaTienda += `   ❤️ HP: ${poke.stats.hp} | ⚔️ ATK: ${poke.stats.attack}\n`;
-        listaTienda += `   🛡️ DEF: ${poke.stats.defense} | 🏃 VEL: ${poke.stats.speed}\n\n`;
+        listaTienda += `   📊 Nivel: ${poke.nivel} | 🎯 ${Array.isArray(poke.tipos) ? poke.tipos.join('/').toUpperCase() : 'Desconocido'}\n`;
+        listaTienda += `   ❤️ HP: ${poke.stats?.hp || '?'} | ⚔️ ATK: ${poke.stats?.attack || '?'}\n\n`;
       });
       
       listaTienda += `💡 *Para comprar:*\n`;
       listaTienda += `• ${usedPrefix}comprarpokemon <número>\n`;
-      listaTienda += `• ${usedPrefix}renovartienda - Renovar stock\n\n`;
+      listaTienda += `• ${usedPrefix}renovartienda - Renovar stock ($200)\n\n`;
+      
+      // MOSTRAR LÍMITE ACTUAL
+      if (user.pokemons.length >= LIMITE_POKEMONES) {
+        listaTienda += `❌ *¡LÍMITE ALCANZADO!*\n`;
+        listaTienda += `Tienes ${user.pokemons.length}/${LIMITE_POKEMONES} Pokémon.\n`;
+        listaTienda += `Usa *.liberar* <número> para hacer espacio.\n\n`;
+      } else {
+        listaTienda += `📊 Espacio disponible: ${LIMITE_POKEMONES - user.pokemons.length} Pokémon\n\n`;
+      }
+      
       listaTienda += `📌 *Ejemplos:*\n`;
       listaTienda += `• ${usedPrefix}comprarpokemon 1\n`;
-      listaTienda += `• ${usedPrefix}comprarpokemon 3`;
+      listaTienda += `• ${usedPrefix}liberar 2`;
       
       return m.reply(listaTienda);
     }
@@ -254,12 +240,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       const pokemon = pokemonTienda[index];
       
-      if (user.dinero < pokemon.precio) {
-        return m.reply(`❌ No tienes suficiente dinero. Necesitas $${pokemon.precio}, tienes $${user.dinero}.`);
+      // VERIFICAR SI EL POKÉMON ES VÁLIDO
+      if (!pokemon || !pokemon.nombre) {
+        return m.reply('❌ Este Pokémon no está disponible. Usa *renovartienda* para obtener nuevos Pokémon.');
       }
       
-      if (user.pokemons.length >= 20) {
-        return m.reply('❌ Ya tienes el máximo de 20 Pokémon. Libera alguno primero.');
+      // VERIFICAR LÍMITE DE POKÉMON
+      if (user.pokemons.length >= LIMITE_POKEMONES) {
+        return m.reply(`❌ *¡LÍMITE ALCANZADO!*\n\nTienes ${user.pokemons.length}/${LIMITE_POKEMONES} Pokémon.\nUsa *.liberar* <número> para liberar alguno y hacer espacio.\n\nEjemplo: *.liberar 1*`);
+      }
+      
+      if (user.dinero < pokemon.precio) {
+        return m.reply(`❌ No tienes suficiente dinero. Necesitas $${pokemon.precio}, tienes $${user.dinero}.`);
       }
       
       // Crear copia del Pokémon para el usuario
@@ -287,17 +279,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           `✨ *${pokemon.nombre}* se unió a tu equipo!\n` +
           `💰 Precio: $${pokemon.precio}\n` +
           `📊 Nivel: ${pokemon.nivel}\n` +
-          `🎯 Tipo: ${pokemon.tipos.join(' / ').toUpperCase()}\n` +
+          `🎯 Tipo: ${Array.isArray(pokemon.tipos) ? pokemon.tipos.join(' / ').toUpperCase() : 'Desconocido'}\n` +
           `⭐ Rareza: ${pokemon.rareza}\n\n` +
-          `❤️ HP: ${pokemon.stats.hp} | ⚔️ ATK: ${pokemon.stats.attack}\n` +
-          `🛡️ DEF: ${pokemon.stats.defense} | 🏃 VEL: ${pokemon.stats.speed}\n\n` +
+          `❤️ HP: ${pokemon.stats?.hp || '?'} | ⚔️ ATK: ${pokemon.stats?.attack || '?'}\n` +
+          `🛡️ DEF: ${pokemon.stats?.defense || '?'} | 🏃 VEL: ${pokemon.stats?.speed || '?'}\n\n` +
           `💵 Dinero restante: $${user.dinero}\n` +
-          `📦 Pokémon en equipo: ${user.pokemons.length}/20`,
+          `📦 Pokémon en equipo: ${user.pokemons.length}/${LIMITE_POKEMONES}`,
           m
         );
       } catch (error) {
         // Si falla la imagen, enviar solo texto
-        m.reply(`🎉 *¡COMPRA EXITOSA!* 🎉\n\n✨ *${pokemon.nombre}* se unió a tu equipo!\n💰 Precio: $${pokemon.precio}\n💵 Dinero restante: $${user.dinero}`);
+        m.reply(`🎉 *¡COMPRA EXITOSA!* 🎉\n\n✨ *${pokemon.nombre}* se unió a tu equipo!\n💰 Precio: $${pokemon.precio}\n💵 Dinero restante: $${user.dinero}\n📦 Pokémon en equipo: ${user.pokemons.length}/${LIMITE_POKEMONES}`);
       }
       
       return;
@@ -311,14 +303,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       m.reply('🔄 Renovando tienda... Esto puede tomar unos segundos.');
       
-      // Obtener 8 Pokémon aleatorios nuevos
+      // Obtener 4 Pokémon aleatorios nuevos
       const nuevosPokemones = [];
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 4; i++) {
         const nuevoPokemon = await obtenerPokemonAleatorio();
-        if (nuevoPokemon) {
+        if (nuevoPokemon && nuevoPokemon.nombre) { // Validar que el Pokémon tenga nombre
           nuevosPokemones.push(nuevoPokemon);
         }
-        // Pequeña pausa para no saturar la API
         await new Promise(resolve => setTimeout(resolve, 500));
       }
       
