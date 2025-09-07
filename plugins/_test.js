@@ -20,12 +20,20 @@ let handler = async (m, { conn }) => {
   try {
     const sender = m.sender;
     const usuarios = leerUsuarios();
-    
+    const LIMITE_POKEMONES = 20; // Límite de Pokémon por usuario
+
     if (!usuarios[sender]) {
       usuarios[sender] = {
         pokemons: [],
         nombre: m.pushName || 'Usuario'
       };
+    }
+
+    // Verificar si el usuario ya alcanzó el límite
+    if (usuarios[sender].pokemons.length >= LIMITE_POKEMONES) {
+      return await conn.sendMessage(m.chat, { 
+        text: `❌ *¡Límite alcanzado!*\n\nSolo puedes tener un máximo de ${LIMITE_POKEMONES} Pokémon en tu colección.\n\nUsa *.liberar* [número] para liberar alguno y dejar espacio.` 
+      }, { quoted: m });
     }
 
     let mensajeCaptura = await conn.sendMessage(m.chat, { 
@@ -91,13 +99,12 @@ let handler = async (m, { conn }) => {
     if (totalStats > 600) rareza = '💎💎💎 Legendario';
 
     if (!pokemonImage) {
-     
       await conn.relayMessage(m.chat, {
         protocolMessage: {
           key: mensajeCaptura.key,
           type: 14,
           editedMessage: {
-            conversation: `🎊 *¡CAPTURADO!*\n\n🌟 *${pokemonName}* - ${rareza}\n❌ No tiene imagen disponible\n\n¡Agregado a tu Pokédex!`
+            conversation: `🎊 *¡CAPTURADO!*\n\n🌟 *${pokemonName}* - ${rareza}\n❌ No tiene imagen disponible\n\n¡Agregado a tu Pokédex! (${usuarios[sender].pokemons.length}/${LIMITE_POKEMONES})`
           }
         }
       }, {});
@@ -108,7 +115,7 @@ let handler = async (m, { conn }) => {
       m.chat, 
       pokemonImage, 
       'pokemon.png', 
-      `🎊 *¡POKÉMON CAPTURADO!*\n\n🌟 *Nombre:* ${pokemonName}\n📊 *Rareza:* ${rareza}\n📏 *Altura:* ${pokemonCapturado.height}m\n⚖️ *Peso:* ${pokemonCapturado.weight}kg\n❤️ *HP:* ${pokemonCapturado.stats.hp}\n⚔️ *Ataque:* ${pokemonCapturado.stats.attack}\n🛡️ *Defensa:* ${pokemonCapturado.stats.defense}\n🌀 *Tipo:* ${pokemonCapturado.types.join(' / ').toUpperCase()}\n📅 *Capturado:* ${pokemonCapturado.captured}\n\n¡Agregado a tu Pokédex! 🎯\nUsa *.verpokemon* para ver tu colección`,
+      `🎊 *¡POKÉMON CAPTURADO!*\n\n🌟 *Nombre:* ${pokemonName}\n📊 *Rareza:* ${rareza}\n📏 *Altura:* ${pokemonCapturado.height}m\n⚖️ *Peso:* ${pokemonCapturado.weight}kg\n❤️ *HP:* ${pokemonCapturado.stats.hp}\n⚔️ *Ataque:* ${pokemonCapturado.stats.attack}\n🛡️ *Defensa:* ${pokemonCapturado.stats.defense}\n🌀 *Tipo:* ${pokemonCapturado.types.join(' / ').toUpperCase()}\n📅 *Capturado:* ${pokemonCapturado.captured}\n\n¡Agregado a tu Pokédex! 🎯 (${usuarios[sender].pokemons.length}/${LIMITE_POKEMONES})\nUsa *.verpokemon* para ver tu colección`,
       m
     );
     
