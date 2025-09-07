@@ -130,8 +130,44 @@ function buscarItem(nombre, items) {
   )
 }
 
-// Variable global para compras temporales
-const comprasPendientes = new Map()
+// Función para ver inventario
+function verInventarioUsuario(user) {
+  if (!user.inventario || user.inventario.length === 0) {
+    return null
+  }
+  
+  return user.inventario
+}
+
+// Función para usar item del inventario
+function usarItemInventario(user, indexItem, indexPokemon) {
+  if (!user.inventario || indexItem < 0 || indexItem >= user.inventario.length) {
+    return { success: false, message: '❌ Item no encontrado en el inventario' }
+  }
+  
+  const pokemones = obtenerPokemonesUsuario(user)
+  if (indexPokemon < 0 || indexPokemon >= pokemones.length) {
+    return { success: false, message: '❌ Pokémon no encontrado' }
+  }
+  
+  const item = user.inventario[indexItem]
+  const pokemon = pokemones[indexPokemon]
+  
+  // Aplicar efecto
+  const mensajeEfecto = aplicarEfectoItem(pokemon, item)
+  
+  // Reducir cantidad o eliminar item
+  if (item.cantidad > 1) {
+    item.cantidad -= 1
+  } else {
+    user.inventario.splice(indexItem, 1)
+  }
+  
+  return { 
+    success: true, 
+    message: `✅ ¡${item.emoji} ${item.nombre} usado en ${pokemon.name}!\n${mensajeEfecto}` 
+  }
+}
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
@@ -147,6 +183,68 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (user.dinero === undefined || user.dinero === null) user.dinero = 1000
     
     const pokemones = obtenerPokemonesUsuario(user)
+    
+    // COMANDO INVENTARIO
+    if (command === 'inventario') {
+      const inventario = verInventarioUsuario(user)
+      
+      if (!inventario) {
+        return m.reply('🎒 *Tu inventario está vacío*\n\nUsa *.comprar* para adquirir items o completa misiones para ganar recompensas.')
+      }
+      
+      let mensaje = '🎒 *TU INVENTARIO* 🎒\n\n'
+      
+      inventario.forEach((item, index) => {
+        mensaje += `${index + 1}. ${item.emoji} *${item.nombre}* x${item.cantidad}\n`
+        mensaje += `   📝 ${item.descripcion || 'Sin descripción'}\n`
+        if (item.efecto) {
+          mensaje += `   ⚡ Efecto: ${item.efecto} +${item.valor}\n`
+        }
+        mensaje += '\n'
+      })
+      
+      mensaje += `💡 *Para usar un item:*\n`
+      mensaje += `*${usedPrefix}usar <item_num> <pokemon_num>*\n\n`
+      mensaje += `📌 *Ejemplos:*\n`
+      mensaje += `• ${usedPrefix}usar 1 1 - Usar el primer item en el primer Pokémon\n`
+      mensaje += `• ${usedPrefix}usar 2 3 - Usar el segundo item en el tercer Pokémon\n\n`
+      mensaje += `📋 *Tus Pokémon:*\n`
+      
+      if (pokemones.length > 0) {
+        pokemones.forEach((poke, index) => {
+          mensaje += `${index + 1}. ${poke.name} - Nvl ${poke.nivel || 1}\n`
+        })
+      } else {
+        mensaje += '❌ No tienes Pokémon todavía'
+      }
+      
+      return m.reply(mensaje)
+    }
+    
+    // COMANDO USAR ITEM
+    if (command === 'usar') {
+      if (args.length < 2) {
+        return m.reply(`❌ Formato incorrecto. Usa: *${usedPrefix}usar <número_item> <número_pokemon>*\nEjemplo: *${usedPrefix}usar 1 1*`)
+      }
+      
+      const indexItem = parseInt(args[0]) - 1
+      const indexPokemon = parseInt(args[1]) - 1
+      
+      if (isNaN(indexItem) || isNaN(indexPokemon)) {
+        return m.reply('❌ Debes usar números válidos para el item y el Pokémon.')
+      }
+      
+      const resultado = usarItemInventario(user, indexItem, indexPokemon)
+      
+      if (resultado.success) {
+        // Guardar cambios en la base de datos
+        usuarios[userId] = user
+        guardarUsuarios(usuarios)
+        return m.reply(resultado.message)
+      } else {
+        return m.reply(resultado.message)
+      }
+    }
     
     // VERIFICAR SI ES COMANDO ALIMENTAR
     if (command === 'alimentar') {
@@ -195,13 +293,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         listaTienda += `   📝 ${item.descripcion}\n\n`
       })
       
-      listaTienda += `💡 *Para comprar:*\n`
-      listaTienda += `• ${usedPrefix}comprar <item>\n`
-      listaTienda += `• ${usedPrefix}alimentar <número> <item>\n\n`
+      listaTienda += `💡 *Comandos disponibles:*\n`
+      listaTienda += `• ${usedPrefix}comprar <item> - Comprar item\n`
+      listaTienda += `• ${usedPrefix}alimentar <num> <item> - Alimentar Pokémon\n`
+      listaTienda += `• ${usedPrefix}inventario - Ver tu inventario\n`
+      listaTienda += `• ${usedPrefix}usar <item_num> <poke_num> - Usar item del inventario\n\n`
       listaTienda += `📌 *Ejemplos:*\n`
       listaTienda += `• ${usedPrefix}comprar caramelo\n`
       listaTienda += `• ${usedPrefix}alimentar 1 caramelo\n`
-      listaTienda += `• ${usedPrefix}alimentar 3 miel`
+      listaTienda += `• ${usedPrefix}usar 1 1`
       
       return m.reply(listaTienda)
     }
@@ -222,48 +322,58 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply('😢 No tienes Pokémon. Atrapa uno primero.')
     }
     
-    // SI SOLO TIENE 1 POKÉMON - APLICAR DIRECTAMENTE
-    if (pokemones.length === 1) {
-      const pokemon = pokemones[0]
-      let mensaje = `✅ ¡Compra exitosa!\n`
-      mensaje += `📦 ${item.emoji} ${item.nombre} - $${item.precio}\n`
-      mensaje += `🐾 Para: ${pokemon.name}\n\n`
-      mensaje += aplicarEfectoItem(pokemon, item)
-      
-      user.dinero -= item.precio
-      usuarios[userId] = user
-      guardarUsuarios(usuarios)
-      
-      return m.reply(mensaje)
+    // INICIALIZAR INVENTARIO SI NO EXISTE
+    if (!user.inventario) {
+      user.inventario = []
     }
     
-    // SI TIENE MÚLTIPLES POKÉMON - ENSEÑAR CÓMO ALIMENTAR
-    let mensaje = `🎯 *Tienes múltiples Pokémon* 🎯\n\n`
-    mensaje += `📦 Item: ${item.emoji} ${item.nombre} - $${item.precio}\n\n`
-    mensaje += `*TUS POKÉMON:*\n`
+    // AGREGAR ITEM AL INVENTARIO
+    const itemExistente = user.inventario.find(i => i.id === item.id)
+    if (itemExistente) {
+      itemExistente.cantidad += 1
+    } else {
+      user.inventario.push({
+        id: item.id,
+        nombre: item.nombre,
+        emoji: item.emoji,
+        descripcion: item.descripcion,
+        efecto: item.efecto,
+        valor: item.valor,
+        cantidad: 1
+      })
+    }
     
-    pokemones.forEach((poke, index) => {
-      mensaje += `${index + 1}. ${poke.name} - Nvl ${poke.nivel || 1} | ❤️ ${poke.vida || 100}/${poke.vidaMax || 100}\n`
-    })
+    user.dinero -= item.precio
+    usuarios[userId] = user
     
-    mensaje += `\n💡 *Para alimentar usa:*\n`
-    mensaje += `*${usedPrefix}alimentar <número> ${item.nombre}*\n\n`
-    mensaje += `📌 *Ejemplos:*\n`
-    mensaje += `• ${usedPrefix}alimentar 1 ${item.nombre}\n`
-    mensaje += `• ${usedPrefix}alimentar 3 ${item.nombre}`
-    
-    return m.reply(mensaje)
+    if (guardarUsuarios(usuarios)) {
+      let mensaje = `✅ ¡Compra exitosa!\n`
+      mensaje += `📦 ${item.emoji} ${item.nombre} - $${item.precio}\n`
+      mensaje += `🎒 Agregado a tu inventario\n`
+      mensaje += `💵 Saldo restante: $${user.dinero}\n\n`
+      mensaje += `💡 Usa *${usedPrefix}inventario* para ver tus items\n`
+      mensaje += `💡 Usa *${usedPrefix}usar <num_item> <num_pokemon>* para usar items`
+      
+      return m.reply(mensaje)
+    } else {
+      return m.reply('❌ Error al guardar la compra. Intenta nuevamente.')
+    }
     
   } catch (error) {
-    console.error('Error en comando comprar/alimentar:', error)
+    console.error('Error en comando:', error)
     m.reply('❌ Error en el sistema. Intenta nuevamente.')
   }
 }
 
 // CONFIGURAR MÚLTIPLES COMANDOS EN EL MISMO HANDLER
-handler.help = ['comprar [item]', 'alimentar [número] [item]']
-handler.tags = ['pokemon', 'economy']
-handler.command = /^(comprar|buy|alimentar|feed)$/i
+handler.help = [
+  'comprar [item]', 
+  'alimentar [número] [item]', 
+  'inventario', 
+  'usar [item_num] [poke_num]'
+]
+handler.tags = ['pokemon', 'economy', 'inventory']
+handler.command = /^(comprar|buy|alimentar|feed|inventario|inventory|usar|use)$/i
 handler.register = true
 
 export default handler
