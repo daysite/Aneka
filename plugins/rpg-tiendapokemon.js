@@ -44,13 +44,13 @@ function guardarUsuarios(usuarios) {
 // TIENDA POR DEFECTO
 const tiendaDefault = {
   items: [
-    { id: 1, nombre: "🍎 Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima" },
-    { id: 2, nombre: "🍖 Caramelo Raro", precio: 100, efecto: "nivel", valor: 1, descripcion: "+1 nivel" },
-    { id: 3, nombre: "🧁 Pastel Pokémon", precio: 80, efecto: "experiencia", valor: 50, descripcion: "+50 experiencia" },
-    { id: 4, nombre: "🍯 Miel Dorada", precio: 150, efecto: "vida", valor: 25, descripcion: "+25 vida máxima" },
-    { id: 5, nombre: "⭐ Caramelo XL", precio: 200, efecto: "nivel", valor: 2, descripcion: "+2 niveles" },
-    { id: 6, nombre: "🍬 Caramelo Energía", precio: 120, efecto: "vida", valor: 15, descripcion: "+15 vida máxima" },
-    { id: 7, nombre: "🎂 Tarta Experiencia", precio: 180, efecto: "experiencia", valor: 100, descripcion: "+100 experiencia" }
+    { id: 1, nombre: "Baya Aranja", precio: 50, efecto: "vida", valor: 10, descripcion: "+10 vida máxima", emoji: "🍎" },
+    { id: 2, nombre: "Caramelo Raro", precio: 100, efecto: "nivel", valor: 1, descripcion: "+1 nivel", emoji: "🍖" },
+    { id: 3, nombre: "Pastel Pokémon", precio: 80, efecto: "experiencia", valor: 50, descripcion: "+50 experiencia", emoji: "🧁" },
+    { id: 4, nombre: "Miel Dorada", precio: 150, efecto: "vida", valor: 25, descripcion: "+25 vida máxima", emoji: "🍯" },
+    { id: 5, nombre: "Caramelo XL", precio: 200, efecto: "nivel", valor: 2, descripcion: "+2 niveles", emoji: "⭐" },
+    { id: 6, nombre: "Caramelo Energía", precio: 120, efecto: "vida", valor: 15, descripcion: "+15 vida máxima", emoji: "🍬" },
+    { id: 7, nombre: "Tarta Experiencia", precio: 180, efecto: "experiencia", valor: 100, descripcion: "+100 experiencia", emoji: "🎂" }
   ]
 }
 
@@ -120,8 +120,14 @@ function aplicarEfectoItem(pokemon, item) {
   return mensaje
 }
 
-// Variable global para almacenar compras temporales
-const comprasTemporales = new Map()
+// Buscar item por nombre (case insensitive)
+function buscarItemPorNombre(nombre, items) {
+  const nombreBusqueda = nombre.toLowerCase().trim()
+  return items.find(item => 
+    item.nombre.toLowerCase().includes(nombreBusqueda) ||
+    item.emoji === nombre
+  )
+}
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
@@ -138,64 +144,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     
     const pokemones = obtenerPokemonesUsuario(user)
     
-    // VERIFICAR SI HAY UNA COMPRA PENDIENTE PARA ESTE USUARIO
-    if (comprasTemporales.has(userId) && args.length === 0) {
-      const compra = comprasTemporales.get(userId)
-      const seleccion = m.text ? m.text.trim() : args[0]
-      
-      if (seleccion) {
-        const seleccionIdx = parseInt(seleccion) - 1
-        
-        // Validar selección
-        if (isNaN(seleccionIdx) || seleccionIdx < 0 || seleccionIdx >= pokemones.length) {
-          comprasTemporales.delete(userId)
-          return m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
-        }
-        
-        const item = itemsTienda.find(i => i.id === compra.itemId)
-        if (!item) {
-          comprasTemporales.delete(userId)
-          return m.reply('❌ Error: El artículo ya no está disponible.')
-        }
-        
-        if (user.dinero < item.precio) {
-          comprasTemporales.delete(userId)
-          return m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
-        }
-        
-        // Aplicar el efecto al Pokémon seleccionado
-        const pokemon = pokemones[seleccionIdx]
-        let mensaje = `✅ ¡Compra exitosa!\n`
-        mensaje += `📦 ${item.nombre} - $${item.precio}\n`
-        mensaje += `🐾 Para: ${pokemon.name}\n\n`
-        mensaje += aplicarEfectoItem(pokemon, item)
-        
-        // Actualizar el Pokémon
-        pokemones[seleccionIdx] = pokemon
-        user.pokemons = pokemones
-        user.dinero -= item.precio
-        
-        // Guardar cambios
-        usuarios[userId] = user
-        guardarUsuarios(usuarios)
-        
-        comprasTemporales.delete(userId)
-        return m.reply(mensaje)
-      }
-    }
-    
     // MOSTRAR TIENDA SI NO HAY ARGUMENTOS
     if (args.length === 0) {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`
       listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`
       
       itemsTienda.forEach(item => {
-        listaTienda += `*${item.id}.* ${item.nombre} - $${item.precio}\n`
+        listaTienda += `${item.emoji} *${item.nombre}* - $${item.precio}\n`
         listaTienda += `   📝 ${item.descripcion}\n\n`
       })
       
-      listaTienda += `💡 Usa: *${usedPrefix}comprar <número>* para comprar un item\n`
-      listaTienda += `Ejemplo: *${usedPrefix}comprar 1*`
+      listaTienda += `💡 Usa: *${usedPrefix}comprar <nombre>* para comprar\n`
+      listaTienda += `Ejemplos:\n• *${usedPrefix}comprar caramelo*\n• *${usedPrefix}comprar 🍖*\n• *${usedPrefix}comprar baya*`
       
       return m.reply(listaTienda)
     }
@@ -205,56 +165,53 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply('😢 No tienes Pokémon. Atrapa uno primero.')
     }
     
-    // COMPRAR ITEM
-    const itemId = parseInt(args[0])
-    const item = itemsTienda.find(i => i.id === itemId)
+    // BUSCAR ITEM POR NOMBRE (no por número)
+    const nombreItem = args.join(' ').toLowerCase()
+    const item = buscarItemPorNombre(nombreItem, itemsTienda)
     
     if (!item) {
-      return m.reply(`❌ Item no válido. Usa *${usedPrefix}comprar* para ver los items.`)
+      return m.reply(`❌ Item no encontrado. Usa *${usedPrefix}comprar* para ver los items disponibles.`)
     }
     
+    // VERIFICAR DINERO
     if (user.dinero < item.precio) {
       return m.reply(`❌ No tienes suficiente dinero.\nNecesitas: $${item.precio}\nTienes: $${user.dinero}`)
     }
     
-    // SI SOLO TIENE UN POKÉMON
+    // SI SOLO TIENE UN POKÉMON - APLICAR DIRECTAMENTE
     if (pokemones.length === 1) {
       const pokemon = pokemones[0]
       let mensaje = `✅ ¡Compra exitosa!\n`
-      mensaje += `📦 ${item.nombre} - $${item.precio}\n`
+      mensaje += `📦 ${item.emoji} ${item.nombre} - $${item.precio}\n`
       mensaje += `🐾 Para: ${pokemon.name}\n\n`
       mensaje += aplicarEfectoItem(pokemon, item)
       
       user.dinero -= item.precio
+      usuarios[userId] = user
       guardarUsuarios(usuarios)
       
       return m.reply(mensaje)
     }
     
-    // SI TIENE MÚLTIPLES POKÉMON
+    // SI TIENE MÚLTIPLES POKÉMON - MOSTRAR OPCIONES PERO CON COMANDO ESPECÍFICO
     let listaPokemones = `🎯 *¿Qué Pokémon quieres alimentar?* 🎯\n\n`
-    listaPokemones += `📦 Item: ${item.nombre} - $${item.precio}\n\n`
+    listaPokemones += `📦 Item: ${item.emoji} ${item.nombre} - $${item.precio}\n\n`
     listaPokemones += `*TUS POKÉMON:*\n`
     
     pokemones.forEach((poke, index) => {
-      listaPokemones += `*${index + 1}.* ${poke.name} - Nvl ${poke.nivel || 1} | ❤️ ${poke.vida || 100}/${poke.vidaMax || 100}\n`
+      listaPokemones += `${index + 1}. ${poke.name} - Nvl ${poke.nivel || 1} | ❤️ ${poke.vida || 100}/${poke.vidaMax || 100}\n`
     })
     
-    listaPokemones += `\nResponde con el *número* del Pokémon.\n`
-    listaPokemones += `Ejemplo: *1* para ${pokemones[0].name}`
+    listaPokemones += `\n💡 Usa: *${usedPrefix}alimentar <número> con ${item.nombre.toLowerCase()}*\n`
+    listaPokemones += `Ejemplo: *${usedPrefix}alimentar 1 con ${item.nombre.toLowerCase()}*`
     
-    // GUARDAR COMPRA TEMPORAL EN MEMORIA
-    comprasTemporales.set(userId, {
+    // Guardar contexto de compra temporal
+    user.ultimaCompra = {
       itemId: item.id,
       timestamp: Date.now()
-    })
-    
-    // Configurar timeout para limpiar compra temporal (5 minutos)
-    setTimeout(() => {
-      if (comprasTemporales.has(userId)) {
-        comprasTemporales.delete(userId)
-      }
-    }, 300000)
+    }
+    usuarios[userId] = user
+    guardarUsuarios(usuarios)
     
     await m.reply(listaPokemones)
     
@@ -264,11 +221,84 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 }
 
-// ELIMINAR EL HANDLER BEFORE - TODO SE MANEJA EN EL HANDLER PRINCIPAL
+// Handler para el comando alimentar
+let handlerAlimentar = async (m, { conn, args, usedPrefix }) => {
+  try {
+    const usuarios = leerUsuarios()
+    const itemsTienda = obtenerItemsTienda()
+    const userId = m.sender
+    
+    if (!usuarios[userId] || !usuarios[userId].ultimaCompra) {
+      return m.reply('❌ No tienes una compra pendiente. Usa *.comprar* primero.')
+    }
+    
+    const user = usuarios[userId]
+    const pokemones = obtenerPokemonesUsuario(user)
+    const compra = user.ultimaCompra
+    
+    // Verificar tiempo (5 minutos)
+    if (Date.now() - compra.timestamp > 300000) {
+      delete user.ultimaCompra
+      guardarUsuarios(usuarios)
+      return m.reply('❌ Tiempo agotado. Realiza la compra nuevamente.')
+    }
+    
+    const item = itemsTienda.find(i => i.id === compra.itemId)
+    if (!item) {
+      delete user.ultimaCompra
+      guardarUsuarios(usuarios)
+      return m.reply('❌ Error: El artículo ya no está disponible.')
+    }
+    
+    // Buscar el número del Pokémon en los argumentos
+    let pokemonIndex = -1
+    for (let i = 0; i < args.length; i++) {
+      if (!isNaN(args[i]) && parseInt(args[i]) > 0) {
+        pokemonIndex = parseInt(args[i]) - 1
+        break
+      }
+    }
+    
+    if (pokemonIndex === -1 || pokemonIndex >= pokemones.length) {
+      return m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
+    }
+    
+    // Verificar dinero
+    if (user.dinero < item.precio) {
+      delete user.ultimaCompra
+      guardarUsuarios(usuarios)
+      return m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
+    }
+    
+    // Aplicar efecto
+    const pokemon = pokemones[pokemonIndex]
+    let mensaje = `✅ ¡Alimentación exitosa!\n`
+    mensaje += `📦 ${item.emoji} ${item.nombre} - $${item.precio}\n`
+    mensaje += `🐾 Para: ${pokemon.name}\n\n`
+    mensaje += aplicarEfectoItem(pokemon, item)
+    
+    // Actualizar
+    user.dinero -= item.precio
+    delete user.ultimaCompra
+    usuarios[userId] = user
+    guardarUsuarios(usuarios)
+    
+    m.reply(mensaje)
+    
+  } catch (error) {
+    console.error('Error en alimentar:', error)
+    m.reply('❌ Error al alimentar. Intenta nuevamente.')
+  }
+}
 
-handler.help = ['comprar [número]']
+handlerAlimentar.help = ['alimentar <número>']
+handlerAlimentar.tags = ['pokemon']
+handlerAlimentar.command = ['alimentar']
+handlerAlimentar.register = true
+
+handler.help = ['comprar <nombre>']
 handler.tags = ['pokemon', 'economy']
 handler.command = ['comprar', 'buy']
 handler.register = true
 
-export default handler
+export { handler as default, handlerAlimentar }
