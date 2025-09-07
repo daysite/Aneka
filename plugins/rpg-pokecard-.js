@@ -102,15 +102,14 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
     // Mostrar información de las cartas encontradas
     let cardInfo = `🃏 *Pokémon Cards Encontradas* 🃏\n\n`;
     cardInfo += `🔍 *Búsqueda:* ${text}\n`;
-    cardInfo += `📊 *Total de cartas:* ${cards.length}\n`;
-    cardInfo += `🌐 *Estrategia:* ${strategyUsed}\n\n`;
+    cardInfo += `📊 *Total de cartas:* ${cards.length}\n\n`;
     
     // Mostrar primeras 5 cartas
     cards.slice(0, 5).forEach((card, index) => {
       cardInfo += `*${index + 1}.* ${card.name}\n`;
-      if (card.set) cardInfo += `   🎴 *Set:* ${card.set.name}\n`;
-      if (card.rarity) cardInfo += `   ⭐ *Rareza:* ${card.rarity}\n`;
-      if (card.hp) cardInfo += `   ❤️ *HP:* ${card.hp}\n`;
+      if (card.set) cardInfo += `   - *Set:* ${card.set.name}\n`;
+      if (card.rarity) cardInfo += `   - *Rareza:* ${card.rarity}\n`;
+      if (card.hp) cardInfo += `   - *HP:* ${card.hp}\n`;
       cardInfo += `\n`;
     });
     
@@ -118,7 +117,7 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
       cardInfo += `ℹ️ *Y ${cards.length - 5} cartas más...*\n\n`;
     }
     
-    cardInfo += `💡 *Usa:* ${usedPrefix}pokecardimg <número> para ver una carta`;
+    cardInfo += `💡 *Usa:* ${usedPrefix}pokecarding <número> para ver una carta`;
     
     await conn.reply(m.chat, cardInfo, m);
     
@@ -147,7 +146,7 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   }
 };
 
-// Handler para ver imágenes de cartas (EL MISMO DE ANTES)
+// Handler para ver imágenes de cartas (CORREGIDO)
 let handlerImg = async (m, { conn, usedPrefix, args }) => {
   if (!global.pokecards || !global.pokecards[m.sender]) {
     return conn.reply(m.chat,
@@ -158,6 +157,7 @@ let handlerImg = async (m, { conn, usedPrefix, args }) => {
   
   const userData = global.pokecards[m.sender];
   
+  // Limpiar datos después de 5 minutos
   if (Date.now() - userData.timestamp > 300000) {
     delete global.pokecards[m.sender];
     return conn.reply(m.chat,
@@ -169,8 +169,8 @@ let handlerImg = async (m, { conn, usedPrefix, args }) => {
   if (!args[0] || isNaN(args[0])) {
     return conn.reply(m.chat,
       `❌ *Número inválido*\n\n` +
-      `Usa: ${usedPrefix}pokecardimg <número>\n` +
-      `Ejemplo: ${usedPrefix}pokecardimg 1\n\n` +
+      `Usa: ${usedPrefix}pokecarding <número>\n` +
+      `Ejemplo: ${usedPrefix}pokecarding 1\n\n` +
       `Cartas disponibles: 1-${userData.cards.length}`, 
     m);
   }
@@ -210,7 +210,7 @@ let handlerImg = async (m, { conn, usedPrefix, args }) => {
     await m.react('✅');
     
   } catch (error) {
-    console.error('Error en pokecardimg:', error);
+    console.error('Error en pokecarding:', error);
     await m.react('✖️');
     await conn.reply(m.chat, `❌ Error al cargar la imagen`, m);
   }
@@ -222,9 +222,10 @@ handler.tags = ['pokemon', 'cards'];
 handler.command = ['pokecard', 'pkmncard', 'cartapokemon'];
 handler.register = true;
 
-handlerImg.help = ['pokecardimg <número>'];
+// Configuración para el comando pokecarding (CORREGIDO)
+handlerImg.help = ['pokecarding <número>'];
 handlerImg.tags = ['pokemon', 'cards'];
-handlerImg.command = ['pokecardimg', 'pkmnimg', 'vercarta'];
+handlerImg.command = ['pokecarding', 'pkmnimg', 'vercarta'];
 handlerImg.register = true;
 
 export { handler as default, handlerImg };
