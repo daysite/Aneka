@@ -140,7 +140,7 @@ function aplicarEfectoItem(pokemon, item) {
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     const usuarios = leerUsuarios()
-    const itemsTienda = obtenerItemsTienda() // Siempre obtiene items
+    const itemsTienda = obtenerItemsTienda()
     const userId = m.sender
     
     if (!usuarios[userId]) {
@@ -161,7 +161,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`
       listaTienda += `💵 Tu dinero: $${user.dinero}\n\n`
       
-      // MOSTRAR ITEMS (siempre debería haber items)
       itemsTienda.forEach(item => {
         listaTienda += `*${item.id}.* ${item.nombre} - $${item.precio}\n`
         listaTienda += `   📝 ${item.descripcion}\n\n`
@@ -170,7 +169,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       listaTienda += `💡 Usa: *${usedPrefix}comprar <número>* para comprar un item\n`
       listaTienda += `Ejemplo: *${usedPrefix}comprar 1*`
       
-      // SOLO TEXTO - SIN IMAGEN
       return m.reply(listaTienda)
     }
     
@@ -216,11 +214,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     listaPokemones += `*TUS POKÉMON:*\n`
     
     pokemones.forEach((poke, index) => {
-      listaPokemones += `*${index + 1}.* ${poke.name || 'Pokémon'} - Nvl ${poke.nivel || 1} | ❤️ ${poke.vida || 100}/${poke.vidaMax || 100}\n`
+      listaPokemones += `*${index + 1}.* ${poke.name} - Nvl ${poke.nivel || 1} | ❤️ ${poke.vida || 100}/${poke.vidaMax || 100}\n`
     })
     
     listaPokemones += `\nResponde con el *número* del Pokémon.\n`
-    listaPokemones += `Ejemplo: *1* para ${pokemones[0].name || 'Pokémon 1'}`
+    listaPokemones += `Ejemplo: *1* para ${pokemones[0].name}`
     
     // Guardar estado temporal
     user.compraTemporal = {
@@ -228,11 +226,22 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       timestamp: Date.now()
     }
     
+    usuarios[userId] = user // Actualizar el usuario en el objeto
     if (!guardarUsuarios(usuarios)) {
       return m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
     }
     
-    m.reply(listaPokemones)
+    // Enviar mensaje y configurar el handler de respuesta
+    await m.reply(listaPokemones)
+    
+    // Configurar un timeout para limpiar la compra temporal después de 5 minutos
+    setTimeout(() => {
+      const usuariosTemp = leerUsuarios()
+      if (usuariosTemp[userId] && usuariosTemp[userId].compraTemporal) {
+        delete usuariosTemp[userId].compraTemporal
+        guardarUsuarios(usuariosTemp)
+      }
+    }, 300000)
     
   } catch (error) {
     console.error('Error en comando comprar:', error)
@@ -240,9 +249,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 }
 
-// Manejar mensajes de respuesta (para la selección de Pokémon)
+// Handler para procesar las respuestas de selección de Pokémon
 export async function before(m, { conn }) {
-  if (!m.text || m.isBaileys || m.fromMe) return
+  if (!m.text || m.isBaileys || m.fromMe) return false
   
   try {
     const usuarios = leerUsuarios()
@@ -250,39 +259,51 @@ export async function before(m, { conn }) {
     const userId = m.sender
     const user = usuarios[userId]
     
+    // Verificar si el usuario tiene una compra temporal pendiente
     if (!user || !user.compraTemporal) return false
     
     const selection = m.text.trim()
     const seleccionIdx = parseInt(selection) - 1
     const pokemones = obtenerPokemonesUsuario(user)
     
+    console.log('Procesando selección:', {
+      userId,
+      selection,
+      seleccionIdx,
+      tieneCompraTemporal: !!user.compraTemporal,
+      numPokemones: pokemones.length
+    })
+    
     // Validar selección
     if (isNaN(seleccionIdx) || seleccionIdx < 0 || seleccionIdx >= pokemones.length) {
-      m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
+      await m.reply(`❌ Número inválido. Elige entre 1 y ${pokemones.length}.`)
+      // Limpiar estado temporal si la selección es inválida
+      delete user.compraTemporal
+      guardarUsuarios(usuarios)
       return true
     }
     
     // Verificar que la compra no sea muy antigua (5 minutos)
     if (Date.now() - user.compraTemporal.timestamp > 300000) {
+      await m.reply('❌ Tiempo agotado. Realiza la compra nuevamente.')
       delete user.compraTemporal
       guardarUsuarios(usuarios)
-      m.reply('❌ Tiempo agotado. Realiza la compra nuevamente.')
       return true
     }
     
     const item = itemsTienda.find(i => i.id === user.compraTemporal.itemId)
     if (!item) {
+      await m.reply('❌ Error: El artículo ya no está disponible.')
       delete user.compraTemporal
       guardarUsuarios(usuarios)
-      m.reply('❌ Error: El artículo ya no está disponible.')
       return true
     }
     
     // Verificar si todavía tiene suficiente dinero
     if (user.dinero < item.precio) {
+      await m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
       delete user.compraTemporal
       guardarUsuarios(usuarios)
-      m.reply(`❌ Ya no tienes suficiente dinero. Necesitas $${item.precio}.`)
       return true
     }
     
@@ -290,24 +311,30 @@ export async function before(m, { conn }) {
     const pokemon = pokemones[seleccionIdx]
     let mensaje = `✅ ¡Compra exitosa!\n`
     mensaje += `📦 ${item.nombre} - $${item.precio}\n`
-    mensaje += `🐾 Para: ${pokemon.name || 'Pokémon'}\n\n`
+    mensaje += `🐾 Para: ${pokemon.name}\n\n`
     mensaje += aplicarEfectoItem(pokemon, item)
+    
+    // Actualizar el Pokémon en la lista
+    pokemones[seleccionIdx] = pokemon
     
     // Actualizar dinero y limpiar estado temporal
     user.dinero -= item.precio
+    user.pokemons = pokemones // Asegurar que se guarde la lista actualizada
     delete user.compraTemporal
     
+    // Guardar cambios
+    usuarios[userId] = user
     if (!guardarUsuarios(usuarios)) {
-      m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
+      await m.reply('❌ Error al guardar los datos. Intenta nuevamente.')
       return true
     }
     
-    m.reply(mensaje)
+    await m.reply(mensaje)
     return true
     
   } catch (error) {
     console.error('Error en before comprar:', error)
-    m.reply('❌ Error al procesar la compra. Intenta nuevamente.')
+    await m.reply('❌ Error al procesar la compra. Intenta nuevamente.')
     return true
   }
 }
