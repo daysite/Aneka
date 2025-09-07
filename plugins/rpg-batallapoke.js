@@ -20,6 +20,9 @@ function leerUsuarios() {
     }
     
     const data = fs.readFileSync(usuariosPath, 'utf8')
+    if (!data.trim()) {
+      return {};
+    }
     return JSON.parse(data) || {}
   } catch (error) {
     console.error('Error al leer usuarios:', error)
@@ -38,10 +41,37 @@ function guardarUsuarios(usuarios) {
   }
 }
 
-// Función MEJORADA para obtener Pokémon
+// Función MEJORADA para obtener Pokémon con más validaciones
 function obtenerPokemonesUsuario(user) {
-  if (!user || !user.pokemons || !Array.isArray(user.pokemons)) return []
-  return user.pokemons.filter(p => p && p.nombre && p.nombre !== 'undefined')
+  console.log('🔍 Analizando usuario:', user?.id || 'sin id');
+  
+  if (!user) {
+    console.log('❌ Usuario no definido');
+    return [];
+  }
+  
+  if (!user.pokemons) {
+    console.log('❌ Usuario no tiene propiedad pokemons');
+    user.pokemons = []; // Inicializar si no existe
+    return [];
+  }
+  
+  if (!Array.isArray(user.pokemons)) {
+    console.log('❌ pokemons no es un array:', typeof user.pokemons);
+    user.pokemons = []; // Corregir si no es array
+    return [];
+  }
+  
+  const pokemonesValidos = user.pokemons.filter(p => {
+    const tieneNombre = p && p.nombre && p.nombre !== 'undefined' && p.nombre !== '';
+    if (!tieneNombre) {
+      console.log('⚠️ Pokémon inválido filtrado:', p);
+    }
+    return tieneNombre;
+  });
+  
+  console.log(`✅ Pokémon válidos encontrados: ${pokemonesValidos.length} de ${user.pokemons.length}`);
+  return pokemonesValidos;
 }
 
 function calcularPoder(pokemon) {
@@ -99,21 +129,6 @@ function aplicarEfectosBatalla(pokemon, esGanador) {
   return pokemonModificado;
 }
 
-// Función para recuperar Pokémon (debe ser llamado después de un tiempo)
-function recuperarPokemon(pokemon) {
-  if (!pokemon) return pokemon;
-  
-  const pokemonRecuperado = { ...pokemon };
-  
-  // Estados que se recuperan automáticamente
-  const estadosRecuperables = ['cansado', 'debilitado'];
-  if (estadosRecuperables.includes(pokemonRecuperado.estado)) {
-    pokemonRecuperado.estado = 'normal';
-  }
-  
-  return pokemonRecuperado;
-}
-
 function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   const poderAtacante = calcularPoder(pokeAtacante)
   const poderDefensor = calcularPoder(pokeDefensor)
@@ -122,7 +137,6 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   resultado += `👤 ${userName}\n`
   resultado += `🐾 ${pokeAtacante.nombre} (Nivel ${pokeAtacante.nivel || 1})`
   
-  // Mostrar estado actual si existe
   if (pokeAtacante.estado && pokeAtacante.estado !== 'normal') {
     resultado += ` [${pokeAtacante.estado.toUpperCase()}]`
   }
@@ -132,14 +146,12 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   resultado += `👤 ${rivalName}\n`
   resultado += `🐾 ${pokeDefensor.nombre} (Nivel ${pokeDefensor.nivel || 1})`
   
-  // Mostrar estado actual si existe
   if (pokeDefensor.estado && pokeDefensor.estado !== 'normal') {
     resultado += ` [${pokeDefensor.estado.toUpperCase()}]`
   }
   
   resultado += `\n⚡ Poder: ${Math.round(poderDefensor)}\n\n`
   
-  // Añadir narrativa de batalla
   resultado += `🎯 *INICIO DE BATALLA*:\n`
   resultado += `¡${pokeAtacante.nombre} usa ${obtenerAtaqueAleatorio(pokeAtacante.tipos)}!\n`
   resultado += `¡${pokeDefensor.nombre} contraataca con ${obtenerAtaqueAleatorio(pokeDefensor.tipos)}!\n\n`
@@ -171,7 +183,6 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   return { resultado, ganador, perdedor, empate: poderAtacante === poderDefensor }
 }
 
-// Función para obtener ataques según tipo
 function obtenerAtaqueAleatorio(tipos) {
   const ataquesComunes = ['Placaje', 'Gruñido', 'Arañazo', 'Destructor'];
   const ataquesPorTipo = {
@@ -181,174 +192,165 @@ function obtenerAtaqueAleatorio(tipos) {
     planta: ['Latigazo', 'Hoja Afilada', 'Rayo Solar', 'Drenadoras'],
     veneno: ['Ácido', 'Tóxico', 'Residuos', 'Bomba Lodo'],
     volador: ['Tornado', 'Ataque Aéreo', 'Picotazo', 'Remolino'],
-    // Agrega más tipos según necesites
   };
   
-  // Si no hay tipos o son desconocidos, usar ataques comunes
   if (!tipos || !Array.isArray(tipos) || tipos.length === 0) {
     return ataquesComunes[Math.floor(Math.random() * ataquesComunes.length)];
   }
   
-  // Buscar ataques para el primer tipo
   const primerTipo = tipos[0].toLowerCase();
   if (ataquesPorTipo[primerTipo]) {
     return ataquesPorTipo[primerTipo][Math.floor(Math.random() * ataquesPorTipo[primerTipo].length)];
   }
   
-  // Si el tipo no está en la lista, usar ataques comunes
   return ataquesComunes[Math.floor(Math.random() * ataquesComunes.length)];
 }
 
 let handler = async (m, { conn, args, usedPrefix }) => {
   try {
-    console.log('Iniciando batalla...');
+    console.log('🎯 Iniciando comando pelear...');
     const usuarios = leerUsuarios();
-    console.log('Usuarios cargados:', Object.keys(usuarios).length);
+    console.log('📊 Usuarios en DB:', Object.keys(usuarios).length);
     
-    const userId = m.sender
+    const userId = m.sender;
+    console.log('👤 Usuario actual:', userId);
     
     if (!usuarios[userId]) {
-      return m.reply('❌ No estás registrado. Usa *.registrar* primero.')
+      console.log('❌ Usuario no registrado');
+      return m.reply('❌ No estás registrado. Usa *.registrar* primero.');
     }
     
-    const user = usuarios[userId]
-    const pokemonesUser = obtenerPokemonesUsuario(user)
+    const user = usuarios[userId];
+    const pokemonesUser = obtenerPokemonesUsuario(user);
+    console.log('🐾 Pokémon del usuario:', pokemonesUser.length);
     
     if (pokemonesUser.length === 0) {
-      return m.reply('❌ No tienes Pokémon capturados. Usa *.pokemon* para capturar alguno.')
+      return m.reply('❌ No tienes Pokémon capturados. Usa *.pokemon* para capturar alguno.');
     }
 
-    // Mostrar lista si no hay argumentos
     if (args.length === 0) {
-      let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
+      let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`;
       pokemonesUser.forEach((poke, index) => {
-        const poder = Math.round(calcularPoder(poke))
+        const poder = Math.round(calcularPoder(poke));
         const estado = poke.estado && poke.estado !== 'normal' ? `[${poke.estado.toUpperCase()}]` : '';
-        lista += `${index + 1}. ${poke.nombre} - Nvl ${poke.nivel || 1} ${estado} | ⚡ ${poder}\n`
-      })
+        lista += `${index + 1}. ${poke.nombre} - Nvl ${poke.nivel || 1} ${estado} | ⚡ ${poder}\n`;
+      });
       
-      lista += `\n⚔️ *Para pelear:*\n`
-      lista += `${usedPrefix}pelear @usuario - Desafiar a alguien\n`
-      lista += `${usedPrefix}pelear 1 @usuario - Usar Pokémon 1\n`
-      lista += `\n💡 *Estados:*\n• CANSADO: Recupera en 30 min\n• DEBILITADO: Necesita curación\n• NORMAL: Listo para combatir`
+      lista += `\n⚔️ *Para pelear:*\n`;
+      lista += `${usedPrefix}pelear @usuario - Desafiar a alguien\n`;
+      lista += `${usedPrefix}pelear 1 @usuario - Usar Pokémon 1\n`;
+      lista += `\n💡 *Estados:*\n• CANSADO: Recupera en 30 min\n• DEBILITADO: Necesita curación\n• NORMAL: Listo para combatir`;
       
-      return m.reply(lista)
+      return m.reply(lista);
     }
 
     // BUSCAR USUARIO MENCIONADO
-    let mentionedJid = null
-    let pokemonIndex = 0 // Por defecto el primer Pokémon
+    let mentionedJid = null;
+    let pokemonIndex = 0;
 
-    // Verificar si hay menciones en el mensaje
     if (m.mentionedJid && m.mentionedJid.length > 0) {
-      mentionedJid = m.mentionedJid[0]
+      mentionedJid = m.mentionedJid[0];
+      console.log('🎯 Usuario mencionado:', mentionedJid);
     }
 
-    // Buscar número de Pokémon en los argumentos
     for (let i = 0; i < args.length; i++) {
       if (!isNaN(args[i]) && parseInt(args[i]) > 0) {
-        pokemonIndex = parseInt(args[i]) - 1
-        break
+        pokemonIndex = parseInt(args[i]) - 1;
+        break;
       }
     }
 
     if (!mentionedJid) {
-      return m.reply(`❌ Debes mencionar a alguien.\nEjemplo: *${usedPrefix}pelear @usuario*`)
+      return m.reply(`❌ Debes mencionar a alguien.\nEjemplo: *${usedPrefix}pelear @usuario*`);
     }
 
-    // Verificar que no sea uno mismo
     if (userId === mentionedJid) {
-      return m.reply('❌ No puedes pelear contra ti mismo.')
+      return m.reply('❌ No puedes pelear contra ti mismo.');
     }
 
-    // BUSCAR RIVAL EN LA BASE DE DATOS
-    const rivalId = mentionedJid
-    let rival = usuarios[rivalId]
-
+    // BUSCAR RIVAL
+    const rivalId = mentionedJid;
+    console.log('🥊 Buscando rival:', rivalId);
+    
+    let rival = usuarios[rivalId];
     if (!rival) {
-      return m.reply('❌ El usuario mencionado no está registrado en el sistema Pokémon.')
+      console.log('❌ Rival no encontrado en usuarios:', rivalId);
+      console.log('Usuarios disponibles:', Object.keys(usuarios));
+      return m.reply('❌ El usuario mencionado no está registrado en el sistema Pokémon.');
     }
 
-    const pokemonesRival = obtenerPokemonesUsuario(rival)
+    console.log('✅ Rival encontrado:', rival.nombre || 'sin nombre');
+    console.log('🔍 Propiedades del rival:', Object.keys(rival));
+    
+    const pokemonesRival = obtenerPokemonesUsuario(rival);
+    console.log('🐾 Pokémon del rival encontrados:', pokemonesRival.length);
     
     if (pokemonesRival.length === 0) {
-      return m.reply('❌ El oponente no tiene Pokémon capturados.')
+      console.log('❌ Rival no tiene Pokémon válidos');
+      console.log('Estructura completa del rival:', JSON.stringify(rival, null, 2));
+      return m.reply('❌ El oponente no tiene Pokémon capturados.');
     }
 
-    // Verificar índice de Pokémon
     if (pokemonIndex < 0 || pokemonIndex >= pokemonesUser.length) {
-      return m.reply(`❌ Pokémon inválido. Elige del 1 al ${pokemonesUser.length}.`)
+      return m.reply(`❌ Pokémon inválido. Elige del 1 al ${pokemonesUser.length}.`);
     }
 
-    const pokemonUser = pokemonesUser[pokemonIndex]
+    const pokemonUser = pokemonesUser[pokemonIndex];
+    console.log('⚡ Pokémon usuario seleccionado:', pokemonUser.nombre);
     
-    // Verificar si el Pokémon puede pelear
     if (!puedePelear(pokemonUser)) {
-      return m.reply(`❌ *${pokemonUser.nombre}* no puede pelear ahora (Estado: ${pokemonUser.estado || 'desconocido'}).\n💡 Usa pociones o espera a que se recupere.`)
+      return m.reply(`❌ *${pokemonUser.nombre}* no puede pelear ahora (Estado: ${pokemonUser.estado || 'desconocido'}).\n💡 Usa pociones o espera a que se recupere.`);
     }
 
-    // Elegir Pokémon rival aleatorio que pueda pelear
-    const pokemonesRivalDisponibles = pokemonesRival.filter(p => puedePelear(p))
+    const pokemonesRivalDisponibles = pokemonesRival.filter(p => puedePelear(p));
+    console.log('🎯 Pokémon rival disponibles:', pokemonesRivalDisponibles.length);
+    
     if (pokemonesRivalDisponibles.length === 0) {
-      return m.reply('❌ Tu rival no tiene Pokémon disponibles para pelear.')
+      return m.reply('❌ Tu rival no tiene Pokémon disponibles para pelear.');
     }
     
-    const pokemonRival = pokemonesRivalDisponibles[Math.floor(Math.random() * pokemonesRivalDisponibles.length)]
+    const pokemonRival = pokemonesRivalDisponibles[Math.floor(Math.random() * pokemonesRivalDisponibles.length)];
+    console.log('🥊 Pokémon rival seleccionado:', pokemonRival.nombre);
     
-    console.log('Pokémon usuario:', pokemonUser.nombre);
-    console.log('Pokémon rival:', pokemonRival.nombre);
-    
-    // Simular batalla
     const batalla = simularBatalla(
       pokemonUser,
       pokemonRival,
       user.nombre || conn.getName(userId),
       rival.nombre || conn.getName(rivalId)
-    )
+    );
     
-    // Aplicar efectos de batalla a los Pokémon
     if (!batalla.empate) {
-      const pokemonUserModificado = aplicarEfectosBatalla(
-        pokemonUser, 
-        batalla.ganador === pokemonUser
-      );
+      const pokemonUserModificado = aplicarEfectosBatalla(pokemonUser, batalla.ganador === pokemonUser);
+      const pokemonRivalModificado = aplicarEfectosBatalla(pokemonRival, batalla.ganador === pokemonRival);
       
-      const pokemonRivalModificado = aplicarEfectosBatalla(
-        pokemonRival, 
-        batalla.ganador === pokemonRival
-      );
-      
-      // Actualizar Pokémon en la base de datos (VERSIÓN MEJORADA)
+      // Actualizar Pokémon del usuario
       const userPokemonIndex = user.pokemons.findIndex(p => 
         p && pokemonUser && (p.idUnico === pokemonUser.idUnico || p.nombre === pokemonUser.nombre)
       );
 
       if (userPokemonIndex !== -1 && pokemonUserModificado) {
         user.pokemons[userPokemonIndex] = pokemonUserModificado;
-        console.log('Pokémon usuario actualizado:', pokemonUserModificado.nombre);
       }
 
+      // Actualizar Pokémon del rival
       const rivalPokemonIndex = rival.pokemons.findIndex(p => 
         p && pokemonRival && (p.idUnico === pokemonRival.idUnico || p.nombre === pokemonRival.nombre)
       );
 
       if (rivalPokemonIndex !== -1 && pokemonRivalModificado) {
         rival.pokemons[rivalPokemonIndex] = pokemonRivalModificado;
-        console.log('Pokémon rival actualizado:', pokemonRivalModificado.nombre);
       }
       
-      // Guardar cambios
       usuarios[userId] = user;
       usuarios[rivalId] = rival;
-      const guardadoExitoso = guardarUsuarios(usuarios);
-      console.log('Datos guardados:', guardadoExitoso);
+      guardarUsuarios(usuarios);
     }
     
-    await m.reply(batalla.resultado)
+    await m.reply(batalla.resultado);
 
   } catch (error) {
-    console.error('Error detallado en pelear:', error);
-    console.error('Stack trace:', error.stack);
+    console.error('💥 Error detallado en pelear:', error);
+    console.error('📋 Stack trace:', error.stack);
     m.reply('❌ Error en la batalla. Revisa la consola para más detalles.');
   }
 }
@@ -358,4 +360,4 @@ handler.tags = ['pokemon', 'rpg']
 handler.command = /^(pelear|batalla|battle)$/i
 handler.register = true;
 
-export default handler
+export default handler;
