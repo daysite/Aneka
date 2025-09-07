@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   if (!text) {
     return conn.reply(m.chat, 
-      `🎵 *SoundCloud Downloader* 🎵\n\n` +
+      `🎵 *Downloader de Música* 🎵\n\n` +
       `❌ Debes ingresar el nombre de una canción o artista.\n\n` +
       `💡 *Ejemplos:*\n` +
       `> ${usedPrefix + command} Lisa Money\n` +
@@ -15,106 +15,128 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   await m.react('🕒');
   
   try {
-    // API CONFIABLE - SoundCloud a MP3
-    const searchUrl = `https://api.soundcloud-downloader.com/search?q=${encodeURIComponent(text)}&limit=1`;
-    
-    const searchResponse = await fetch(searchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      timeout: 15000
-    });
-    
-    if (!searchResponse.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error en la búsqueda (Código: ${searchResponse.status})\n\n` +
-        `Intenta con otro nombre de canción.`, 
-      m);
-    }
-    
-    const searchData = await searchResponse.json();
-    
-    if (!searchData || searchData.length === 0) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ No se encontraron resultados para: "${text}"\n\n` +
-        `Intenta con una búsqueda diferente.`, 
-      m);
-    }
-    
-    const track = searchData[0];
-    const downloadUrl = `https://api.soundcloud-downloader.com/download?url=${encodeURIComponent(track.permalink_url)}`;
-    
-    // Mensaje de progreso
-    await conn.reply(m.chat, 
-      `🎵 *Encontrado:* ${track.title}\n` +
-      `🎤 *Artista:* ${track.user.username}\n` +
-      `⏱️ *Duración:* ${Math.floor(track.duration / 60000)}:${Math.floor((track.duration % 60000) / 1000).toString().padStart(2, '0')}\n\n` +
-      `⬇️ *Descargando audio...*`, 
-    m);
-    
-    // Descargar audio
-    const audioResponse = await fetch(downloadUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      timeout: 30000
-    });
-    
-    if (!audioResponse.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error en la descarga (Código: ${audioResponse.status})\n\n` +
-        `La canción no se pudo descargar.`, 
-      m);
-    }
-    
-    const audioBuffer = await audioResponse.buffer();
-    
-    // Enviar audio
-    await conn.sendMessage(m.chat, {
-      audio: audioBuffer,
-      fileName: `${track.title.replace(/[^\w\s]/gi, '')}.mp3`,
-      mimetype: 'audio/mpeg',
-      contextInfo: {
-        externalAdReply: {
-          title: track.title,
-          body: `By: ${track.user.username}`,
-          thumbnailUrl: track.artwork_url,
-          sourceUrl: track.permalink_url
+    // PRIMERO intentar con YouTube (MÁS CONFIABLE)
+    try {
+      await conn.reply(m.chat, `🔍 *Buscando en YouTube:* "${text}"\n\n⏳ Esto es más confiable...`, m);
+      
+      const ytSearchUrl = `https://api.yt-downloader.org/search?q=${encodeURIComponent(text)}&limit=1`;
+      const ytSearchResponse = await fetch(ytSearchUrl, { timeout: 15000 });
+      
+      if (ytSearchResponse.ok) {
+        const ytData = await ytSearchResponse.json();
+        
+        if (ytData && ytData.length > 0) {
+          const video = ytData[0];
+          const downloadUrl = `https://api.yt-downloader.org/download?url=${encodeURIComponent(video.url)}`;
+          
+          await conn.reply(m.chat, `✅ *Encontrado en YouTube:* ${video.title}\n\n⬇️ Descargando...`, m);
+          
+          const audioResponse = await fetch(downloadUrl, { timeout: 30000 });
+          if (audioResponse.ok) {
+            const audioBuffer = await audioResponse.buffer();
+            
+            await conn.sendMessage(m.chat, {
+              audio: audioBuffer,
+              fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
+              mimetype: 'audio/mpeg'
+            }, { quoted: m });
+            
+            await conn.reply(m.chat, 
+              `✅ *Descarga de YouTube completada*\n\n` +
+              `📀 ${video.title}\n` +
+              `⏱️ ${video.duration}\n` +
+              `🎵 Vía YouTube`, 
+            m);
+            
+            return await m.react('✅');
+          }
         }
       }
-    }, { quoted: m });
+    } catch (ytError) {
+      console.log('YouTube falló, intentando SoundCloud...');
+    }
     
-    // Mensaje de éxito
+    // SI YOUTUBE FALLA, intentar SoundCloud
+    await conn.reply(m.chat, `🔍 *Buscando en SoundCloud:* "${text}"\n\n⚠️ YouTube falló, intentando alternativa...`, m);
+    
+    const scSearchUrl = `https://api.soundcloud.com/tracks?q=${encodeURIComponent(text)}&client_id=YOUR_CLIENT_ID&limit=1`;
+    const scSearchResponse = await fetch(scSearchUrl, { timeout: 10000 });
+    
+    if (!scSearchResponse.ok) {
+      await m.react('✖️');
+      return conn.reply(m.chat, 
+        `❌ *Error en todas las plataformas*\n\n` +
+        `💡 *Soluciones:*\n` +
+        `• Intenta con otro nombre\n` +
+        `• Espera unos minutos\n` +
+        `• Usa búsquedas más específicas\n\n` +
+        `⚠️ Las APIs de música están temporalmente caídas`, 
+      m);
+    }
+    
+    const scData = await scSearchResponse.json();
+    
+    if (!scData || scData.length === 0) {
+      await m.react('✖️');
+      return conn.reply(m.chat, 
+        `❌ No se encontró: "${text}"\n\n` +
+        `Intenta con:\n` +
+        `• Nombre más exacto\n` +
+        `• Artista + Canción\n` +
+        `• Menos palabras`, 
+      m);
+    }
+    
+    const track = scData[0];
+    
+    // OFRECER PREVIEW (lo único que funciona consistentemente)
+    if (track.streamable && track.stream_url) {
+      await conn.reply(m.chat, 
+        `🎵 *Preview de SoundCloud* 🎵\n\n` +
+        `📀 ${track.title}\n` +
+        `🎤 ${track.user.username}\n` +
+        `⏱️ Preview de 30 segundos\n\n` +
+        `⚠️ *Solo preview disponible* - Descargas bloqueadas`, 
+      m);
+      
+      // Stream URL requiere client_id, usar permalink como fallback
+      const previewUrl = track.permalink_url;
+      
+      await conn.sendMessage(m.chat, {
+        audio: { url: previewUrl },
+        fileName: `${track.title.replace(/[^\w\s]/gi, '')}_preview.mp3`,
+        mimetype: 'audio/mpeg'
+      }, { quoted: m });
+      
+      return await m.react('✅');
+    }
+    
+    // SI TODO FALLA
+    await m.react('✖️');
     await conn.reply(m.chat,
-      `✅ *Descarga completada*\n\n` +
-      `📀 ${track.title}\n` +
-      `🎤 ${track.user.username}\n` +
-      `🎵 SoundCloud Download`, 
+      `❌ *Sistema no disponible*\n\n` +
+      `Las descargas de música están temporalmente bloqueadas.\n\n` +
+      `💡 *Alternativas:*\n` +
+      `• Intenta más tarde\n` +
+      `• Usa YouTube directamente\n` +
+      `• Busca en otras plataformas`, 
     m);
     
-    await m.react('✅');
-    
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error general:', error);
     await m.react('✖️');
     
     await conn.reply(m.chat,
-      `❌ *Error del sistema*\n\n` +
-      `No se pudo completar la descarga.\n\n` +
-      `💡 *Posibles causas:*\n` +
-      `• El servidor de SoundCloud está lento\n` +
-      `• La canción no está disponible\n` +
-      `• Intenta con otra búsqueda`, 
+      `❌ *Error crítico*\n\n` +
+      `El sistema de descargas está experimentando problemas técnicos.\n\n` +
+      `📞 *Reporta este error al administrador*`, 
     m);
   }
 };
 
-handler.help = ['soundcloud <búsqueda>'];
+handler.help = ['music <búsqueda>', 'song <búsqueda>'];
 handler.tags = ['downloader', 'music'];
-handler.command = ['soundcloud', 'sound', 'scdl'];
+handler.command = ['music', 'song', 'musica', 'cancion'];
 handler.register = true;
 
 export default handler;
