@@ -1,44 +1,90 @@
 import fs from 'fs';
-import path from 'path';
 
 const usuariosPath = './src/database/usuarios.json';
 
-// Asegurar que el directorio existe
-function asegurarDirectorio(rutaArchivo) {
-  const directorio = path.dirname(rutaArchivo);
-  if (!fs.existsSync(directorio)) {
-    fs.mkdirSync(directorio, { recursive: true });
-  }
-}
-
 function leerUsuarios() {
   try {
-    asegurarDirectorio(usuariosPath);
-    if (!fs.existsSync(usuariosPath)) {
-      fs.writeFileSync(usuariosPath, JSON.stringify({}, null, 2));
-      return {};
-    }
-    
     const data = fs.readFileSync(usuariosPath, 'utf8');
     return JSON.parse(data) || {};
   } catch (error) {
-    console.error('Error al leer usuarios:', error);
     return {};
   }
 }
 
 function guardarUsuarios(usuarios) {
-  try {
-    asegurarDirectorio(usuariosPath);
-    fs.writeFileSync(usuariosPath, JSON.stringify(usuarios, null, 2));
-    return true;
-  } catch (error) {
-    console.error('Error al guardar usuarios:', error);
-    return false;
-  }
+  fs.writeFileSync(usuariosPath, JSON.stringify(usuarios, null, 2));
 }
 
-// Función para obtener emoji de rareza (debe coincidir con otros handlers)
+let handler = async (m, { conn, usedPrefix, args }) => {
+  try {
+    const sender = m.sender;
+    const usuarios = leerUsuarios();
+    
+    if (!usuarios[sender]) {
+      return conn.sendMessage(m.chat, { 
+        text: '❌ No estás registrado. Usa *.registrar* primero.' 
+      }, { quoted: m });
+    }
+    
+    const user = usuarios[sender];
+    
+    // Asegurarse de que pokemons es un array
+    if (!user.pokemons || !Array.isArray(user.pokemons)) {
+      user.pokemons = [];
+    }
+    
+    if (user.pokemons.length === 0) {
+      return conn.sendMessage(m.chat, { 
+        text: '❌ No tienes Pokémon para liberar.' 
+      }, { quoted: m });
+    }
+    
+    if (args.length === 0) {
+      let listaPokemon = `📋 *TUS POKÉMON (${user.pokemons.length})*\n\n`;
+      
+      user.pokemons.forEach((poke, index) => {
+        // ✅ COMPATIBLE CON AMBAS PROPIEDADES
+        const nombrePokemon = poke.nombre || poke.name || 'Desconocido';
+        const emojiRareza = obtenerEmojiRareza(poke.rareza);
+        listaPokemon += `${index + 1}. ${emojiRareza} ${nombrePokemon}\n`;
+      });
+      
+      listaPokemon += `\n💡 *Usa ${usedPrefix}liberar [número] para liberar un Pokémon*`;
+      listaPokemon += `\n*Ejemplo:* ${usedPrefix}liberar 1`;
+      
+      return conn.sendMessage(m.chat, { text: listaPokemon }, { quoted: m });
+    }
+    
+    // LIBERAR POKÉMON ESPECÍFICO
+    const index = parseInt(args[0]) - 1;
+    
+    if (isNaN(index) || index < 0 || index >= user.pokemons.length) {
+      return conn.sendMessage(m.chat, { 
+        text: `❌ Número inválido. Usa *${usedPrefix}liberar* para ver la lista.` 
+      }, { quoted: m });
+    }
+    
+    // ✅ COMPATIBLE CON AMBAS PROPIEDADES
+    const pokemonLiberado = user.pokemons[index];
+    const nombrePokemon = pokemonLiberado.nombre || pokemonLiberado.name || 'Desconocido';
+    
+    // Eliminar el Pokémon
+    user.pokemons.splice(index, 1);
+    guardarUsuarios(usuarios);
+    
+    await conn.sendMessage(m.chat, { 
+      text: `🎉 *¡POKÉMON LIBERADO!*\n\n✨ *${nombrePokemon}* ha sido liberado.\n\n📊 *Pokémon restantes:* ${user.pokemons.length}` 
+    }, { quoted: m });
+    
+  } catch (error) {
+    console.error('Error en comando liberar:', error);
+    await conn.sendMessage(m.chat, { 
+      text: '❌ Error al liberar el Pokémon. Intenta nuevamente.' 
+    }, { quoted: m });
+  }
+};
+
+// Función para obtener emoji de rareza (misma que en Pokédex)
 function obtenerEmojiRareza(rareza) {
   if (!rareza) return '📦';
   
@@ -51,105 +97,9 @@ function obtenerEmojiRareza(rareza) {
   }
 }
 
-let handler = async (m, { conn, args, usedPrefix }) => {
-  try {
-    const sender = m.sender;
-    const usuarios = leerUsuarios();
-    
-    // Verificar si el usuario existe
-    if (!usuarios[sender]) {
-      return await conn.sendMessage(m.chat, { 
-        text: '❌ *No estás registrado.*\nUsa *.registrar* para crear una cuenta primero.' 
-      }, { quoted: m });
-    }
-    
-    // Inicializar pokemons si no existe
-    if (!usuarios[sender].pokemons || !Array.isArray(usuarios[sender].pokemons)) {
-      usuarios[sender].pokemons = [];
-    }
-    
-    // Filtrar solo Pokémon válidos
-    const pokemonesValidos = usuarios[sender].pokemons.filter(p => 
-      p && p.nombre && p.nombre !== 'undefined'
-    );
-    
-    if (pokemonesValidos.length === 0) {
-      return await conn.sendMessage(m.chat, { 
-        text: `❌ *No tienes Pokémon para liberar.*\n\nUsa *${usedPrefix}pokemon* para capturar algunos primero.\nO usa *${usedPrefix}tiendapokemon* para comprar en la tienda.` 
-      }, { quoted: m });
-    }
-
-    // Si no se proporciona argumento, mostrar la lista
-    if (args.length === 0) {
-      let listaPokemon = '📋 *Tu colección de Pokémon:*\n\n';
-      
-      pokemonesValidos.forEach((p, i) => {
-        const emojiRareza = obtenerEmojiRareza(p.rareza);
-        listaPokemon += `${i + 1}. ${emojiRareza} *${p.nombre}* `;
-        
-        if (p.tipos && Array.isArray(p.tipos)) {
-          listaPokemon += `🎯 ${p.tipos.join('/').toUpperCase()}`;
-        }
-        
-        if (p.nivel) {
-          listaPokemon += ` | 📊 Nvl. ${p.nivel}`;
-        }
-        
-        listaPokemon += '\n';
-      });
-      
-      listaPokemon += `\n💡 *Para liberar un Pokémon usa:*\n${usedPrefix}liberar [número]\n\n`;
-      listaPokemon += `📌 *Ejemplo:* ${usedPrefix}liberar 1`;
-      
-      return await conn.sendMessage(m.chat, { 
-        text: listaPokemon 
-      }, { quoted: m });
-    }
-
-    const index = parseInt(args[0]) - 1;
-    
-    if (isNaN(index) || index < 0 || index >= pokemonesValidos.length) {
-      return await conn.sendMessage(m.chat, { 
-        text: `❌ *Número de Pokémon inválido.*\n\nUsa *${usedPrefix}liberar* sin número para ver tu lista de Pokémon.` 
-      }, { quoted: m });
-    }
-
-    const pokemonLiberado = pokemonesValidos[index];
-    
-    // Eliminar el Pokémon de la lista (usando el índice del array filtrado)
-    // Necesitamos encontrar el índice real en el array original
-    const pokemonId = pokemonLiberado.idUnico;
-    const indiceReal = usuarios[sender].pokemons.findIndex(p => p.idUnico === pokemonId);
-    
-    if (indiceReal !== -1) {
-      usuarios[sender].pokemons.splice(indiceReal, 1);
-    } else {
-      // Fallback: usar el índice proporcionado si no encontramos por idUnico
-      usuarios[sender].pokemons.splice(index, 1);
-    }
-    
-    // Guardar cambios
-    if (!guardarUsuarios(usuarios)) {
-      return await conn.sendMessage(m.chat, { 
-        text: '❌ *Error al guardar los datos.* Intenta de nuevo.' 
-      }, { quoted: m });
-    }
-
-    await conn.sendMessage(m.chat, { 
-      text: `🎉 *¡Pokémon liberado!*\n\n✨ *${pokemonLiberado.nombre}* ha sido liberado y ha vuelto a la naturaleza.\n\n📊 *Pokémon restantes:* ${usuarios[sender].pokemons.length}/5\n\n¡Ahora tienes espacio para capturar más! 🎣` 
-    }, { quoted: m });
-
-  } catch (error) {
-    console.error('Error en comando liberar:', error);
-    await conn.sendMessage(m.chat, { 
-      text: '❌ *Error al liberar el Pokémon.* Intenta de nuevo.' 
-    }, { quoted: m });
-  }
-};
-
+handler.help = ['liberar', 'liberar [número]'];
 handler.tags = ['pokemon'];
-handler.help = ['liberar [número]'];
-handler.command = ['liberar', 'release'];
+handler.command = /^(liberar|release)$/i;
 handler.register = true;
 
 export default handler;
