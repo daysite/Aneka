@@ -21,26 +21,49 @@ function guardarUsuarios(usuarios) {
   }
 }
 
-// Función ESPECÍFICA para tu estructura
+// Función ESPECÍFICA para tu estructura - CORREGIDA para oponentes
 function obtenerPokemonesUsuario(user) {
   if (!user) return []
   
-  // Usar EXACTAMENTE la misma estructura que tu Pokédex
-  if (user.pokemons && Array.isArray(user.pokemons) && user.pokemons.length > 0) {
+  console.log('Buscando Pokémon en usuario:', user.nombre || 'Sin nombre')
+  console.log('Campos disponibles:', Object.keys(user))
+  
+  // Buscar en TODOS los formatos posibles para compatibilidad máxima
+  if (user.pokemons && Array.isArray(user.pokemons)) {
+    console.log('Encontrado: pokemons array con', user.pokemons.length, 'pokémon(s)')
     return user.pokemons.map(pokemon => ({
       // Mantener todos los datos originales
       ...pokemon,
       // Campos adicionales para el sistema de batalla
-      nombre: pokemon.name || 'Pokémon',
+      nombre: pokemon.name || pokemon.nombre || 'Pokémon',
       nivel: pokemon.nivel || 1,
-      vida: pokemon.stats?.hp || 50,
-      vidaMax: pokemon.stats?.hp || 50,
-      ataque: pokemon.stats?.attack || 10,
-      defensa: pokemon.stats?.defense || 5,
-      experiencia: pokemon.experiencia || 0
+      vida: pokemon.stats?.hp || pokemon.hp || pokemon.vida || 50,
+      vidaMax: pokemon.stats?.hp || pokemon.hp || pokemon.vidaMax || 50,
+      ataque: pokemon.stats?.attack || pokemon.ataque || pokemon.attack || 10,
+      defensa: pokemon.stats?.defense || pokemon.defensa || pokemon.defense || 5,
+      experiencia: pokemon.experiencia || pokemon.exp || 0
     }))
   }
   
+  // Buscar en otros formatos por si acaso
+  const formatosAlternativos = ['pokemones', 'poke', 'mis_pokemones', 'pokemon_capturados', 'mispokemons', 'pokedex']
+  for (const formato of formatosAlternativos) {
+    if (user[formato] && Array.isArray(user[formato])) {
+      console.log('Encontrado:', formato, 'array con', user[formato].length, 'pokémon(s)')
+      return user[formato].map(pokemon => ({
+        ...pokemon,
+        nombre: pokemon.name || pokemon.nombre || 'Pokémon',
+        nivel: pokemon.nivel || 1,
+        vida: pokemon.stats?.hp || pokemon.hp || pokemon.vida || 50,
+        vidaMax: pokemon.stats?.hp || pokemon.hp || pokemon.vidaMax || 50,
+        ataque: pokemon.stats?.attack || pokemon.ataque || pokemon.attack || 10,
+        defensa: pokemon.stats?.defense || pokemon.defensa || pokemon.defense || 5,
+        experiencia: pokemon.experiencia || pokemon.exp || 0
+      }))
+    }
+  }
+  
+  console.log('No se encontraron Pokémon en formatos conocidos')
   return []
 }
 
@@ -50,9 +73,9 @@ function calcularPoder(pokemon) {
   
   // Usar las stats de tu sistema
   const stats = pokemon.stats || {}
-  return (stats.hp || 50) + 
-         (stats.attack || 10) + 
-         (stats.defense || 5) +
+  return (stats.hp || pokemon.hp || 50) + 
+         (stats.attack || pokemon.attack || pokemon.ataque || 10) + 
+         (stats.defense || pokemon.defense || pokemon.defensa || 5) +
          (pokemon.nivel || 1) * 2 +
          (pokemon.experiencia || 0) / 20
 }
@@ -64,20 +87,20 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   
   let resultado = `⚔️ *BATALLA POKÉMON* ⚔️\n\n`
   resultado += `👤 ${userName}\n`
-  resultado += `🐾 ${pokeAtacante.name} (Nivel ${pokeAtacante.nivel || 1})\n`
+  resultado += `🐾 ${pokeAtacante.name || pokeAtacante.nombre} (Nivel ${pokeAtacante.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderAtacante)}\n\n`
   resultado += `🆚\n\n`
   resultado += `👤 ${rivalName}\n`
-  resultado += `🐾 ${pokeDefensor.name} (Nivel ${pokeDefensor.nivel || 1})\n`
+  resultado += `🐾 ${pokeDefensor.name || pokeDefensor.nombre} (Nivel ${pokeDefensor.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderDefensor)}\n\n`
   
   // Simular turnos
   const turnos = Math.floor(Math.random() * 2) + 2
   for (let i = 1; i <= turnos; i++) {
     if (Math.random() > 0.4) {
-      resultado += `⏱️ Turno ${i}: ${pokeAtacante.name} usa ${obtenerAtaque(pokeAtacante)}!\n`
+      resultado += `⏱️ Turno ${i}: ${pokeAtacante.name || pokeAtacante.nombre} usa ${obtenerAtaque(pokeAtacante)}!\n`
     } else {
-      resultado += `⏱️ Turno ${i}: ${pokeDefensor.name} usa ${obtenerAtaque(pokeDefensor)}!\n`
+      resultado += `⏱️ Turno ${i}: ${pokeDefensor.name || pokeDefensor.nombre} usa ${obtenerAtaque(pokeDefensor)}!\n`
     }
   }
   
@@ -98,12 +121,12 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
     pokeAtacante.experiencia = (pokeAtacante.experiencia || 0) + expGanada
     
     resultado += `🎉 ¡${userName} gana la batalla!\n`
-    resultado += `✨ ${pokeAtacante.name} ganó ${expGanada} EXP\n`
+    resultado += `✨ ${pokeAtacante.name || pokeAtacante.nombre} ganó ${expGanada} EXP\n`
     
     // Verificar si sube de nivel
     if (pokeAtacante.experiencia >= (pokeAtacante.nivel || 1) * 100) {
       pokeAtacante.nivel = (pokeAtacante.nivel || 1) + 1
-      resultado += `🆙 ¡${pokeAtacante.name} subió al nivel ${pokeAtacante.nivel}!`
+      resultado += `🆙 ¡${pokeAtacante.name || pokeAtacante.nombre} subió al nivel ${pokeAtacante.nivel}!`
     }
     
   } else {
@@ -111,12 +134,12 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
     pokeDefensor.experiencia = (pokeDefensor.experiencia || 0) + expGanada
     
     resultado += `😵 ¡${rivalName} gana la batalla!\n`
-    resultado += `✨ ${pokeDefensor.name} ganó ${expGanada} EXP\n`
+    resultado += `✨ ${pokeDefensor.name || pokeDefensor.nombre} ganó ${expGanada} EXP\n`
     
     // Verificar si sube de nivel
     if (pokeDefensor.experiencia >= (pokeDefensor.nivel || 1) * 100) {
       pokeDefensor.nivel = (pokeDefensor.nivel || 1) + 1
-      resultado += `🆙 ¡${pokeDefensor.name} subió al nivel ${pokeDefensor.nivel}!`
+      resultado += `🆙 ¡${pokeDefensor.name || pokeDefensor.nombre} subió al nivel ${pokeDefensor.nivel}!`
     }
   }
   
@@ -125,28 +148,18 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
 
 // Función auxiliar para obtener nombre de ataque
 function obtenerAtaque(pokemon) {
-  const tipos = pokemon.types || ['Normal']
+  const tipos = pokemon.types || pokemon.tipo || ['Normal']
+  const tipoPrincipal = Array.isArray(tipos) ? tipos[0] : tipos
   const ataques = {
-    'FIRE': 'Lanzallamas',
-    'WATER': 'Hidrobomba', 
-    'ELECTRIC': 'Rayo',
-    'GRASS': 'Latigazo',
-    'ICE': 'Rayo Hielo',
-    'FIGHTING': 'Puño Dinámico',
-    'POISON': 'Veneno X',
-    'GROUND': 'Terremoto',
-    'FLYING': 'Tornado',
-    'PSYCHIC': 'Psíquico',
-    'BUG': 'Picadura',
-    'ROCK': 'Roca Afilada',
-    'GHOST': 'Bola Sombra',
-    'DRAGON': 'Dracoataque',
-    'DARK': 'Pulso Umbrío',
-    'STEEL': 'Cabeza de Hierro',
-    'FAIRY': 'Brillo Mágico'
+    'FIRE': 'Lanzallamas', 'WATER': 'Hidrobomba', 'ELECTRIC': 'Rayo',
+    'GRASS': 'Latigazo', 'ICE': 'Rayo Hielo', 'FIGHTING': 'Puño Dinámico',
+    'POISON': 'Veneno X', 'GROUND': 'Terremoto', 'FLYING': 'Tornado',
+    'PSYCHIC': 'Psíquico', 'BUG': 'Picadura', 'ROCK': 'Roca Afilada',
+    'GHOST': 'Bola Sombra', 'DRAGON': 'Dracoataque', 'DARK': 'Pulso Umbrío',
+    'STEEL': 'Cabeza de Hierro', 'FAIRY': 'Brillo Mágico', 'NORMAL': 'Impactrueno'
   }
   
-  return ataques[tipos[0]] || 'Impactrueno'
+  return ataques[tipoPrincipal.toUpperCase()] || 'Impactrueno'
 }
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -154,17 +167,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const usuarios = leerUsuarios()
     const userId = m.sender
     
-    // DIAGNÓSTICO: Ver qué hay en la base de datos
+    // DIAGNÓSTICO COMPLETO
     console.log('=== DIAGNÓSTICO BATALLA POKÉMON ===')
     console.log('User ID:', userId)
-    console.log('Existe usuario:', !!usuarios[userId])
-    if (usuarios[userId]) {
-      console.log('Tiene pokemons:', usuarios[userId].pokemons ? usuarios[userId].pokemons.length : 0)
-      console.log('Estructura completa:', usuarios[userId])
-    }
+    console.log('Total usuarios en DB:', Object.keys(usuarios).length)
     
     // Crear usuario si no existe (USANDO TU ESTRUCTURA)
     if (!usuarios[userId]) {
+      console.log('Creando nuevo usuario...')
       usuarios[userId] = {
         nombre: conn.getName(m.sender),
         dinero: 1000,
@@ -176,7 +186,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const user = usuarios[userId]
     const pokemonesUser = obtenerPokemonesUsuario(user)
     
-    console.log('Pokémon encontrados para batalla:', pokemonesUser.length)
+    console.log('Pokémon del usuario encontrados:', pokemonesUser.length)
     
     if (pokemonesUser.length === 0) {
       return m.reply('😢 No tienes Pokémon capturados. Usa *.pokemon* para capturar alguno.')
@@ -187,8 +197,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         const poder = Math.round(calcularPoder(poke))
-        lista += `*${index + 1}.* ${poke.name} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.stats?.hp || 0} | ⚡ ${poder} | 🌀 ${poke.types?.join('/') || 'Normal'}\n\n`
+        lista += `*${index + 1}.* ${poke.name || poke.nombre} - Nvl ${poke.nivel || 1}\n`
+        lista += `   ❤️ ${poke.stats?.hp || poke.hp || 0} | ⚡ ${poder} | 🌀 ${poke.types?.join('/') || poke.tipo || 'Normal'}\n\n`
       })
       
       lista += `⚔️ *Para pelear:*\n`
@@ -203,8 +213,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (args[0].toLowerCase() === 'lista') {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
-        lista += `*${index + 1}.* ${poke.name} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.stats?.hp || 0} | 🌀 ${poke.types?.join('/') || 'Normal'}\n\n`
+        lista += `*${index + 1}.* ${poke.name || poke.nombre} - Nvl ${poke.nivel || 1}\n`
+        lista += `   ❤️ ${poke.stats?.hp || poke.hp || 0} | 🌀 ${poke.types?.join('/') || poke.tipo || 'Normal'}\n\n`
       })
       return m.reply(lista)
     }
@@ -227,27 +237,38 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 
     const rivalId = mentionedJid.includes('@s.whatsapp.net') ? mentionedJid : mentionedJid + '@s.whatsapp.net'
+    const rivalIdSimple = rivalId.replace('@s.whatsapp.net', '')
     
     // Verificar que no sea uno mismo
-    if (userId === rivalId) {
+    if (userId === rivalId || userId === rivalIdSimple) {
       return m.reply('❌ No puedes pelear contra ti mismo.')
     }
 
+    // DIAGNÓSTICO DEL RIVAL - BUSCAR EN TODOS LOS FORMATOS POSIBLES
+    console.log('=== DIAGNÓSTICO RIVAL ===')
+    console.log('Buscando rival ID:', rivalId)
+    console.log('Buscando rival ID simple:', rivalIdSimple)
+    
+    let rival = usuarios[rivalId] || usuarios[rivalIdSimple]
+    
     // Crear rival si no existe (USANDO TU ESTRUCTURA)
-    if (!usuarios[rivalId]) {
-      usuarios[rivalId] = {
+    if (!rival) {
+      console.log('Rival no encontrado, creando nuevo...')
+      rival = {
         nombre: conn.getName(rivalId) || 'Entrenador',
         dinero: 1000,
         pokemons: [] // MISMA estructura
       }
+      usuarios[rivalId] = rival
       guardarUsuarios(usuarios)
     }
     
-    const rival = usuarios[rivalId]
+    console.log('Rival encontrado:', rival.nombre)
+    console.log('Campos del rival:', Object.keys(rival))
+    
     const pokemonesRival = obtenerPokemonesUsuario(rival)
     
-    console.log('Rival ID:', rivalId)
-    console.log('Pokémon del rival:', pokemonesRival.length)
+    console.log('Pokémon del rival encontrados:', pokemonesRival.length)
     
     if (pokemonesRival.length === 0) {
       return m.reply('⚠️ El oponente no tiene Pokémon capturados.')
@@ -259,12 +280,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       lista += `🎯 *SELECCIONA TU POKÉMON:*\n\n`
       
       pokemonesUser.forEach((poke, index) => {
-        lista += `*${index + 1}.* ${poke.name} - Nvl ${poke.nivel || 1}\n`
-        lista += `   ❤️ ${poke.stats?.hp || 0} | 🌀 ${poke.types?.join('/') || 'Normal'}\n\n`
+        lista += `*${index + 1}.* ${poke.name || poke.nombre} - Nvl ${poke.nivel || 1}\n`
+        lista += `   ❤️ ${poke.stats?.hp || poke.hp || 0} | 🌀 ${poke.types?.join('/') || poke.tipo || 'Normal'}\n\n`
       })
       
       lista += `Responde con el *número* del Pokémon.\n`
-      lista += `Ej: *1* para ${pokemonesUser[0].name}`
+      lista += `Ej: *1* para ${pokemonesUser[0].name || pokemonesUser[0].nombre}`
       
       // Guardar estado temporal
       user.batallaTemporal = {
