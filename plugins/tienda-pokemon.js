@@ -61,7 +61,7 @@ const tiendaPokemonDefault = {
     {
       id: 2,
       nombre: "Charmander",
-      precio: 300,
+      precio: 10,
       nivel: 3,
       tipos: ["fuego"],
       imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
