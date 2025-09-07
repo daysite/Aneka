@@ -2,7 +2,6 @@ import fs from 'fs'
 
 const usuariosPath = './src/database/usuarios.json'
 
-// Función IDÉNTICA a la de tu Pokédex
 function leerUsuarios() {
   try {
     const data = fs.readFileSync(usuariosPath, 'utf8')
@@ -12,7 +11,6 @@ function leerUsuarios() {
   }
 }
 
-// Función para guardar (compatible)
 function guardarUsuarios(usuarios) {
   try {
     fs.writeFileSync(usuariosPath, JSON.stringify(usuarios, null, 2))
@@ -21,88 +19,51 @@ function guardarUsuarios(usuarios) {
   }
 }
 
-// Función para extraer ID de menciones - ¡CORREGIDA!
-function extractMentionedJid(text) {
-  const mentionRegex = /@([0-9]){0,20}/g
-  const matches = text.match(mentionRegex)
-  if (matches && matches[0]) {
-    return matches[0].replace('@', '') + '@s.whatsapp.net'
-  }
-  return null
-}
-
-// Función ESPECÍFICA para tu estructura
+// Función MEJORADA para obtener Pokémon
 function obtenerPokemonesUsuario(user) {
   if (!user) return []
-  
-  // Buscar en TODOS los formatos posibles para compatibilidad máxima
-  if (user.pokemons && Array.isArray(user.pokemons)) {
-    return user.pokemons.map(pokemon => ({
-      ...pokemon,
-      nombre: pokemon.name || pokemon.nombre || 'Pokémon',
-      nivel: pokemon.nivel || 1,
-      vida: pokemon.stats?.hp || pokemon.hp || pokemon.vida || 50,
-      vidaMax: pokemon.stats?.hp || pokemon.hp || pokemon.vidaMax || 50,
-      ataque: pokemon.stats?.attack || pokemon.ataque || pokemon.attack || 10,
-      defensa: pokemon.stats?.defense || pokemon.defensa || pokemon.defense || 5,
-      experiencia: pokemon.experiencia || pokemon.exp || 0
-    }))
-  }
-  
-  return []
+  return user.pokemons || []
 }
 
-// Función para calcular poder basado en TU estructura
 function calcularPoder(pokemon) {
   if (!pokemon) return 0
-  
   const stats = pokemon.stats || {}
-  return (stats.hp || pokemon.hp || 50) + 
-         (stats.attack || pokemon.attack || pokemon.ataque || 10) + 
-         (stats.defense || pokemon.defense || pokemon.defensa || 5) +
-         (pokemon.nivel || 1) * 2
+  return (stats.hp || 50) + (stats.attack || 10) + (stats.defense || 5) + ((pokemon.nivel || 1) * 2)
 }
 
-// Función para simular batalla
 function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   const poderAtacante = calcularPoder(pokeAtacante)
   const poderDefensor = calcularPoder(pokeDefensor)
   
   let resultado = `⚔️ *BATALLA POKÉMON* ⚔️\n\n`
   resultado += `👤 ${userName}\n`
-  resultado += `🐾 ${pokeAtacante.name || pokeAtacante.nombre} (Nivel ${pokeAtacante.nivel || 1})\n`
+  resultado += `🐾 ${pokeAtacante.name} (Nivel ${pokeAtacante.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderAtacante)}\n\n`
   resultado += `🆚\n\n`
   resultado += `👤 ${rivalName}\n`
-  resultado += `🐾 ${pokeDefensor.name || pokeDefensor.nombre} (Nivel ${pokeDefensor.nivel || 1})\n`
+  resultado += `🐾 ${pokeDefensor.name} (Nivel ${pokeDefensor.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderDefensor)}\n\n`
   
-  // Simular resultado
   resultado += `🎯 *RESULTADO FINAL*:\n`
   
-  const diferencia = Math.abs(poderAtacante - poderDefensor)
-  const esEmpate = diferencia < 25
-
-  if (esEmpate) {
-    resultado += `🤝 ¡Empate! Ambos lucharon valientemente.\n`
-    resultado += `✨ +15 EXP para ambos Pokémon\n`
-  } else if (poderAtacante > poderDefensor) {
+  if (poderAtacante > poderDefensor) {
     resultado += `🎉 ¡${userName} gana la batalla!\n`
-    resultado += `✨ ${pokeAtacante.name || pokeAtacante.nombre} ganó 25 EXP\n`
-  } else {
+    resultado += `✨ ${pokeAtacante.name} ganó 25 EXP\n`
+  } else if (poderDefensor > poderAtacante) {
     resultado += `😵 ¡${rivalName} gana la batalla!\n`
-    resultado += `✨ ${pokeDefensor.name || pokeDefensor.nombre} ganó 25 EXP\n`
+    resultado += `✨ ${pokeDefensor.name} ganó 25 EXP\n`
+  } else {
+    resultado += `🤝 ¡Empate! Ambos lucharon valientemente.\n`
   }
   
   return resultado
 }
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { conn, args, usedPrefix }) => {
   try {
     const usuarios = leerUsuarios()
     const userId = m.sender
     
-    // Crear usuario si no existe
     if (!usuarios[userId]) {
       usuarios[userId] = {
         nombre: conn.getName(m.sender),
@@ -123,7 +84,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         const poder = Math.round(calcularPoder(poke))
-        lista += `${index + 1}. ${poke.name || poke.nombre} - Nvl ${poke.nivel || 1} | ⚡ ${poder}\n`
+        lista += `${index + 1}. ${poke.name} - Nvl ${poke.nivel || 1} | ⚡ ${poder}\n`
       })
       
       lista += `\n⚔️ *Para pelear:*\n`
@@ -133,16 +94,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply(lista)
     }
 
-    // Buscar usuario mencionado - ¡MÉTODO CORREGIDO!
+    // BUSCAR USUARIO MENCIONADO - ¡CORREGIDO!
     let mentionedJid = null
-    let pokemonIndex = null
-    
-    // Buscar menciones en el mensaje completo
-    mentionedJid = extractMentionedJid(m.text)
-    
+    let pokemonIndex = 0 // Por defecto el primer Pokémon
+
+    // Verificar si hay menciones en el mensaje
+    if (m.mentionedJid && m.mentionedJid.length > 0) {
+      mentionedJid = m.mentionedJid[0]
+    }
+
     // Buscar número de Pokémon en los argumentos
     for (let i = 0; i < args.length; i++) {
-      if (!isNaN(args[i])) {
+      if (!isNaN(args[i]) && parseInt(args[i]) > 0) {
         pokemonIndex = parseInt(args[i]) - 1
         break
       }
@@ -152,38 +115,27 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply(`❌ Debes mencionar a alguien.\nEjemplo: *${usedPrefix}pelear @usuario*`)
     }
 
-    const rivalId = mentionedJid
-    const rivalIdSimple = rivalId.replace('@s.whatsapp.net', '')
-    
     // Verificar que no sea uno mismo
-    if (userId === rivalId || userId === rivalIdSimple) {
+    if (userId === mentionedJid) {
       return m.reply('❌ No puedes pelear contra ti mismo.')
     }
 
-    // Buscar rival
-    let rival = usuarios[rivalId] || usuarios[rivalIdSimple]
-    
-    // Crear rival si no existe
+    // BUSCAR RIVAL EN LA BASE DE DATOS - ¡ESTA ES LA CLAVE!
+    const rivalId = mentionedJid
+    let rival = usuarios[rivalId]
+
     if (!rival) {
-      rival = {
-        nombre: conn.getName(rivalId) || 'Entrenador',
-        pokemons: []
-      }
-      usuarios[rivalId] = rival
-      guardarUsuarios(usuarios)
+      // Si el rival no existe en la base de datos
+      return m.reply('❌ El usuario mencionado no está registrado en el sistema Pokémon.')
     }
-    
+
     const pokemonesRival = obtenerPokemonesUsuario(rival)
     
     if (pokemonesRival.length === 0) {
       return m.reply('❌ El oponente no tiene Pokémon capturados.')
     }
 
-    // Seleccionar Pokémon (por defecto el primero)
-    if (pokemonIndex === null) {
-      pokemonIndex = 0
-    }
-
+    // Verificar índice de Pokémon
     if (pokemonIndex < 0 || pokemonIndex >= pokemonesUser.length) {
       return m.reply(`❌ Pokémon inválido. Elige del 1 al ${pokemonesUser.length}.`)
     }
@@ -195,8 +147,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const resultado = simularBatalla(
       pokemonUser,
       pokemonRival,
-      user.nombre || 'Entrenador',
-      rival.nombre || 'Rival'
+      user.nombre || conn.getName(userId),
+      rival.nombre || conn.getName(rivalId)
     )
     
     await m.reply(resultado)
