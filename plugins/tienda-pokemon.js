@@ -43,7 +43,7 @@ function guardarUsuarios(usuarios) {
 }
 
 // LÍMITE DE POKÉMON POR USUARIO
-const LIMITE_POKEMONES = 5; // Cambiado a 5 como solicitaste
+const LIMITE_POKEMONES = 5;
 
 // TIENDA POKÉMON POR DEFECTO
 const tiendaPokemonDefault = {
@@ -108,7 +108,8 @@ function obtenerPokemonTienda() {
       return tiendaPokemonDefault.pokemones;
     }
     
-    return tienda.pokemones;
+    // FILTRAR POKÉMON INVÁLIDOS
+    return tienda.pokemones.filter(poke => poke && poke.nombre && poke.nombre !== 'undefined');
   } catch (error) {
     console.error('Error al leer tienda Pokémon:', error);
     return tiendaPokemonDefault.pokemones;
@@ -126,15 +127,49 @@ function obtenerEmojiRareza(rareza) {
   }
 }
 
-// Función para obtener Pokémon aleatorio de la API
+// Función para obtener Pokémon aleatorio de la API (MEJORADA)
 async function obtenerPokemonAleatorio() {
   try {
     const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1000');
     const pokemons = response.data.results;
-    const randomPokemon = pokemons[Math.floor(Math.random() * pokemons.length)];
-    const pokemonData = await axios.get(randomPokemon.url);
+    
+    let pokemonData;
+    let intentos = 0;
+    let pokemonValido = false;
+    
+    // Intentar hasta encontrar un Pokémon válido
+    while (!pokemonValido && intentos < 10) {
+      const randomPokemon = pokemons[Math.floor(Math.random() * pokemons.length)];
+      try {
+        pokemonData = await axios.get(randomPokemon.url);
+        
+        // Validar que tenga los datos necesarios
+        if (pokemonData.data && 
+            pokemonData.data.name && 
+            pokemonData.data.sprites && 
+            pokemonData.data.stats &&
+            pokemonData.data.types) {
+          pokemonValido = true;
+        }
+      } catch (e) {
+        console.error('Error al obtener datos del Pokémon:', e);
+      }
+      
+      intentos++;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    if (!pokemonValido) {
+      console.error('No se pudo obtener un Pokémon válido después de 10 intentos');
+      return null;
+    }
     
     const nombre = pokemonData.data.name.charAt(0).toUpperCase() + pokemonData.data.name.slice(1);
+    const imagen = pokemonData.data.sprites.other?.['official-artwork']?.front_default || 
+                  pokemonData.data.sprites.front_default;
+    
+    // Si no hay imagen, usar una por defecto
+    const imagenFinal = imagen || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
     
     return {
       id: pokemonData.data.id,
@@ -142,8 +177,7 @@ async function obtenerPokemonAleatorio() {
       precio: Math.floor(Math.random() * 2000) + 100,
       nivel: Math.floor(Math.random() * 20) + 1,
       tipos: pokemonData.data.types.map(t => t.type.name),
-      imagen: pokemonData.data.sprites.other['official-artwork']?.front_default || 
-              pokemonData.data.sprites.front_default,
+      imagen: imagenFinal,
       rareza: determinarRareza(pokemonData.data),
       stats: {
         hp: pokemonData.data.stats[0].base_stat,
@@ -181,7 +215,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const user = usuarios[userId];
     if (user.dinero === undefined || user.dinero === null) user.dinero = 1000;
     
-    // Inicializar array de Pokémon si no existe y asegurar que no sea undefined
+    // Inicializar array de Pokémon si no existe
     if (!user.pokemons || !Array.isArray(user.pokemons)) {
       user.pokemons = [];
     }
@@ -192,8 +226,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       listaTienda += `💵 Tu dinero: $${user.dinero}\n`;
       listaTienda += `📦 Pokémon actuales: ${user.pokemons.length}/${LIMITE_POKEMONES}\n\n`;
       
-      // FILTRAR POKÉMON VÁLIDOS (sin undefined)
-      const pokemonesValidos = pokemonTienda.filter(poke => poke && poke.nombre);
+      // FILTRAR POKÉMON VÁLIDOS
+      const pokemonesValidos = pokemonTienda.filter(poke => poke && poke.nombre && poke.nombre !== 'undefined');
       
       if (pokemonesValidos.length === 0) {
         listaTienda += '❌ No hay Pokémon disponibles en la tienda.\n';
@@ -202,8 +236,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       }
       
       pokemonesValidos.forEach((poke, index) => {
-        if (!poke || !poke.nombre) return; // Saltar Pokémon inválidos
-        
         const emojiRareza = obtenerEmojiRareza(poke.rareza);
         listaTienda += `${index + 1}. ${emojiRareza} *${poke.nombre}* - $${poke.precio}\n`;
         listaTienda += `   📊 Nivel: ${poke.nivel} | 🎯 ${Array.isArray(poke.tipos) ? poke.tipos.join('/').toUpperCase() : 'Desconocido'}\n`;
@@ -240,8 +272,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       const pokemon = pokemonTienda[index];
       
-      // VERIFICAR SI EL POKÉMON ES VÁLIDO
-      if (!pokemon || !pokemon.nombre) {
+      // VERIFICACIÓN MÁS ESTRICTA
+      if (!pokemon || !pokemon.nombre || pokemon.nombre === 'undefined' || !pokemon.imagen) {
         return m.reply('❌ Este Pokémon no está disponible. Usa *renovartienda* para obtener nuevos Pokémon.');
       }
       
@@ -303,14 +335,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       m.reply('🔄 Renovando tienda... Esto puede tomar unos segundos.');
       
-      // Obtener 4 Pokémon aleatorios nuevos
+      // Obtener 4 Pokémon aleatorios nuevos CON VALIDACIÓN
       const nuevosPokemones = [];
-      for (let i = 0; i < 4; i++) {
+      let intentos = 0;
+      
+      while (nuevosPokemones.length < 4 && intentos < 20) {
         const nuevoPokemon = await obtenerPokemonAleatorio();
-        if (nuevoPokemon && nuevoPokemon.nombre) { // Validar que el Pokémon tenga nombre
+        // VALIDACIÓN ESTRICTA
+        if (nuevoPokemon && nuevoPokemon.nombre && nuevoPokemon.nombre !== 'undefined' && nuevoPokemon.imagen) {
           nuevosPokemones.push(nuevoPokemon);
         }
-        await new Promise(resolve => setTimeout(resolve, 500));
+        intentos++;
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
       
       if (nuevosPokemones.length === 0) {
