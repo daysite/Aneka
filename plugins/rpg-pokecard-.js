@@ -1,7 +1,31 @@
 import fetch from 'node-fetch';
 
-// API CONFIABLE DE POKÉMON TCG
+// API oficial de Pokémon TCG
 const POKEMON_TCG_API = 'https://api.pokemontcg.io/v2/cards';
+
+// Mapeo de nombres en español a inglés (para búsquedas más efectivas)
+const POKEMON_TRANSLATIONS = {
+  'pikachu': 'pikachu',
+  'charizard': 'charizard', 
+  'mewtwo': 'mewtwo',
+  'bulbasaur': 'bulbasaur',
+  'squirtle': 'squirtle',
+  'charmander': 'charmander',
+  'eevee': 'eevee',
+  'lucario': 'lucario',
+  'gengar': 'gengar',
+  'mew': 'mew',
+  'lugia': 'lugia',
+  'rayquaza': 'rayquaza',
+  'garchomp': 'garchomp',
+  'snorlax': 'snorlax',
+  'dragonite': 'dragonite',
+  'blastoise': 'blastoise',
+  'venusaur': 'venusaur',
+  'gyarados': 'gyarados',
+  'arcanine': 'arcanine',
+  'umbreon': 'umbreon'
+};
 
 let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   if (!text) {
@@ -9,61 +33,82 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
       `🃏 *Pokémon Card Finder* 🃏\n\n` +
       `❌ Debes ingresar el nombre de un Pokémon.\n\n` +
       `💡 *Ejemplos:*\n` +
-      `> ${usedPrefix + command} Pikachu\n` +
-      `> ${usedPrefix + command} Charizard\n` +
-      `> ${usedPrefix + command} Mewtwo\n\n` +
-      `🌐 *Busca cartas de Pokémon TCG*`, 
+      `> ${usedPrefix + command} pikachu\n` +
+      `> ${usedPrefix + command} charizard\n` +
+      `> ${usedPrefix + command} mewtwo\n\n` +
+      `⚠️ *Usa nombres en inglés*`, 
     m);
   }
   
   await m.react('🕒');
   
   try {
-    // Buscar cartas usando la API oficial de Pokémon TCG
-    const searchUrl = `${POKEMON_TCG_API}?q=name:${encodeURIComponent(text)}*&orderBy=-set.releaseDate&pageSize=10`;
+    // Convertir a minúsculas y buscar traducción
+    const searchTerm = text.toLowerCase().trim();
+    const englishName = POKEMON_TRANSLATIONS[searchTerm] || searchTerm;
     
-    await conn.reply(m.chat, `🔍 *Buscando cartas de:* ${text}\n\n⏳ Consultando Pokémon TCG API...`, m);
+    // Diferentes estrategias de búsqueda
+    const searchStrategies = [
+      `name:"${englishName}"`,           // Búsqueda exacta
+      `name:${englishName}*`,            // Que comience con
+      `name:*${englishName}*`,           // Que contenga
+      `subtypes:${englishName}`          // Por subtipo
+    ];
     
-    const response = await fetch(searchUrl, { 
-      timeout: 15000,
-      headers: {
-        'X-Api-Key': 'tu-api-key-aqui', // Opcional, funciona sin API key también
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    let cards = [];
+    let strategyUsed = '';
+    
+    // Probar diferentes estrategias de búsqueda
+    for (const strategy of searchStrategies) {
+      const searchUrl = `${POKEMON_TCG_API}?q=${encodeURIComponent(strategy)}&pageSize=20&orderBy=-set.releaseDate`;
+      
+      try {
+        const response = await fetch(searchUrl, { 
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data && data.data.length > 0) {
+            cards = data.data;
+            strategyUsed = strategy;
+            break;
+          }
+        }
+      } catch (error) {
+        console.log(`Estrategia fallida: ${strategy}`);
       }
-    });
-    
-    if (!response.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error en la API (Código: ${response.status})\n\n` +
-        `Intenta más tarde o con otro Pokémon.`, 
-      m);
     }
     
-    const data = await response.json();
-    
-    if (!data.data || data.data.length === 0) {
+    if (cards.length === 0) {
       await m.react('✖️');
       return conn.reply(m.chat, 
-        `❌ No se encontraron cartas para: "${text}"\n\n` +
-        `💡 *Intenta:*\n` +
-        `• Revisar el nombre del Pokémon\n` +
-        `• Usar nombres en inglés\n` +
-        `• Probar con otro Pokémon`, 
+        `❌ *No se encontraron cartas* 🃏\n\n` +
+        `No hay cartas para: *${text}*\n\n` +
+        `💡 *Soluciones:*\n` +
+        `• Usa nombres en *inglés* (pikachu, charizard)\n` +
+        `• Pokémon más populares\n` +
+        `• Verifica el nombre\n\n` +
+        `📋 *Ejemplos que sí funcionan:*\n` +
+        `• ${usedPrefix + command} pikachu\n` +
+        `• ${usedPrefix + command} charizard\n` +
+        `• ${usedPrefix + command} mewtwo`, 
       m);
     }
-    
-    const cards = data.data;
     
     // Mostrar información de las cartas encontradas
     let cardInfo = `🃏 *Pokémon Cards Encontradas* 🃏\n\n`;
     cardInfo += `🔍 *Búsqueda:* ${text}\n`;
-    cardInfo += `📊 *Total de cartas:* ${cards.length}\n\n`;
+    cardInfo += `📊 *Total de cartas:* ${cards.length}\n`;
+    cardInfo += `🌐 *Estrategia:* ${strategyUsed}\n\n`;
     
     // Mostrar primeras 5 cartas
     cards.slice(0, 5).forEach((card, index) => {
-      cardInfo += `*${index + 1}.* ${card.name || 'Sin nombre'}\n`;
-      if (card.set) cardInfo += `   🎴 *Set:* ${card.set.name || 'Desconocido'}\n`;
+      cardInfo += `*${index + 1}.* ${card.name}\n`;
+      if (card.set) cardInfo += `   🎴 *Set:* ${card.set.name}\n`;
       if (card.rarity) cardInfo += `   ⭐ *Rareza:* ${card.rarity}\n`;
       if (card.hp) cardInfo += `   ❤️ *HP:* ${card.hp}\n`;
       cardInfo += `\n`;
@@ -92,17 +137,17 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
     await m.react('✖️');
     
     await conn.reply(m.chat,
-      `❌ *Error del sistema*\n\n` +
-      `No se pudo completar la búsqueda.\n\n` +
+      `❌ *Error de conexión*\n\n` +
+      `No se pudo conectar con la API.\n\n` +
       `💡 *Intenta:*\n` +
-      `• Verificar tu conexión\n` +
-      `• Probar más tarde\n` +
-      `• Usar otro nombre de Pokémon`, 
+      `• Verificar tu conexión a internet\n` +
+      `• Probar en unos minutos\n` +
+      `• Usar Pokémon más comunes`, 
     m);
   }
 };
 
-// Handler para ver imágenes de cartas
+// Handler para ver imágenes de cartas (EL MISMO DE ANTES)
 let handlerImg = async (m, { conn, usedPrefix, args }) => {
   if (!global.pokecards || !global.pokecards[m.sender]) {
     return conn.reply(m.chat,
@@ -113,7 +158,6 @@ let handlerImg = async (m, { conn, usedPrefix, args }) => {
   
   const userData = global.pokecards[m.sender];
   
-  // Limpiar datos antiguos
   if (Date.now() - userData.timestamp > 300000) {
     delete global.pokecards[m.sender];
     return conn.reply(m.chat,
@@ -154,42 +198,21 @@ let handlerImg = async (m, { conn, usedPrefix, args }) => {
       m);
     }
     
-    // Enviar información de la carta
     let cardDetails = `🃏 *Detalles de la Carta* 🃏\n\n`;
-    cardDetails += `📛 *Nombre:* ${card.name || 'Desconocido'}\n`;
-    
+    cardDetails += `📛 *Nombre:* ${card.name}\n`;
     if (card.hp) cardDetails += `❤️ *HP:* ${card.hp}\n`;
     if (card.types) cardDetails += `🎯 *Tipos:* ${card.types.join(', ')}\n`;
     if (card.rarity) cardDetails += `⭐ *Rareza:* ${card.rarity}\n`;
-    
-    if (card.set) {
-      cardDetails += `🎴 *Set:* ${card.set.name || 'Desconocido'}\n`;
-      if (card.set.series) cardDetails += `📚 *Serie:* ${card.set.series}\n`;
-    }
-    
-    if (card.abilities) {
-      cardDetails += `✨ *Habilidades:* ${card.abilities.length}\n`;
-    }
-    
-    if (card.attacks) {
-      cardDetails += `⚔️ *Ataques:* ${card.attacks.length}\n`;
-    }
-    
+    if (card.set) cardDetails += `🎴 *Set:* ${card.set.name}\n`;
     cardDetails += `\n🌐 *Fuente:* Pokémon TCG API`;
     
-    // Enviar imagen de la carta
     await conn.sendFile(m.chat, card.images.large, 'pokecard.jpg', cardDetails, m);
-    
     await m.react('✅');
     
   } catch (error) {
     console.error('Error en pokecardimg:', error);
     await m.react('✖️');
-    
-    await conn.reply(m.chat,
-      `❌ *Error al cargar la imagen*\n\n` +
-      `No se pudo cargar la imagen.`, 
-    m);
+    await conn.reply(m.chat, `❌ Error al cargar la imagen`, m);
   }
 };
 
