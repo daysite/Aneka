@@ -1,4 +1,6 @@
-import fetch from 'node-fetch';
+import yts from 'yt-search';
+import ytdl from 'ytdl-core';
+import { youtubedl } from '@bochilteam/scraper';
 
 let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   if (!text) {
@@ -15,115 +17,125 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
   await m.react('🕒');
   
   try {
-    // API DE YOUTUBE QUE SÍ FUNCIONA
-    await conn.reply(m.chat, `🔍 *Buscando:* "${text}"\n\n⏳ Buscando en YouTube...`, m);
+    // BUSCAR EN YOUTUBE
+    await conn.reply(m.chat, `🔍 *Buscando:* "${text}"\n\n⏳ Esto puede tomar unos segundos...`, m);
     
-    const searchUrl = `https://yt-api.cyclic.app/search?q=${encodeURIComponent(text)}&limit=1`;
-    const searchResponse = await fetch(searchUrl, { timeout: 15000 });
+    const searchResults = await yts(text);
     
-    if (!searchResponse.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error en la búsqueda\n\n` +
-        `Intenta con otro nombre o más tarde.`, 
-      m);
-    }
-    
-    const searchData = await searchResponse.json();
-    
-    if (!searchData || searchData.length === 0) {
+    if (!searchResults.videos || searchResults.videos.length === 0) {
       await m.react('✖️');
       return conn.reply(m.chat, 
         `❌ No se encontró: "${text}"\n\n` +
         `Intenta con:\n` +
-        `• Nombre más exacto\n` +
-        `• Artista + Canción`, 
+        `• Un nombre más exacto\n` +
+        `• Artista + Canción\n` +
+        `• Menos palabras`, 
       m);
     }
     
-    const video = searchData[0];
+    const video = searchResults.videos[0];
+    
+    // VERIFICAR DURACIÓN (máximo 15 minutos)
+    const durationMinutes = parseInt(video.timestamp.split(':')[0]);
+    if (durationMinutes > 15) {
+      await m.react('✖️');
+      return conn.reply(m.chat, 
+        `❌ Video demasiado largo\n\n` +
+        `Duración: ${video.timestamp}\n` +
+        `Límite: 15 minutos\n\n` +
+        `Busca una versión más corta.`, 
+      m);
+    }
     
     // DESCARGAR AUDIO
-    await conn.reply(m.chat, `✅ *Encontrado:* ${video.title}\n\n⬇️ Descargando audio...`, m);
+    await conn.reply(m.chat, 
+      `✅ *Encontrado:* ${video.title}\n` +
+      `⏱️ *Duración:* ${video.timestamp}\n` +
+      `👁️ *Vistas:* ${video.views}\n\n` +
+      `⬇️ *Descargando audio...*`, 
+    m);
     
-    const downloadUrl = `https://yt-api.cyclic.app/download?url=${encodeURIComponent(video.url)}&type=audio`;
-    const downloadResponse = await fetch(downloadUrl, { timeout: 45000 });
-    
-    if (!downloadResponse.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error en la descarga\n\n` +
-        `El audio es muy largo o no está disponible.`, 
-      m);
-    }
-    
-    const audioData = await downloadResponse.json();
-    
-    if (!audioData.downloadUrl) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Enlace de descarga no disponible\n\n` +
-        `Intenta con otra canción.`, 
-      m);
-    }
-    
-    // OBTENER EL AUDIO
-    const audioResponse = await fetch(audioData.downloadUrl, { timeout: 60000 });
-    
-    if (!audioResponse.ok) {
-      await m.react('✖️');
-      return conn.reply(m.chat, 
-        `❌ Error al obtener el audio\n\n` +
-        `El servidor está lento. Intenta más tarde.`, 
-      m);
-    }
-    
-    const audioBuffer = await audioResponse.buffer();
-    
-    // ENVIAR AUDIO
-    await conn.sendMessage(m.chat, {
-      audio: audioBuffer,
-      fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
-      mimetype: 'audio/mpeg',
-      contextInfo: {
-        externalAdReply: {
-          title: video.title,
-          body: `Duración: ${video.duration}`,
-          thumbnailUrl: video.thumbnail,
-          sourceUrl: video.url
-        }
+    try {
+      // INTENTO 1: Usando ytdl-core
+      const audioStream = ytdl(video.url, {
+        filter: 'audioonly',
+        quality: 'highestaudio',
+      });
+      
+      const chunks = [];
+      for await (const chunk of audioStream) {
+        chunks.push(chunk);
       }
-    }, { quoted: m });
+      const audioBuffer = Buffer.concat(chunks);
+      
+      // ENVIAR AUDIO
+      await conn.sendMessage(m.chat, {
+        audio: audioBuffer,
+        fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
+        mimetype: 'audio/mpeg',
+        contextInfo: {
+          externalAdReply: {
+            title: video.title.slice(0, 60),
+            body: `Duración: ${video.timestamp} | ${video.views} vistas`,
+            thumbnailUrl: video.image,
+            mediaType: 2,
+            sourceUrl: video.url
+          }
+        }
+      }, { quoted: m });
+      
+    } catch (ytdlError) {
+      console.log('ytdl-core falló, intentando con scraper...');
+      
+      // INTENTO 2: Usando scraper alternativo
+      const audioInfo = await youtubedl(video.url);
+      const audioData = await audioInfo.audio['128kbps'].download();
+      
+      await conn.sendMessage(m.chat, {
+        audio: audioData,
+        fileName: `${video.title.replace(/[^\w\s]/gi, '')}.mp3`,
+        mimetype: 'audio/mpeg'
+      }, { quoted: m });
+    }
     
     // MENSAJE DE ÉXITO
     await conn.reply(m.chat,
       `✅ *Descarga completada*\n\n` +
       `📀 ${video.title}\n` +
-      `⏱️ ${video.duration}\n` +
-      `👁️ ${video.views} vistas\n\n` +
-      `🎵 Fuente: YouTube`, 
+      `🎤 ${video.author.name}\n` +
+      `⏱️ ${video.timestamp}\n` +
+      `👁️ ${video.views}\n\n` +
+      `🌐 *Fuente:* YouTube`, 
     m);
     
     await m.react('✅');
     
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error general:', error);
     await m.react('✖️');
     
     await conn.reply(m.chat,
-      `❌ *Error del sistema*\n\n` +
-      `No se pudo completar la descarga.\n\n` +
-      `💡 *Intenta:*\n` +
-      `• Usar otro nombre\n` +
-      `• Esperar unos minutos\n` +
-      `• Búsqueda más específica`, 
+      `❌ *Error en la descarga*\n\n` +
+      `No se pudo descargar el audio.\n\n` +
+      `💡 *Soluciones:*\n` +
+      `• El video puede estar restringido\n` +
+      `• Intenta con otra canción\n` +
+      `• Espera unos minutos\n` +
+      `• Busca "nombre artista canción"`, 
     m);
   }
 };
 
-handler.help = ['music <búsqueda>', 'song <búsqueda>'];
+// INSTALAR DEPENDENCIAS NECESARIAS:
+/*
+npm install yt-search
+npm install ytdl-core
+npm install @bochilteam/scraper
+*/
+
+handler.help = ['play <búsqueda>', 'music <búsqueda>', 'song <búsqueda>'];
 handler.tags = ['downloader', 'music'];
-handler.command = ['music', 'song', 'musica', 'cancion', 'play'];
+handler.command = ['play', 'music', 'song', 'musica', 'cancion', 'p'];
 handler.register = true;
 
 export default handler;
