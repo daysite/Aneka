@@ -57,7 +57,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
     }
 
-    // Definir todas las fuentes
+    // Definir todas las fuentes (el mismo objeto de antes)
     const fonts = {
         fancy1: {
             name: "🫧 Burbuja",
@@ -240,10 +240,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         return conn.sendMessage(m.chat, {
             text: result,
-            footer: 'Selecciona un estilo para copiar o ver más',
+            footer: 'Selecciona "📋 COPIAR" para instrucciones de copiado',
             buttons: [
                 { buttonId: `${usedPrefix}copiar ${fonts.fancy1.convert(messageText)}`, buttonText: { displayText: '📋 COPIAR BURBUJA' }, type: 1 },
-                { buttonId: `${usedPrefix}font fancy1 ${messageText}`, buttonText: { displayText: '🫧 VER BURBUJA' }, type: 1 },
+                { buttonId: `${usedPrefix}copiar ${fonts.fancy3.convert(messageText)}`, buttonText: { displayText: '📋 COPIAR CURSIVA' }, type: 1 },
                 { buttonId: `${usedPrefix}font ayuda`, buttonText: { displayText: '❓ AYUDA' }, type: 1 }
             ],
             headerType: 1
@@ -254,7 +254,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         
         return conn.sendMessage(m.chat, {
             text: `🎨 *${fonts[fontType].name}*\n\n*Texto original:* ${messageText}\n*Texto convertido:*\n\`\`\`${convertedText}\`\`\`\n\n💡 Tipo: ${fontType}`,
-            footer: '¿Quieres copiar este texto o ver más opciones?',
+            footer: 'Selecciona "📋 COPIAR" para instrucciones',
             buttons: [
                 { buttonId: `${usedPrefix}copiar ${convertedText}`, buttonText: { displayText: '📋 COPIAR TEXTO' }, type: 1 },
                 { buttonId: `${usedPrefix}font all ${messageText}`, buttonText: { displayText: '🎨 TODOS LOS ESTILOS' }, type: 1 },
@@ -277,13 +277,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
-// Handler para el comando de copiar
+// Handler para el comando de copiar (CORREGIDO)
 handler.copiar = async (m, { conn, text }) => {
-    if (!text) return;
+    if (!text) {
+        return conn.sendMessage(m.chat, {
+            text: `❌ No hay texto para copiar.\n💡 Usa el comando con texto: ${usedPrefix}copiar <texto>`
+        }, { quoted: m });
+    }
     
     await conn.sendMessage(m.chat, {
-        text: `✅ *Texto copiado*\n\nEl texto ha sido copiado a tu portapapeles:\n\`\`\`${text}\`\`\`\n\n💡 Puedes pegarlo en cualquier lugar`,
-        footer: "Texto listo para usar"
+        text: `📋 *INSTRUCCIONES PARA COPIAR:*\n\n1. ⭐ *Mantén presionado* el texto de abajo\n2. 📋 Selecciona *"Copiar"*\n3. 🎯 ¡Listo! Puedes pegarlo donde quieras\n\n*Texto a copiar:*\n\`\`\`${text}\`\`\`\n\n💡 El texto está en formato para fácil copia`,
+        footer: "Copia manualmente el texto de arriba"
     }, { quoted: m });
 };
 
