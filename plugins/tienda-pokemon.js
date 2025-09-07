@@ -51,7 +51,7 @@ const tiendaPokemonDefault = {
     {
       id: 1,
       nombre: "Pikachu",
-      precio: 10,
+      precio: 500,
       nivel: 5,
       tipos: ["eléctrico"],
       imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
@@ -224,7 +224,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (command === 'tiendapokemon' && args.length === 0) {
       let listaTienda = `🛒 *TIENDA POKÉMON* 🛒\n\n`;
       listaTienda += `💵 Tu dinero: $${user.dinero}\n`;
-      listaTienda += `📦 Pokémon actuales: ${user.pokemons.length}/${LIMITE_POKEMONES}\n\n`;
+      
+      // CORRECCIÓN: Mostrar el conteo real de Pokémon del usuario
+      const pokemonesValidosUsuario = user.pokemons.filter(p => p && p.nombre && p.nombre !== 'undefined');
+      listaTienda += `📦 Pokémon actuales: ${pokemonesValidosUsuario.length}/${LIMITE_POKEMONES}\n\n`;
       
       // FILTRAR POKÉMON VÁLIDOS
       const pokemonesValidos = pokemonTienda.filter(poke => poke && poke.nombre && poke.nombre !== 'undefined');
@@ -247,12 +250,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       listaTienda += `• ${usedPrefix}renovartienda - Renovar stock ($200)\n\n`;
       
       // MOSTRAR LÍMITE ACTUAL
-      if (user.pokemons.length >= LIMITE_POKEMONES) {
+      if (pokemonesValidosUsuario.length >= LIMITE_POKEMONES) {
         listaTienda += `❌ *¡LÍMITE ALCANZADO!*\n`;
-        listaTienda += `Tienes ${user.pokemons.length}/${LIMITE_POKEMONES} Pokémon.\n`;
+        listaTienda += `Tienes ${pokemonesValidosUsuario.length}/${LIMITE_POKEMONES} Pokémon.\n`;
         listaTienda += `Usa *.liberar* <número> para hacer espacio.\n\n`;
       } else {
-        listaTienda += `📊 Espacio disponible: ${LIMITE_POKEMONES - user.pokemons.length} Pokémon\n\n`;
+        listaTienda += `📊 Espacio disponible: ${LIMITE_POKEMONES - pokemonesValidosUsuario.length} Pokémon\n\n`;
       }
       
       listaTienda += `📌 *Ejemplos:*\n`;
@@ -277,9 +280,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply('❌ Este Pokémon no está disponible. Usa *renovartienda* para obtener nuevos Pokémon.');
       }
       
+      // CORRECCIÓN: Filtrar Pokémon válidos para verificar el límite
+      const pokemonesValidosUsuario = user.pokemons.filter(p => p && p.nombre && p.nombre !== 'undefined');
+      
       // VERIFICAR LÍMITE DE POKÉMON
-      if (user.pokemons.length >= LIMITE_POKEMONES) {
-        return m.reply(`❌ *¡LÍMITE ALCANZADO!*\n\nTienes ${user.pokemons.length}/${LIMITE_POKEMONES} Pokémon.\nUsa *.liberar* <número> para liberar alguno y hacer espacio.\n\nEjemplo: *.liberar 1*`);
+      if (pokemonesValidosUsuario.length >= LIMITE_POKEMONES) {
+        return m.reply(`❌ *¡LÍMITE ALCANZADO!*\n\nTienes ${pokemonesValidosUsuario.length}/${LIMITE_POKEMONES} Pokémon.\nUsa *.liberar* <número> para liberar alguno y hacer espacio.\n\nEjemplo: *.liberar 1*`);
       }
       
       if (user.dinero < pokemon.precio) {
@@ -295,11 +301,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       // Realizar compra
       user.dinero -= pokemon.precio;
+      
+      // CORRECCIÓN: Limpiar array de Pokémon antes de agregar (eliminar posibles undefined)
+      user.pokemons = user.pokemons.filter(p => p && p.nombre && p.nombre !== 'undefined');
       user.pokemons.push(pokemonComprado);
       
       // Guardar cambios
       usuarios[userId] = user;
-      guardarUsuarios(usuarios);
+      if (!guardarUsuarios(usuarios)) {
+        return m.reply('❌ Error al guardar los datos. Intenta nuevamente.');
+      }
       
       // Enviar mensaje con imagen del Pokémon
       try {
