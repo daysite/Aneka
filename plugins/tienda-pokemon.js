@@ -51,7 +51,7 @@ const tiendaPokemonDefault = {
     {
       id: 1,
       nombre: "Pikachu",
-      precio: 500,
+      precio: 10,
       nivel: 5,
       tipos: ["eléctrico"],
       imagen: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
