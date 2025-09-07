@@ -37,21 +37,21 @@ function simularBatalla(pokeAtacante, pokeDefensor, userName, rivalName) {
   
   let resultado = `⚔️ *BATALLA POKÉMON* ⚔️\n\n`
   resultado += `👤 ${userName}\n`
-  resultado += `🐾 ${pokeAtacante.name} (Nivel ${pokeAtacante.nivel || 1})\n`
+  resultado += `🐾 ${pokeAtacante.name || pokeAtacante.nombre || 'Pokémon desconocido'} (Nivel ${pokeAtacante.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderAtacante)}\n\n`
   resultado += `🆚\n\n`
   resultado += `👤 ${rivalName}\n`
-  resultado += `🐾 ${pokeDefensor.name} (Nivel ${pokeDefensor.nivel || 1})\n`
+  resultado += `🐾 ${pokeDefensor.name || pokeDefensor.nombre || 'Pokémon desconocido'} (Nivel ${pokeDefensor.nivel || 1})\n`
   resultado += `⚡ Poder: ${Math.round(poderDefensor)}\n\n`
   
   resultado += `🎯 *RESULTADO FINAL*:\n`
   
   if (poderAtacante > poderDefensor) {
     resultado += `🎉 ¡${userName} gana la batalla!\n`
-    resultado += `✨ ${pokeAtacante.name} ganó 25 EXP\n`
+    resultado += `✨ ${pokeAtacante.name || pokeAtacante.nombre || 'Pokémon desconocido'} ganó 25 EXP\n`
   } else if (poderDefensor > poderAtacante) {
     resultado += `😵 ¡${rivalName} gana la batalla!\n`
-    resultado += `✨ ${pokeDefensor.name} ganó 25 EXP\n`
+    resultado += `✨ ${pokeDefensor.name || pokeDefensor.nombre || 'Pokémon desconocido'} ganó 25 EXP\n`
   } else {
     resultado += `🤝 ¡Empate! Ambos lucharon valientemente.\n`
   }
@@ -84,7 +84,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
       let lista = `📋 *TUS POKÉMON* (${pokemonesUser.length})\n\n`
       pokemonesUser.forEach((poke, index) => {
         const poder = Math.round(calcularPoder(poke))
-        lista += `${index + 1}. ${poke.name} - Nvl ${poke.nivel || 1} | ⚡ ${poder}\n`
+        lista += `${index + 1}. ${poke.name || poke.nombre || 'Pokémon desconocido'} - Nvl ${poke.nivel || 1} | ⚡ ${poder}\n`
       })
       
       lista += `\n⚔️ *Para pelear:*\n`
@@ -120,7 +120,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
       return m.reply('❌ No puedes pelear contra ti mismo.')
     }
 
-    // BUSCAR RIVAL EN LA BASE DE DATOS - CORRECCIÓN APLICADA
+    // BUSCAR RIVAL EN LA BASE DE DATOS
     const rivalId = mentionedJid
     let rival = usuarios[rivalId]
 
