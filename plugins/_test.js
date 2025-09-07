@@ -117,21 +117,8 @@ let handler = async (m, { conn }) => {
     const pokemonImage = pokemonData.data.sprites.other['official-artwork']?.front_default || 
                          pokemonData.data.sprites.front_default;
 
-    const pokemonCapturado = {
-      id: pokemonData.data.id,
-      name: pokemonName,
-      image: pokemonImage,
-      height: pokemonData.data.height / 10,
-      weight: pokemonData.data.weight / 10,
-      types: pokemonData.data.types.map(t => t.type.name),
-      captured: new Date().toLocaleDateString(),
-      stats: pokemonData.data.stats.reduce((acc, stat) => {
-        acc[stat.stat.name] = stat.base_stat;
-        return acc;
-      }, {})
-    };
-
-    const totalStats = Object.values(pokemonCapturado.stats).reduce((a, b) => a + b, 0);
+    // CALCULAR RAREZA
+    const totalStats = Object.values(pokemonData.data.stats).reduce((acc, stat) => acc + stat.base_stat, 0);
     let rareza = '⭐ Común';
     let rarezaTipo = 'comun';
     if (totalStats > 400) {
@@ -146,6 +133,26 @@ let handler = async (m, { conn }) => {
       rareza = '💎💎💎 Legendario';
       rarezaTipo = 'legendario';
     }
+
+    // OBJETO POKÉMON COMPATIBLE CON POKÉDEX
+    const pokemonCapturado = {
+      id: pokemonData.data.id,
+      name: pokemonName,
+      nombre: pokemonName, // ← PROPiedad que busca Pokédex
+      image: pokemonImage,
+      imagen: pokemonImage, // ← PROPiedad que busca Pokédex
+      height: pokemonData.data.height / 10,
+      weight: pokemonData.data.weight / 10,
+      types: pokemonData.data.types.map(t => t.type.name),
+      tipos: pokemonData.data.types.map(t => t.type.name), // ← PROPiedad que busca Pokédex
+      captured: new Date().toLocaleDateString(),
+      rareza: rarezaTipo, // ← PROPiedad que busca Pokédex
+      idUnico: Date.now() + '-' + Math.random().toString(36).substr(2, 9), // ← ID único para Pokédex
+      stats: pokemonData.data.stats.reduce((acc, stat) => {
+        acc[stat.stat.name] = stat.base_stat;
+        return acc;
+      }, {})
+    };
 
     // AGREGAR POKÉMON A LA COLECCIÓN
     usuarios[sender].pokemons.push(pokemonCapturado);
