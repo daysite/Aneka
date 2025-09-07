@@ -1,22 +1,8 @@
-// plugins/misiones.js
 import fs from 'fs';
 
 const usuariosPath = './src/database/usuarios.json';
 
-function leerUsuarios() {
-  try {
-    const data = fs.readFileSync(usuariosPath, 'utf8');
-    return JSON.parse(data) || {};
-  } catch (error) {
-    return {};
-  }
-}
-
-function guardarUsuarios(usuarios) {
-  fs.writeFileSync(usuariosPath, JSON.stringify(usuarios, null, 2));
-}
-
-// Tipos de misiones disponibles
+// DEFINIR EL ARRAY MISIONES (esto faltaba)
 const MISIONES = [
   {
     id: 1,
@@ -24,7 +10,7 @@ const MISIONES = [
     descripcion: "Captura 3 Pokémon comunes",
     objetivo: { tipo: 'capturas', cantidad: 3, rareza: 'comun' },
     recompensa: { dinero: 50, experiencia: 10 },
-    duracion: 30 // minutos
+    duracion: 30
   },
   {
     id: 2,
@@ -60,7 +46,37 @@ const COMIDAS = [
   { id: 4, nombre: "🎂 Torta Legendaria", precio: 200, energia: 100 }
 ];
 
-let handler = async (m, { conn, args, command }) => {
+function leerUsuarios() {
+  try {
+    const data = fs.readFileSync(usuariosPath, 'utf8');
+    return JSON.parse(data) || {};
+  } catch (error) {
+    console.error('Error leyendo usuarios:', error);
+    return {};
+  }
+}
+
+function guardarUsuarios(usuarios) {
+  try {
+    fs.writeFileSync(usuariosPath, JSON.stringify(usuarios, null, 2));
+  } catch (error) {
+    console.error('Error guardando usuarios:', error);
+  }
+}
+
+// Función auxiliar para texto de objetivo
+function obtenerTextoObjetivo(objetivo) {
+  switch (objetivo.tipo) {
+    case 'capturas':
+      return `Capturar ${objetivo.cantidad} Pokémon ${objetivo.rareza.toUpperCase()}`;
+    case 'dinero':
+      return `Ganar ${objetivo.cantidad} dinero`;
+    default:
+      return 'Objetivo desconocido';
+  }
+}
+
+let handler = async (m, { conn, args }) => {
   try {
     const sender = m.sender;
     const usuarios = leerUsuarios();
@@ -77,6 +93,7 @@ let handler = async (m, { conn, args, command }) => {
         inventario: [],
         ultimaMision: 0
       };
+      guardarUsuarios(usuarios);
     }
 
     const usuario = usuarios[sender];
@@ -110,27 +127,31 @@ let handler = async (m, { conn, args, command }) => {
         break;
       
       default:
-        await mostrarMenuMisiones(conn, m);
+        await mostrarMenuMisiones(conn, m, usuario);
     }
 
   } catch (error) {
     console.error('Error en comando misiones:', error);
-    await m.reply('❌ *Error en el sistema de misiones.* Intenta de nuevo.');
+    await conn.sendMessage(m.chat, { 
+      text: '❌ *Error en el sistema de misiones.* Intenta de nuevo.' 
+    }, { quoted: m });
   }
 };
 
 // Función para mostrar el menú principal
-async function mostrarMenuMisiones(conn, m) {
+async function mostrarMenuMisiones(conn, m, usuario) {
   const menu = `🎯 *SISTEMA DE MISIONES POKÉMON* 🎯
 
-💰 *Dinero:* Consulta tus fondos
+💰 *Dinero:* ${usuario.dinero}
+⭐ *Experiencia:* ${usuario.experiencia}
+📊 *Nivel:* ${usuario.nivel}
+
 🍎 *Tienda:* Compra comida para tus Pokémon
 📋 *Misiones disponibles:* Completa objetivos
 
 💡 *Comandos disponibles:*
 .misiones ver - Ver misiones disponibles
 .misiones aceptar [número] - Aceptar una misión
-.misiones completadas - Ver misión actual
 .misiones tienda - Ver tienda de comida
 .misiones comprar [número] - Comprar comida
 .misiones inventario - Ver tu inventario
@@ -145,7 +166,7 @@ async function verMisiones(conn, m, usuario) {
   let mensaje = '📋 *MISIONES DISPONIBLES*\n\n';
   
   MISIONES.forEach((mision, index) => {
-    const tieneMision = usuario.misiones.some(m => m.id === mision.id);
+    const tieneMision = usuario.misiones && usuario.misiones.some(m => m.id === mision.id);
     const estado = tieneMision ? '✅ *ACEPTADA*' : '🟡 *DISPONIBLE*';
     
     mensaje += `${index + 1}. ${mision.nombre} ${estado}\n`;
@@ -173,7 +194,7 @@ async function aceptarMision(conn, m, usuario, usuarios, argIndex) {
   const misionElegida = MISIONES[index];
   
   // Verificar si ya tiene la misión
-  if (usuario.misiones.some(m => m.id === misionElegida.id)) {
+  if (usuario.misiones && usuario.misiones.some(m => m.id === misionElegida.id)) {
     return await conn.sendMessage(m.chat, { 
       text: '❌ *Ya tienes esta misión activa.*' 
     }, { quoted: m });
@@ -181,13 +202,18 @@ async function aceptarMision(conn, m, usuario, usuarios, argIndex) {
 
   // Verificar cooldown entre misiones (5 minutos)
   const ahora = Date.now();
-  const cooldown = 5 * 60 * 1000; // 5 minutos en milisegundos
+  const cooldown = 5 * 60 * 1000;
   
   if (ahora - usuario.ultimaMision < cooldown) {
     const tiempoRestante = Math.ceil((cooldown - (ahora - usuario.ultimaMision)) / 60000);
     return await conn.sendMessage(m.chat, { 
       text: `⏰ *Debes esperar ${tiempoRestante} minutos* antes de aceptar otra misión.` 
     }, { quoted: m });
+  }
+
+  // Inicializar array de misiones si no existe
+  if (!usuario.misiones) {
+    usuario.misiones = [];
   }
 
   // Agregar misión al usuario
@@ -203,6 +229,13 @@ async function aceptarMision(conn, m, usuario, usuarios, argIndex) {
 
   await conn.sendMessage(m.chat, { 
     text: `✅ *¡Misión aceptada!*\n\n🎯 ${misionElegida.nombre}\n📝 ${misionElegida.descripcion}\n\n⏰ Tienes ${misionElegida.duracion} minutos para completarla!\n\nUsa *.pokemon* para capturar y avanzar en la misión.` 
+  }, { quoted: m });
+}
+
+// Función para ver misiones completadas (placeholder)
+async function verMisionesCompletadas(conn, m, usuario) {
+  await conn.sendMessage(m.chat, { 
+    text: '🔄 *Esta función está en desarrollo.*\nPronto podrás ver tus misiones completadas.' 
   }, { quoted: m });
 }
 
@@ -242,6 +275,11 @@ async function comprarComida(conn, m, usuario, usuarios, argIndex) {
   // Realizar compra
   usuario.dinero -= comidaElegida.precio;
   
+  // Inicializar inventario si no existe
+  if (!usuario.inventario) {
+    usuario.inventario = [];
+  }
+
   // Agregar al inventario
   const itemExistente = usuario.inventario.find(item => item.id === comidaElegida.id);
   if (itemExistente) {
@@ -264,7 +302,7 @@ async function comprarComida(conn, m, usuario, usuarios, argIndex) {
 
 // Función para ver inventario
 async function verInventario(conn, m, usuario) {
-  if (usuario.inventario.length === 0) {
+  if (!usuario.inventario || usuario.inventario.length === 0) {
     return await conn.sendMessage(m.chat, { 
       text: '🎒 *Tu inventario está vacío.*\nVisita la tienda con *.misiones tienda*' 
     }, { quoted: m });
@@ -281,18 +319,6 @@ async function verInventario(conn, m, usuario) {
   mensaje += '💡 Próximamente: Usa comida para alimentar a tus Pokémon';
   
   await conn.sendMessage(m.chat, { text: mensaje }, { quoted: m });
-}
-
-// Función auxiliar para texto de objetivo
-function obtenerTextoObjetivo(objetivo) {
-  switch (objetivo.tipo) {
-    case 'capturas':
-      return `Capturar ${objetivo.cantidad} Pokémon ${objetivo.rareza.toUpperCase()}`;
-    case 'dinero':
-      return `Ganar ${objetivo.cantidad} dinero`;
-    default:
-      return 'Objetivo desconocido';
-  }
 }
 
 handler.tags = ['game', 'pokemon', 'economy'];
