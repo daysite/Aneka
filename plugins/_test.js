@@ -20,7 +20,7 @@ let handler = async (m, { conn }) => {
   try {
     const sender = m.sender;
     const usuarios = leerUsuarios();
-    const LIMITE_POKEMONES = 20; // Límite de Pokémon por usuario
+    const LIMITE_POKEMONES = 5; // Límite de Pokémon por usuario
 
     if (!usuarios[sender]) {
       usuarios[sender] = {
