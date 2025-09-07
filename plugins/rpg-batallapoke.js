@@ -62,32 +62,37 @@ function puedePelear(pokemon) {
   return !estadosInvalidos.includes(pokemon.estado);
 }
 
-// Función para aplicar daño y estado después de la batalla
+// Función MEJORADA para aplicar daño y estado después de la batalla
 function aplicarEfectosBatalla(pokemon, esGanador) {
-  if (!pokemon) return pokemon;
+  if (!pokemon) return null;
   
-  // Crear copia para no modificar el original directamente
-  const pokemonModificado = { ...pokemon };
+  // Crear copia profunda para no modificar el original
+  const pokemonModificado = JSON.parse(JSON.stringify(pokemon));
   
+  // Asegurar que tenga las propiedades necesarias
   if (!pokemonModificado.estado) {
     pokemonModificado.estado = 'normal';
   }
   
-  if (esGanador) {
-    // Ganador: cansado pero feliz
-    pokemonModificado.estado = 'cansado';
-    // Aumentar experiencia por ganar
-    pokemonModificado.experiencia = (pokemonModificado.experiencia || 0) + 25;
-  } else {
-    // Perdedor: debilitado
-    pokemonModificado.estado = 'debilitado';
-    // Aumentar experiencia por participar
-    pokemonModificado.experiencia = (pokemonModificado.experiencia || 0) + 10;
+  if (!pokemonModificado.experiencia) {
+    pokemonModificado.experiencia = 0;
   }
   
-  // Verificar si sube de nivel (cada 100 exp)
+  if (!pokemonModificado.nivel) {
+    pokemonModificado.nivel = 1;
+  }
+  
+  if (esGanador) {
+    pokemonModificado.estado = 'cansado';
+    pokemonModificado.experiencia += 25;
+  } else {
+    pokemonModificado.estado = 'debilitado';
+    pokemonModificado.experiencia += 10;
+  }
+  
+  // Verificar si sube de nivel
   if (pokemonModificado.experiencia >= 100) {
-    pokemonModificado.nivel = (pokemonModificado.nivel || 1) + 1;
+    pokemonModificado.nivel += 1;
     pokemonModificado.experiencia = 0;
   }
   
@@ -196,7 +201,10 @@ function obtenerAtaqueAleatorio(tipos) {
 
 let handler = async (m, { conn, args, usedPrefix }) => {
   try {
-    const usuarios = leerUsuarios()
+    console.log('Iniciando batalla...');
+    const usuarios = leerUsuarios();
+    console.log('Usuarios cargados:', Object.keys(usuarios).length);
+    
     const userId = m.sender
     
     if (!usuarios[userId]) {
@@ -287,6 +295,9 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     
     const pokemonRival = pokemonesRivalDisponibles[Math.floor(Math.random() * pokemonesRivalDisponibles.length)]
     
+    console.log('Pokémon usuario:', pokemonUser.nombre);
+    console.log('Pokémon rival:', pokemonRival.nombre);
+    
     // Simular batalla
     const batalla = simularBatalla(
       pokemonUser,
@@ -307,28 +318,38 @@ let handler = async (m, { conn, args, usedPrefix }) => {
         batalla.ganador === pokemonRival
       );
       
-      // Actualizar Pokémon en la base de datos
-      const userPokemonIndex = user.pokemons.findIndex(p => p.idUnico === pokemonUser.idUnico);
-      if (userPokemonIndex !== -1) {
+      // Actualizar Pokémon en la base de datos (VERSIÓN MEJORADA)
+      const userPokemonIndex = user.pokemons.findIndex(p => 
+        p && pokemonUser && (p.idUnico === pokemonUser.idUnico || p.nombre === pokemonUser.nombre)
+      );
+
+      if (userPokemonIndex !== -1 && pokemonUserModificado) {
         user.pokemons[userPokemonIndex] = pokemonUserModificado;
+        console.log('Pokémon usuario actualizado:', pokemonUserModificado.nombre);
       }
-      
-      const rivalPokemonIndex = rival.pokemons.findIndex(p => p.idUnico === pokemonRival.idUnico);
-      if (rivalPokemonIndex !== -1) {
+
+      const rivalPokemonIndex = rival.pokemons.findIndex(p => 
+        p && pokemonRival && (p.idUnico === pokemonRival.idUnico || p.nombre === pokemonRival.nombre)
+      );
+
+      if (rivalPokemonIndex !== -1 && pokemonRivalModificado) {
         rival.pokemons[rivalPokemonIndex] = pokemonRivalModificado;
+        console.log('Pokémon rival actualizado:', pokemonRivalModificado.nombre);
       }
       
       // Guardar cambios
       usuarios[userId] = user;
       usuarios[rivalId] = rival;
-      guardarUsuarios(usuarios);
+      const guardadoExitoso = guardarUsuarios(usuarios);
+      console.log('Datos guardados:', guardadoExitoso);
     }
     
     await m.reply(batalla.resultado)
 
   } catch (error) {
-    console.error('Error en pelear:', error)
-    m.reply('❌ Error en la batalla. Intenta nuevamente.')
+    console.error('Error detallado en pelear:', error);
+    console.error('Stack trace:', error.stack);
+    m.reply('❌ Error en la batalla. Revisa la consola para más detalles.');
   }
 }
 
