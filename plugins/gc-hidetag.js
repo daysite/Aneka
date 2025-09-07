@@ -1,4 +1,3 @@
-
 import MessageType from '@whiskeysockets/baileys'
 import { generateWAMessageFromContent } from '@whiskeysockets/baileys'
 
@@ -9,7 +8,7 @@ let c = m.quoted ? m.quoted : m.msg
 const msg = conn.cMod(m.chat,
 generateWAMessageFromContent(m.chat, {
 [c.toJSON ? q.mtype : 'extendedTextMessage']: c.toJSON ? c.toJSON() : {
-text: c || ''
+text: c || '> by lucxxs.qzy'
 }
 }, {
 userJid: conn.user.id
