@@ -135,44 +135,36 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
       })
 
-      console.log('📦 Respuesta de API de descarga:', JSON.stringify(downloadResponse.data, null, 2))
+      console.log('📦 Respuesta de API de descarga recibida')
 
-      let downloadData = downloadResponse.data
+      // 🔥 CORRECCIÓN: Extraer el enlace de la estructura correcta
+      let fileUrl
       
-      // 🔍 DEBUG DETALLADO: Ver todas las propiedades posibles
-      if (downloadResponse.data) {
-        console.log('🔍 Propiedades disponibles en la respuesta:')
-        for (let key in downloadResponse.data) {
-          console.log(`   ${key}:`, downloadResponse.data[key])
-        }
-        
-        // Buscar enlace en múltiples propiedades posibles
-        const possibleUrlKeys = ['url', 'downloadUrl', 'link', 'download_link', 'audio_url', 'mp3_url', 'result']
-        for (let key of possibleUrlKeys) {
-          if (downloadResponse.data[key] && typeof downloadResponse.data[key] === 'string') {
-            downloadData = { url: downloadResponse.data[key] }
-            console.log(`✅ Enlace encontrado en propiedad: ${key}`)
-            break
-          }
-        }
-        
-        // Si es un objeto result, buscar dentro
-        if (downloadResponse.data.result && typeof downloadResponse.data.result === 'object') {
-          for (let key of possibleUrlKeys) {
-            if (downloadResponse.data.result[key] && typeof downloadResponse.data.result[key] === 'string') {
-              downloadData = { url: downloadResponse.data.result[key] }
-              console.log(`✅ Enlace encontrado en result.${key}`)
-              break
-            }
-          }
-        }
+      if (downloadResponse.data.data && downloadResponse.data.data.download && downloadResponse.data.data.download.url) {
+        // Estructura: data.download.url
+        fileUrl = downloadResponse.data.data.download.url
+        console.log('✅ Enlace encontrado en: data.download.url')
       }
-
-      const fileUrl = downloadData.url || downloadData.downloadUrl || downloadData.link
-      
-      if (!fileUrl) {
-        console.log('❌ No se encontró enlace de descarga en la respuesta')
-        throw new Error('La API no devolvió un enlace de descarga válido. Revisa logs.')
+      else if (downloadResponse.data.download && downloadResponse.data.download.url) {
+        // Estructura: download.url
+        fileUrl = downloadResponse.data.download.url
+        console.log('✅ Enlace encontrado en: download.url')
+      }
+      else if (downloadResponse.data.url) {
+        // Estructura: url directamente
+        fileUrl = downloadResponse.data.url
+        console.log('✅ Enlace encontrado en: url')
+      }
+      else if (downloadResponse.data.result && downloadResponse.data.result.url) {
+        // Estructura: result.url
+        fileUrl = downloadResponse.data.result.url
+        console.log('✅ Enlace encontrado en: result.url')
+      }
+      else {
+        // Debug: mostrar toda la respuesta para identificar la estructura
+        console.log('❌ Estructura no reconocida. Respuesta completa:')
+        console.log(JSON.stringify(downloadResponse.data, null, 2))
+        throw new Error('No se pudo encontrar el enlace en la respuesta de la API')
       }
 
       console.log('✅ Enlace de descarga encontrado:', fileUrl)
@@ -216,10 +208,91 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
   }
 
-  // COMANDO: !video (código similar para video)
+  // COMANDO: !video
   else if (command === 'video') {
-    // ... (el mismo código que !audio pero con MP4_API)
-    // Implementación similar para video
+    const session = global.ytSessions[userId]
+    if (!session || !session.selectedVideo) return m.reply('❌ *Primero selecciona un video con *!descargar numero*')
+
+    try {
+      await m.react('⏳')
+      const video = session.selectedVideo
+      let videoTitle = video.title || video.name || 'Video seleccionado'
+      let videoUrl = video.url || video.link || video.videoUrl
+
+      console.log('🎥 Iniciando descarga de video para:', videoUrl)
+
+      const downloadUrl = `${MP4_API}?url=${encodeURIComponent(videoUrl)}`
+      console.log('📥 Solicitando a API de descarga:', downloadUrl)
+
+      const downloadResponse = await axios.get(downloadUrl, {
+        timeout: 60000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      })
+
+      console.log('📦 Respuesta de API de descarga recibida')
+
+      // Misma lógica de extracción para video
+      let fileUrl
+      
+      if (downloadResponse.data.data && downloadResponse.data.data.download && downloadResponse.data.data.download.url) {
+        fileUrl = downloadResponse.data.data.download.url
+      }
+      else if (downloadResponse.data.download && downloadResponse.data.download.url) {
+        fileUrl = downloadResponse.data.download.url
+      }
+      else if (downloadResponse.data.url) {
+        fileUrl = downloadResponse.data.url
+      }
+      else if (downloadResponse.data.result && downloadResponse.data.result.url) {
+        fileUrl = downloadResponse.data.result.url
+      }
+      else {
+        console.log('❌ Estructura no reconocida para video:')
+        console.log(JSON.stringify(downloadResponse.data, null, 2))
+        throw new Error('No se pudo encontrar el enlace en la respuesta de la API')
+      }
+
+      console.log('✅ Enlace de descarga encontrado:', fileUrl)
+
+      const filename = `./tmp/${Date.now()}.mp4`
+
+      // Descargar archivo
+      const writer = fs.createWriteStream(filename)
+      const response = await axios({
+        method: 'GET',
+        url: fileUrl,
+        responseType: 'stream',
+        timeout: 120000
+      })
+
+      response.data.pipe(writer)
+
+      writer.on('finish', async () => {
+        await conn.sendMessage(m.chat, {
+          video: { url: filename },
+          mimetype: 'video/mp4',
+          caption: `✅ *Descargado:* ${videoTitle}`
+        }, { quoted: m })
+        
+        fs.unlinkSync(filename)
+        await m.react('✅')
+        delete global.ytSessions[userId]
+      })
+
+      writer.on('error', (err) => {
+        console.error('Error al escribir archivo:', err)
+        m.reply('❌ Error al guardar el archivo.')
+        if (fs.existsSync(filename)) fs.unlinkSync(filename)
+        delete global.ytSessions[userId]
+      })
+
+    } catch (error) {
+      console.error('Error en descarga:', error.message)
+      m.reply('❌ Error al descargar: ' + error.message)
+      delete global.ytSessions[userId]
+    }
   }
 }
 
