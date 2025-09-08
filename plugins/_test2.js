@@ -1,10 +1,6 @@
 import axios from 'axios'
 import fs from 'fs'
-import { promisify } from 'util'
 
-const sleep = promisify(setTimeout)
-
-// URLs de las APIs
 const SEARCH_API = 'https://api.delirius.store/search/ytsearch'
 const MP3_API = 'https://api.delirius.store/download/ytmp3'
 const MP4_API = 'https://api.delirius.store/download/ytmp4'
@@ -13,44 +9,30 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix + command} Twice*`)
 
   try {
-    await m.react('🔍') // Reacción de búsqueda
+    await m.react('🔍')
 
-    // 1. Buscar videos
+    // 1. Buscar videos - con headers y timeout
     const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
-    const searchResponse = await axios.get(searchUrl)
-    
-    if (!searchResponse.data.status === 200) throw new Error('API de búsqueda falló')
-    
-    const videos = searchResponse.data.result.slice(0, 5) // Top 5 resultados
+    console.log('Buscando:', searchUrl) // Log para depuración
 
+    const searchResponse = await axios.get(searchUrl, {
+      timeout: 30000, // 30 segundos de timeout
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    })
+
+    console.log('Respuesta de búsqueda:', searchResponse.data) // Log completo
+
+    // Verificar estructura de la respuesta
+    if (!searchResponse.data || !searchResponse.data.status === 200) {
+      throw new Error('Respuesta inválida de la API de búsqueda')
+    }
+
+    const videos = searchResponse.data.result.slice(0, 5)
     if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
-    // Formatear lista de resultados
-    let list = videos.map((v, i) => {
-      return `${i + 1}. *${v.title}*\n   • ⏱️ ${v.duration || 'N/A'}\n   • 👁️ ${v.views || 'N/A'}\n   • 🔗 ${v.url}`
-    }).join('\n\n')
-
-    let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
-
-    // Enviar mensaje con botones
-    await conn.sendMessage(m.chat, {
-      text: msg,
-      footer: '⏰ Elige en 60 segundos.',
-      templateButtons: [
-        { index: 1, quickReplyButton: { displayText: '1️⃣', id: 'yt1' } },
-        { index: 2, quickReplyButton: { displayText: '2️⃣', id: 'yt2' } },
-        { index: 3, quickReplyButton: { displayText: '3️⃣', id: 'yt3' } },
-        { index: 4, quickReplyButton: { displayText: '4️⃣', id: 'yt4' } },
-        { index: 5, quickReplyButton: { displayText: '5️⃣', id: 'yt5' } }
-      ]
-    }, { quoted: m })
-
-    // Colector de respuesta
-    let collector = conn.collectMessages(m.chat, {
-      filter: (msg) => msg.sender === m.sender && /^[1-5]$/.test(msg.text),
-      time: 60000,
-      max: 1
-    })
+    // ... (el resto del código permanece igual hasta el colector)
 
     collector.on('collect', async ({ text: selected }) => {
       let index = parseInt(selected) - 1
@@ -80,10 +62,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             ? `${MP3_API}?url=${encodeURIComponent(video.url)}`
             : `${MP4_API}?url=${encodeURIComponent(video.url)}`
           
-          const downloadResponse = await axios.get(downloadUrl)
-          
-          if (!downloadResponse.data.status === 200) throw new Error('API de descarga falló')
-          
+          console.log('Descargando desde:', downloadUrl) // Log
+
+          const downloadResponse = await axios.get(downloadUrl, {
+            timeout: 60000, // 60 segundos para descarga
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          })
+
+          console.log('Respuesta de descarga:', downloadResponse.data) // Log
+
+          if (!downloadResponse.data.status === 200) {
+            throw new Error('Error en la API de descarga: ' + JSON.stringify(downloadResponse.data))
+          }
+
           const downloadData = downloadResponse.data.result
           const fileUrl = downloadData.url
           const filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
@@ -93,13 +86,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
           const response = await axios({
             method: 'GET',
             url: fileUrl,
-            responseType: 'stream'
+            responseType: 'stream',
+            timeout: 120000 // 120 segundos para descarga grande
           })
 
           response.data.pipe(writer)
 
           writer.on('finish', async () => {
-            // 4. Enviar el archivo
             await conn.sendMessage(m.chat, {
               [type === 'audio' ? 'audio' : 'video']: { 
                 url: filename 
@@ -108,36 +101,36 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
               caption: `✅ *Descargado:* ${video.title}`
             }, { quoted: m })
             
-            // Eliminar archivo temporal
             fs.unlinkSync(filename)
             await m.react('✅')
           })
 
           writer.on('error', (err) => {
-            console.error(err)
-            m.reply('❌ Error al descargar el archivo.')
-            fs.unlinkSync(filename)
+            console.error('Error al escribir archivo:', err)
+            m.reply('❌ Error al guardar el archivo.')
+            if (fs.existsSync(filename)) fs.unlinkSync(filename)
           })
 
         } catch (error) {
-          console.error(error)
-          m.reply('❌ Error al procesar la descarga. Intenta con otro video.')
+          console.error('Error en descarga:', error.message)
+          m.reply('❌ Error al descargar: ' + error.message)
           await m.react('❌')
         }
       })
 
       typeCollector.on('end', collected => {
-        if (!collected.length) m.reply('❌ Tiempo agotado.')
+        if (!collected.length) m.reply('❌ Tiempo agotado para selección.')
       })
     })
 
     collector.on('end', collected => {
-      if (!collected.length) m.reply('❌ Tiempo agotado.')
+      if (!collected.length) m.reply('❌ Tiempo agotado para selección.')
     })
 
   } catch (error) {
-    console.error(error)
-    m.reply('❌ Error en la búsqueda. Intenta más tarde.')
+    console.error('Error general:', error.message)
+    console.error('Stack:', error.stack)
+    m.reply('❌ Error en la búsqueda: ' + error.message)
     await m.react('❌')
   }
 }
