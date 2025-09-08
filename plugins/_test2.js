@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const SEARCH_API = 'https://api.delirius.store/search/ytsearch'
+const DOWNLOAD_API = 'https://api.delirius.store/download' // Asumiendo esta API para descargas
 
 // Almacenamiento global simple
 global.ytSessions = global.ytSessions || {}
@@ -162,6 +163,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       if (!video) return m.reply('❌ *Selección inválida.*')
 
       let videoTitle = video.title || video.name || 'Video seleccionado'
+      
+      // Guardar la selección actual en la sesión
+      global.ytSessions[userId].selected = video
 
       await conn.sendMessage(m.chat, {
         text: `🎬 *Seleccionaste:* ${videoTitle}\n\n*Usa *${usedPrefix}audio* o *${usedPrefix}video* para descargar.*`
@@ -176,25 +180,96 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   // COMANDO: !audio
   else if (command === 'audio') {
     const session = global.ytSessions[userId]
-    if (!session) return m.reply('❌ *No tienes una búsqueda activa.*\nUsa primero *!ytmusica canción*')
+    if (!session || !session.selected) return m.reply('❌ *No tienes una selección activa.*\nUsa primero *!descargar número*')
 
-    await m.react('⏳')
-    await conn.sendMessage(m.chat, {
-      text: '🎵 *Función de descarga en desarrollo*\n\nPróximamente disponible...'
-    }, { quoted: m })
-    await m.react('✅')
+    try {
+      await m.react('⏳')
+      
+      const video = session.selected
+      const videoUrl = video.url
+      const videoTitle = video.title || 'audio'
+      
+      // Informar que se está procesando
+      await conn.sendMessage(m.chat, {
+        text: `🎵 *Descargando audio...*\n\n*Título:* ${videoTitle}\n\n⏳ Esto puede tomar unos momentos...`
+      }, { quoted: m })
+
+      // Usar la API de descarga para audio
+      // NOTA: Ajusta la URL y parámetros según tu API real
+      const downloadUrl = `${DOWNLOAD_API}/audio?url=${encodeURIComponent(videoUrl)}`
+      
+      const downloadResponse = await axios.get(downloadUrl, {
+        responseType: 'stream',
+        timeout: 60000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      })
+
+      // Limpiar título para usar como nombre de archivo
+      const cleanTitle = videoTitle.replace(/[^\w\s]/gi, '').substring(0, 30)
+      
+      // Enviar el audio
+      await conn.sendMessage(m.chat, {
+        audio: downloadResponse.data,
+        mimetype: 'audio/mpeg',
+        fileName: `${cleanTitle}.mp3`,
+        ptt: false
+      }, { quoted: m })
+
+      await m.react('✅')
+      
+    } catch (error) {
+      console.error('Error en descarga de audio:', error)
+      m.reply('❌ Error al descargar el audio. Intenta nuevamente.')
+    }
   }
 
   // COMANDO: !video
   else if (command === 'video') {
     const session = global.ytSessions[userId]
-    if (!session) return m.reply('❌ *No tienes una búsqueda activa.*\nUsa primero *!ytmusica canción*')
+    if (!session || !session.selected) return m.reply('❌ *No tienes una selección activa.*\nUsa primero *!descargar número*')
 
-    await m.react('⏳')
-    await conn.sendMessage(m.chat, {
-      text: '🎥 *Función de descarga en desarrollo*\n\nPróximamente disponible...'
-    }, { quoted: m })
-    await m.react('✅')
+    try {
+      await m.react('⏳')
+      
+      const video = session.selected
+      const videoUrl = video.url
+      const videoTitle = video.title || 'video'
+      
+      // Informar que se está procesando
+      await conn.sendMessage(m.chat, {
+        text: `🎥 *Descargando video...*\n\n*Título:* ${videoTitle}\n\n⏳ Esto puede tomar unos momentos...`
+      }, { quoted: m })
+
+      // Usar la API de descarga para video
+      // NOTA: Ajusta la URL y parámetros según tu API real
+      const downloadUrl = `${DOWNLOAD_API}/video?url=${encodeURIComponent(videoUrl)}`
+      
+      const downloadResponse = await axios.get(downloadUrl, {
+        responseType: 'stream',
+        timeout: 120000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      })
+
+      // Limpiar título para usar como nombre de archivo
+      const cleanTitle = videoTitle.replace(/[^\w\s]/gi, '').substring(0, 30)
+      
+      // Enviar el video
+      await conn.sendMessage(m.chat, {
+        video: downloadResponse.data,
+        caption: `🎥 ${videoTitle}`,
+        fileName: `${cleanTitle}.mp4`
+      }, { quoted: m })
+
+      await m.react('✅')
+      
+    } catch (error) {
+      console.error('Error en descarga de video:', error)
+      m.reply('❌ Error al descargar el video. Intenta nuevamente.')
+    }
   }
 }
 
