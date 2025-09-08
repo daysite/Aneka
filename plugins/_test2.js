@@ -11,28 +11,63 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     await m.react('🔍')
 
-    // 1. Buscar videos - con headers y timeout
+    // 1. Buscar videos
     const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
-    console.log('Buscando:', searchUrl) // Log para depuración
+    console.log('Buscando:', searchUrl)
 
     const searchResponse = await axios.get(searchUrl, {
-      timeout: 30000, // 30 segundos de timeout
+      timeout: 30000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     })
 
-    console.log('Respuesta de búsqueda:', searchResponse.data) // Log completo
+    console.log('Respuesta de búsqueda:', JSON.stringify(searchResponse.data, null, 2))
 
-    // Verificar estructura de la respuesta
-    if (!searchResponse.data || !searchResponse.data.status === 200) {
-      throw new Error('Respuesta inválida de la API de búsqueda')
+    // 🔥 VALIDACIÓN CRUCIAL: Verificar si la respuesta tiene la estructura correcta
+    if (!searchResponse.data || typeof searchResponse.data !== 'object') {
+      throw new Error('La API devolvió una respuesta inválida')
+    }
+
+    // 🔥 VALIDACIÓN: Si la API devuelve status false o error
+    if (searchResponse.data.status === false || searchResponse.data.error) {
+      throw new Error(searchResponse.data.message || 'Error en la API de búsqueda')
+    }
+
+    // 🔥 VALIDACIÓN: Verificar si existe result y es un array
+    if (!searchResponse.data.result || !Array.isArray(searchResponse.data.result)) {
+      throw new Error('La propiedad "result" no es un array o no existe')
     }
 
     const videos = searchResponse.data.result.slice(0, 5)
     if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
-    // ... (el resto del código permanece igual hasta el colector)
+    // Formatear lista de resultados
+    let list = videos.map((v, i) => {
+      return `${i + 1}. *${v.title}*\n   • ⏱️ ${v.duration || 'N/A'}\n   • 👁️ ${v.views || 'N/A'}\n   • 🔗 ${v.url}`
+    }).join('\n\n')
+
+    let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
+
+    // Enviar mensaje con botones
+    await conn.sendMessage(m.chat, {
+      text: msg,
+      footer: '⏰ Elige en 60 segundos.',
+      templateButtons: [
+        { index: 1, quickReplyButton: { displayText: '1️⃣', id: 'yt1' } },
+        { index: 2, quickReplyButton: { displayText: '2️⃣', id: 'yt2' } },
+        { index: 3, quickReplyButton: { displayText: '3️⃣', id: 'yt3' } },
+        { index: 4, quickReplyButton: { displayText: '4️⃣', id: 'yt4' } },
+        { index: 5, quickReplyButton: { displayText: '5️⃣', id: 'yt5' } }
+      ]
+    }, { quoted: m })
+
+    // Colector de respuesta
+    let collector = conn.collectMessages(m.chat, {
+      filter: (msg) => msg.sender === m.sender && /^[1-5]$/.test(msg.text),
+      time: 60000,
+      max: 1
+    })
 
     collector.on('collect', async ({ text: selected }) => {
       let index = parseInt(selected) - 1
@@ -62,19 +97,20 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             ? `${MP3_API}?url=${encodeURIComponent(video.url)}`
             : `${MP4_API}?url=${encodeURIComponent(video.url)}`
           
-          console.log('Descargando desde:', downloadUrl) // Log
+          console.log('Descargando desde:', downloadUrl)
 
           const downloadResponse = await axios.get(downloadUrl, {
-            timeout: 60000, // 60 segundos para descarga
+            timeout: 60000,
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
           })
 
-          console.log('Respuesta de descarga:', downloadResponse.data) // Log
+          console.log('Respuesta de descarga:', JSON.stringify(downloadResponse.data, null, 2))
 
-          if (!downloadResponse.data.status === 200) {
-            throw new Error('Error en la API de descarga: ' + JSON.stringify(downloadResponse.data))
+          // Validar respuesta de descarga
+          if (!downloadResponse.data || downloadResponse.data.status === false) {
+            throw new Error(downloadResponse.data?.message || 'Error en la API de descarga')
           }
 
           const downloadData = downloadResponse.data.result
@@ -87,7 +123,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             method: 'GET',
             url: fileUrl,
             responseType: 'stream',
-            timeout: 120000 // 120 segundos para descarga grande
+            timeout: 120000
           })
 
           response.data.pipe(writer)
