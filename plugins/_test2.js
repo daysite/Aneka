@@ -1,33 +1,48 @@
-import yts from 'yt-search'
+import axios from 'axios'
 import ytdl from 'ytdl-core'
 import fs from 'fs'
-import { promisify } from 'util'
-import axios from 'axios'
 
-const sleep = promisify(setTimeout)
+// Configura tu API Key de RapidAPI
+const RAPIDAPI_KEY = 'TU_RAPIDAPI_KEY' // Reemplaza con tu key
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix + command} Bad Bunny*`)
 
   try {
-    await m.react('🔍') // Reacción de búsqueda
+    await m.react('🔍')
 
-    // Buscar en YouTube
-    let search = await yts(text).catch(async () => {
-      // Si yt-search falla, usar alternativa (API externa)
-      return await searchFallback(text)
-    })
+    // 1. Buscar en YouTube usando API de RapidAPI
+    const searchOptions = {
+      method: 'GET',
+      url: 'https://youtube-v31.p.rapidapi.com/search',
+      params: {
+        q: text,
+        part: 'snippet',
+        maxResults: '5'
+      },
+      headers: {
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
+        'X-RapidAPI-Host': 'youtube-v31.p.rapidapi.com'
+      }
+    }
 
-    let videos = search.videos?.slice(0, 5)
-    if (!videos || !videos.length) return m.reply('❌ No se encontraron resultados. Intenta con otra búsqueda.')
+    const searchResponse = await axios.request(searchOptions)
+    const videos = searchResponse.data.items
 
-    // Formatear lista
-    let list = videos.map((v, i) => 
-      `${i + 1}. *${v.title}*\n   • ⏱️ ${v.timestamp || 'N/A'}\n   • 👁️ ${v.views || 'N/A'} vistas\n   • 📅 ${v.ago || 'N/A'}`).join('\n\n')
+    if (!videos.length) return m.reply('❌ No se encontraron resultados.')
+
+    // Formatear resultados
+    let list = videos.map((v, i) => {
+      const title = v.snippet.title
+      const channel = v.snippet.channelTitle
+      const videoId = v.id.videoId
+      const url = `https://www.youtube.com/watch?v=${videoId}`
+      return `${i + 1}. *${title}*\n   • Canal: ${channel}\n   • URL: ${url}`
+    }).join('\n\n')
 
     let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
 
-    // Enviar mensaje con botones rápidos
+    // Enviar mensaje con botones
     await conn.sendMessage(m.chat, {
       text: msg,
       footer: '⏰ Elige en 60 segundos.',
@@ -50,10 +65,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     collector.on('collect', async ({ text: selected }) => {
       let index = parseInt(selected) - 1
       let video = videos[index]
+      let videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`
 
       // Preguntar tipo de descarga
       await conn.sendMessage(m.chat, {
-        text: `🎬 *Seleccionaste:* ${video.title}\n\n¿Descargar como audio o video?`,
+        text: `🎬 *Seleccionaste:* ${video.snippet.title}\n\n¿Descargar como audio o video?`,
         templateButtons: [
           { index: 1, quickReplyButton: { displayText: '🎵 MP3', id: 'audio' } },
           { index: 2, quickReplyButton: { displayText: '🎥 MP4', id: 'video' } }
@@ -70,7 +86,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await m.react('⏳')
         try {
           let filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
-          let stream = ytdl(video.url, {
+          let stream = ytdl(videoUrl, {
             quality: type === 'audio' ? 'highestaudio' : 'highestvideo',
             filter: type === 'audio' ? 'audioonly' : 'videoandaudio'
           })
@@ -80,7 +96,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
               await conn.sendMessage(m.chat, {
                 [type === 'audio' ? 'audio' : 'video']: { url: filename },
                 mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
-                caption: `✅ *Descargado:* ${video.title}`
+                caption: `✅ *Descargado:* ${video.snippet.title}`
               }, { quoted: m })
               fs.unlinkSync(filename)
               await m.react('✅')
@@ -105,19 +121,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     console.error(error)
     m.reply('❌ Error en la búsqueda. Intenta más tarde.')
     await m.react('❌')
-  }
-}
-
-// Función alternativa si yt-search falla
-async function searchFallback(query) {
-  try {
-    let response = await axios.get(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`)
-    let html = response.data
-    // Extraer datos de la página (requiere parsing)
-    // Esto es un ejemplo simplificado. Puedes usar cheerio para scraping.
-    return { videos: [] } // Placeholder
-  } catch {
-    throw new Error('Búsqueda fallida')
   }
 }
 
