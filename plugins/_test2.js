@@ -5,165 +5,126 @@ const SEARCH_API = 'https://api.delirius.store/search/ytsearch'
 const MP3_API = 'https://api.delirius.store/download/ytmp3'
 const MP4_API = 'https://api.delirius.store/download/ytmp4'
 
-// Almacenamiento simple por usuario
-const userSessions = {}
+// Almacenamiento global simple
+global.ytSessions = global.ytSessions || {}
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix + command} Twice*`)
+  const userId = m.sender
+  
+  // COMANDO: !ytmusica <búsqueda>
+  if (command === 'ytmusica' || command === 'ytmusic') {
+    if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix}ytmusica Twice*`)
 
-  try {
-    await m.react('🔍')
+    try {
+      await m.react('🔍')
 
-    // 1. Buscar videos
-    const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
-    console.log('🔍 Buscando en API:', searchUrl)
+      // 1. Buscar videos
+      const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
+      console.log('🔍 Buscando en API:', searchUrl)
 
-    const searchResponse = await axios.get(searchUrl, {
-      timeout: 30000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    })
+      const searchResponse = await axios.get(searchUrl, {
+        timeout: 30000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      })
 
-    console.log('📦 Respuesta de la API recibida')
+      // Procesar respuesta de la API
+      let videos = []
+      const responseData = searchResponse.data
 
-    // Procesar respuesta de la API
-    let videos = []
-    const responseData = searchResponse.data
-
-    if (Array.isArray(responseData)) {
-      videos = responseData
-    } else if (responseData.result && Array.isArray(responseData.result)) {
-      videos = responseData.result
-    } else {
-      // Buscar cualquier array en la respuesta
-      for (let key in responseData) {
-        if (Array.isArray(responseData[key])) {
-          videos = responseData[key]
-          break
+      if (Array.isArray(responseData)) {
+        videos = responseData
+      } else if (responseData.result && Array.isArray(responseData.result)) {
+        videos = responseData.result
+      } else {
+        for (let key in responseData) {
+          if (Array.isArray(responseData[key])) {
+            videos = responseData[key]
+            break
+          }
         }
       }
-    }
 
-    if (!videos.length) return m.reply('❌ No se encontraron resultados.')
+      if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
-    // Guardar en sesión de usuario
-    const userId = m.sender
-    userSessions[userId] = {
-      videos: videos.slice(0, 5),
-      timestamp: Date.now(),
-      step: 'waiting_selection',
-      chat: m.chat
-    }
-
-    // Formatear lista de resultados
-    let list = userSessions[userId].videos.map((v, i) => {
-      const title = v.title || v.name || 'Sin título'
-      const duration = v.duration || 'N/A'
-      const views = v.views || 'N/A'
-      
-      const shortTitle = title.length > 50 ? title.substring(0, 50) + '...' : title
-      
-      return `${i + 1}. *${shortTitle}*\n   • ⏱️ ${duration}\n   • 👁️ ${views}`
-    }).join('\n\n')
-
-    let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
-
-    await conn.sendMessage(m.chat, {
-      text: msg,
-      footer: `⏰ Escribe el número (1-5) en 60 segundos`
-    }, { quoted: m })
-
-    // Configurar timeout para limpiar sesión
-    userSessions[userId].timeout = setTimeout(() => {
-      if (userSessions[userId] && userSessions[userId].step === 'waiting_selection') {
-        conn.sendMessage(userSessions[userId].chat, { text: '❌ Tiempo agotado para selección.' })
-        delete userSessions[userId]
+      // Guardar en sesión global
+      global.ytSessions[userId] = {
+        videos: videos.slice(0, 5),
+        timestamp: Date.now(),
+        query: text
       }
-    }, 60000)
 
-  } catch (error) {
-    console.error('❌ Error general:', error.message)
-    m.reply('❌ Error en la búsqueda: ' + error.message)
-    await m.react('❌')
+      // Formatear lista de resultados
+      let list = global.ytSessions[userId].videos.map((v, i) => {
+        const title = v.title || v.name || 'Sin título'
+        const duration = v.duration || 'N/A'
+        const views = v.views || 'N/A'
+        
+        const shortTitle = title.length > 50 ? title.substring(0, 50) + '...' : title
+        
+        return `${i + 1}. *${shortTitle}*\n   • ⏱️ ${duration}\n   • 👁️ ${views}`
+      }).join('\n\n')
+
+      let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Usa *${usedPrefix}descargar 1-5* para seleccionar.*`
+
+      await conn.sendMessage(m.chat, {
+        text: msg,
+        footer: `⏰ La sesión expira en 5 minutos`
+      }, { quoted: m })
+
+    } catch (error) {
+      console.error('❌ Error general:', error.message)
+      m.reply('❌ Error en la búsqueda: ' + error.message)
+      await m.react('❌')
+    }
   }
-}
 
-// 🔥 MANEJADOR PARA CAPTURAR LAS RESPUESTAS DE USUARIO
-handler.all = async (m, { conn }) => {
-  // Solo procesar mensajes de texto normales
-  if (m.isBaileys || m.fromMe || !m.text || m.text.startsWith('!') || m.text.startsWith('/') || m.text.startsWith('.') || m.text.startsWith(usedPrefix)) {
-    return
-  }
-
-  const userId = m.sender
-  const session = userSessions[userId]
-
-  if (!session) return // No hay sesión activa
-
-  // Verificar que sea el mismo chat
-  if (session.chat !== m.chat) return
-
-  // Si está esperando selección de número
-  if (session.step === 'waiting_selection' && /^[1-5]$/.test(m.text)) {
-    clearTimeout(session.timeout)
+  // COMANDO: !descargar <número>
+  else if (command === 'descargar') {
+    if (!text) return m.reply(`❌ *Ingresa un número.*\nEjemplo: *${usedPrefix}descargar 2*`)
     
+    const session = global.ytSessions[userId]
+    if (!session) return m.reply('❌ *No tienes una búsqueda activa.*\nUsa primero *!ytmusica canción*')
+
+    if (!/^[1-5]$/.test(text)) return m.reply('❌ *Número inválido.*\nSolo del 1 al 5.')
+
     try {
-      let index = parseInt(m.text) - 1
+      let index = parseInt(text) - 1
       let video = session.videos[index]
       
-      if (!video) {
-        return conn.sendMessage(m.chat, { text: '❌ Selección inválida.' }, { quoted: m })
-      }
+      if (!video) return m.reply('❌ *Selección inválida.*')
 
       let videoTitle = video.title || video.name || 'Video seleccionado'
       let videoUrl = video.url || video.link || video.videoUrl
 
+      // Guardar selección
+      global.ytSessions[userId].selectedVideo = video
+      global.ytSessions[userId].step = 'waiting_type'
+
       await conn.sendMessage(m.chat, {
-        text: `🎬 *Seleccionaste:* ${videoTitle}\n\n¿Descargar como audio o video?\n\nEscribe *audio* para MP3 o *video* para MP4`
+        text: `🎬 *Seleccionaste:* ${videoTitle}\n\n*Usa *${usedPrefix}audio* o *${usedPrefix}video* para descargar.*`
       }, { quoted: m })
-
-      // Actualizar sesión para siguiente paso
-      userSessions[userId] = {
-        ...session,
-        step: 'waiting_type',
-        selectedVideo: video,
-        timestamp: Date.now()
-      }
-
-      // Timeout para selección de tipo
-      userSessions[userId].timeout = setTimeout(() => {
-        if (userSessions[userId]) {
-          conn.sendMessage(userSessions[userId].chat, { text: '❌ Tiempo agotado para selección de tipo.' })
-          delete userSessions[userId]
-        }
-      }, 30000)
 
     } catch (error) {
       console.error('Error en selección:', error)
-      conn.sendMessage(m.chat, { text: '❌ Error al procesar selección.' }, { quoted: m })
-      delete userSessions[userId]
+      m.reply('❌ Error al procesar selección.')
     }
-    return true // Indicar que el mensaje fue procesado
   }
 
-  // Si está esperando tipo de descarga
-  if (session.step === 'waiting_type' && /^(audio|video)$/i.test(m.text)) {
-    clearTimeout(session.timeout)
-    
+  // COMANDO: !audio
+  else if (command === 'audio') {
+    const session = global.ytSessions[userId]
+    if (!session || !session.selectedVideo) return m.reply('❌ *Primero selecciona un video con *!descargar numero*')
+
     try {
-      const type = m.text.toLowerCase()
+      await m.react('⏳')
       const video = session.selectedVideo
       let videoTitle = video.title || video.name || 'Video seleccionado'
       let videoUrl = video.url || video.link || video.videoUrl
 
-      await m.react('⏳')
-
-      const downloadUrl = type === 'audio' 
-        ? `${MP3_API}?url=${encodeURIComponent(videoUrl)}`
-        : `${MP4_API}?url=${encodeURIComponent(videoUrl)}`
-      
-      console.log('📥 Descargando desde:', downloadUrl)
+      const downloadUrl = `${MP3_API}?url=${encodeURIComponent(videoUrl)}`
+      console.log('📥 Descargando audio desde:', downloadUrl)
 
       const downloadResponse = await axios.get(downloadUrl, {
         timeout: 60000,
@@ -180,7 +141,7 @@ handler.all = async (m, { conn }) => {
       const fileUrl = downloadData.url || downloadData.downloadUrl || downloadData.link
       if (!fileUrl) throw new Error('No se encontró enlace de descarga')
 
-      const filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
+      const filename = `./tmp/${Date.now()}.mp3`
 
       // Descargar archivo
       const writer = fs.createWriteStream(filename)
@@ -195,46 +156,118 @@ handler.all = async (m, { conn }) => {
 
       writer.on('finish', async () => {
         await conn.sendMessage(m.chat, {
-          [type === 'audio' ? 'audio' : 'video']: { 
-            url: filename 
-          },
-          mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
+          audio: { url: filename },
+          mimetype: 'audio/mpeg',
           caption: `✅ *Descargado:* ${videoTitle}`
         }, { quoted: m })
         
         fs.unlinkSync(filename)
         await m.react('✅')
-        delete userSessions[userId]
+        // Limpiar sesión
+        delete global.ytSessions[userId]
       })
 
       writer.on('error', (err) => {
         console.error('Error al escribir archivo:', err)
-        conn.sendMessage(m.chat, { text: '❌ Error al guardar el archivo.' }, { quoted: m })
+        m.reply('❌ Error al guardar el archivo.')
         if (fs.existsSync(filename)) fs.unlinkSync(filename)
-        delete userSessions[userId]
+        delete global.ytSessions[userId]
       })
 
     } catch (error) {
       console.error('Error en descarga:', error.message)
-      conn.sendMessage(m.chat, { text: '❌ Error al descargar: ' + error.message }, { quoted: m })
-      delete userSessions[userId]
+      m.reply('❌ Error al descargar: ' + error.message)
+      delete global.ytSessions[userId]
     }
-    return true // Indicar que el mensaje fue procesado
+  }
+
+  // COMANDO: !video
+  else if (command === 'video') {
+    const session = global.ytSessions[userId]
+    if (!session || !session.selectedVideo) return m.reply('❌ *Primero selecciona un video con *!descargar numero*')
+
+    try {
+      await m.react('⏳')
+      const video = session.selectedVideo
+      let videoTitle = video.title || video.name || 'Video seleccionado'
+      let videoUrl = video.url || video.link || video.videoUrl
+
+      const downloadUrl = `${MP4_API}?url=${encodeURIComponent(videoUrl)}`
+      console.log('📥 Descargando video desde:', downloadUrl)
+
+      const downloadResponse = await axios.get(downloadUrl, {
+        timeout: 60000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      })
+
+      let downloadData = downloadResponse.data
+      if (downloadResponse.data.result) {
+        downloadData = downloadResponse.data.result
+      }
+
+      const fileUrl = downloadData.url || downloadData.downloadUrl || downloadData.link
+      if (!fileUrl) throw new Error('No se encontró enlace de descarga')
+
+      const filename = `./tmp/${Date.now()}.mp4`
+
+      // Descargar archivo
+      const writer = fs.createWriteStream(filename)
+      const response = await axios({
+        method: 'GET',
+        url: fileUrl,
+        responseType: 'stream',
+        timeout: 120000
+      })
+
+      response.data.pipe(writer)
+
+      writer.on('finish', async () => {
+        await conn.sendMessage(m.chat, {
+          video: { url: filename },
+          mimetype: 'video/mp4',
+          caption: `✅ *Descargado:* ${videoTitle}`
+        }, { quoted: m })
+        
+        fs.unlinkSync(filename)
+        await m.react('✅')
+        // Limpiar sesión
+        delete global.ytSessions[userId]
+      })
+
+      writer.on('error', (err) => {
+        console.error('Error al escribir archivo:', err)
+        m.reply('❌ Error al guardar el archivo.')
+        if (fs.existsSync(filename)) fs.unlinkSync(filename)
+        delete global.ytSessions[userId]
+      })
+
+    } catch (error) {
+      console.error('Error en descarga:', error.message)
+      m.reply('❌ Error al descargar: ' + error.message)
+      delete global.ytSessions[userId]
+    }
   }
 }
 
-// Limpiar sesiones antiguas cada minuto
+// Limpiar sesiones antiguas cada 5 minutos
 setInterval(() => {
   const now = Date.now()
-  for (let userId in userSessions) {
-    if (now - userSessions[userId].timestamp > 60000) {
-      delete userSessions[userId]
+  for (let userId in global.ytSessions) {
+    if (now - global.ytSessions[userId].timestamp > 300000) { // 5 minutos
+      delete global.ytSessions[userId]
     }
   }
-}, 60000)
+}, 300000)
 
-handler.help = ['ytmusica <búsqueda>']
+handler.help = [
+  'ytmusica <búsqueda>',
+  'descargar <1-5>',
+  'audio',
+  'video'
+]
 handler.tags = ['downloader']
-handler.command = /^yt(musica|música|music)$/i
+handler.command = /^(yt(musica|música|music)|descargar|audio|video)$/i
 
 export default handler
