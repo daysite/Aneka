@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 const SEARCH_API = 'https://api.delirius.store/search/ytsearch'
-const DOWNLOAD_API = 'https://api.delirius.store/download' // Asumiendo esta API para descargas
+const DOWNLOAD_MP3_API = 'https://api.delirius.store/download/ytmp3'
+const DOWNLOAD_MP4_API = 'https://api.delirius.store/download/ytmp4'
 
 // Almacenamiento global simple
 global.ytSessions = global.ytSessions || {}
@@ -194,13 +195,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         text: `🎵 *Descargando audio...*\n\n*Título:* ${videoTitle}\n\n⏳ Esto puede tomar unos momentos...`
       }, { quoted: m })
 
-      // Usar la API de descarga para audio
-      // NOTA: Ajusta la URL y parámetros según tu API real
-      const downloadUrl = `${DOWNLOAD_API}/audio?url=${encodeURIComponent(videoUrl)}`
+      // Usar la API de descarga para audio MP3
+      const downloadUrl = `${DOWNLOAD_MP3_API}?url=${encodeURIComponent(videoUrl)}`
       
       const downloadResponse = await axios.get(downloadUrl, {
         responseType: 'stream',
-        timeout: 60000,
+        timeout: 120000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -242,13 +242,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         text: `🎥 *Descargando video...*\n\n*Título:* ${videoTitle}\n\n⏳ Esto puede tomar unos momentos...`
       }, { quoted: m })
 
-      // Usar la API de descarga para video
-      // NOTA: Ajusta la URL y parámetros según tu API real
-      const downloadUrl = `${DOWNLOAD_API}/video?url=${encodeURIComponent(videoUrl)}`
+      // Usar la API de descarga para video MP4
+      const downloadUrl = `${DOWNLOAD_MP4_API}?url=${encodeURIComponent(videoUrl)}`
       
       const downloadResponse = await axios.get(downloadUrl, {
         responseType: 'stream',
-        timeout: 120000,
+        timeout: 180000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
