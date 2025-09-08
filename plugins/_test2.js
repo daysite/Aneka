@@ -1,43 +1,33 @@
 import axios from 'axios'
-import ytdl from 'ytdl-core'
 import fs from 'fs'
+import { promisify } from 'util'
 
-// Configura tu API Key de RapidAPI
-const RAPIDAPI_KEY = 'TU_RAPIDAPI_KEY' // Reemplaza con tu key
+const sleep = promisify(setTimeout)
+
+// URLs de las APIs
+const SEARCH_API = 'https://api.delirius.store/search/ytsearch'
+const MP3_API = 'https://api.delirius.store/download/ytmp3'
+const MP4_API = 'https://api.delirius.store/download/ytmp4'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix + command} Bad Bunny*`)
+  if (!text) return m.reply(`❌ *Ingresa una canción o artista.*\nEjemplo: *${usedPrefix + command} Twice*`)
 
   try {
-    await m.react('🔍')
+    await m.react('🔍') // Reacción de búsqueda
 
-    // 1. Buscar en YouTube usando API de RapidAPI
-    const searchOptions = {
-      method: 'GET',
-      url: 'https://youtube-v31.p.rapidapi.com/search',
-      params: {
-        q: text,
-        part: 'snippet',
-        maxResults: '5'
-      },
-      headers: {
-        'X-RapidAPI-Key': RAPIDAPI_KEY,
-        'X-RapidAPI-Host': 'youtube-v31.p.rapidapi.com'
-      }
-    }
-
-    const searchResponse = await axios.request(searchOptions)
-    const videos = searchResponse.data.items
+    // 1. Buscar videos
+    const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
+    const searchResponse = await axios.get(searchUrl)
+    
+    if (!searchResponse.data.status === 200) throw new Error('API de búsqueda falló')
+    
+    const videos = searchResponse.data.result.slice(0, 5) // Top 5 resultados
 
     if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
-    // Formatear resultados
+    // Formatear lista de resultados
     let list = videos.map((v, i) => {
-      const title = v.snippet.title
-      const channel = v.snippet.channelTitle
-      const videoId = v.id.videoId
-      const url = `https://www.youtube.com/watch?v=${videoId}`
-      return `${i + 1}. *${title}*\n   • Canal: ${channel}\n   • URL: ${url}`
+      return `${i + 1}. *${v.title}*\n   • ⏱️ ${v.duration || 'N/A'}\n   • 👁️ ${v.views || 'N/A'}\n   • 🔗 ${v.url}`
     }).join('\n\n')
 
     let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
@@ -65,11 +55,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     collector.on('collect', async ({ text: selected }) => {
       let index = parseInt(selected) - 1
       let video = videos[index]
-      let videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`
 
       // Preguntar tipo de descarga
       await conn.sendMessage(m.chat, {
-        text: `🎬 *Seleccionaste:* ${video.snippet.title}\n\n¿Descargar como audio o video?`,
+        text: `🎬 *Seleccionaste:* ${video.title}\n\n¿Descargar como audio o video?`,
         templateButtons: [
           { index: 1, quickReplyButton: { displayText: '🎵 MP3', id: 'audio' } },
           { index: 2, quickReplyButton: { displayText: '🎥 MP4', id: 'video' } }
@@ -84,26 +73,55 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
       typeCollector.on('collect', async ({ text: type }) => {
         await m.react('⏳')
+        
         try {
-          let filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
-          let stream = ytdl(videoUrl, {
-            quality: type === 'audio' ? 'highestaudio' : 'highestvideo',
-            filter: type === 'audio' ? 'audioonly' : 'videoandaudio'
+          // 2. Obtener enlace de descarga
+          const downloadUrl = type === 'audio' 
+            ? `${MP3_API}?url=${encodeURIComponent(video.url)}`
+            : `${MP4_API}?url=${encodeURIComponent(video.url)}`
+          
+          const downloadResponse = await axios.get(downloadUrl)
+          
+          if (!downloadResponse.data.status === 200) throw new Error('API de descarga falló')
+          
+          const downloadData = downloadResponse.data.result
+          const fileUrl = downloadData.url
+          const filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
+
+          // 3. Descargar el archivo
+          const writer = fs.createWriteStream(filename)
+          const response = await axios({
+            method: 'GET',
+            url: fileUrl,
+            responseType: 'stream'
           })
 
-          stream.pipe(fs.createWriteStream(filename))
-            .on('finish', async () => {
-              await conn.sendMessage(m.chat, {
-                [type === 'audio' ? 'audio' : 'video']: { url: filename },
-                mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
-                caption: `✅ *Descargado:* ${video.snippet.title}`
-              }, { quoted: m })
-              fs.unlinkSync(filename)
-              await m.react('✅')
-            })
+          response.data.pipe(writer)
+
+          writer.on('finish', async () => {
+            // 4. Enviar el archivo
+            await conn.sendMessage(m.chat, {
+              [type === 'audio' ? 'audio' : 'video']: { 
+                url: filename 
+              },
+              mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
+              caption: `✅ *Descargado:* ${video.title}`
+            }, { quoted: m })
+            
+            // Eliminar archivo temporal
+            fs.unlinkSync(filename)
+            await m.react('✅')
+          })
+
+          writer.on('error', (err) => {
+            console.error(err)
+            m.reply('❌ Error al descargar el archivo.')
+            fs.unlinkSync(filename)
+          })
+
         } catch (error) {
           console.error(error)
-          m.reply('❌ Error al descargar. Intenta con otro video.')
+          m.reply('❌ Error al procesar la descarga. Intenta con otro video.')
           await m.react('❌')
         }
       })
