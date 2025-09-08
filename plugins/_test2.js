@@ -24,45 +24,50 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     console.log('Respuesta de búsqueda:', JSON.stringify(searchResponse.data, null, 2))
 
-    // 🔥 VALIDACIÓN CRUCIAL: Verificar si la respuesta tiene la estructura correcta
-    if (!searchResponse.data || typeof searchResponse.data !== 'object') {
-      throw new Error('La API devolvió una respuesta inválida')
+    // Manejar diferentes estructuras de respuesta
+    let videos = searchResponse.data
+    if (!Array.isArray(videos)) {
+      if (searchResponse.data.results && Array.isArray(searchResponse.data.results)) {
+        videos = searchResponse.data.results
+      } else if (searchResponse.data.items && Array.isArray(searchResponse.data.items)) {
+        videos = searchResponse.data.items
+      } else {
+        throw new Error('Estructura de API no reconocida')
+      }
     }
 
-    // 🔥 VALIDACIÓN: Si la API devuelve status false o error
-    if (searchResponse.data.status === false || searchResponse.data.error) {
-      throw new Error(searchResponse.data.message || 'Error en la API de búsqueda')
-    }
-
-    // 🔥 VALIDACIÓN: Verificar si existe result y es un array
-    if (!searchResponse.data.result || !Array.isArray(searchResponse.data.result)) {
-      throw new Error('La propiedad "result" no es un array o no existe')
-    }
-
-    const videos = searchResponse.data.result.slice(0, 5)
+    videos = videos.slice(0, 5)
     if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
     // Formatear lista de resultados
     let list = videos.map((v, i) => {
-      return `${i + 1}. *${v.title}*\n   • ⏱️ ${v.duration || 'N/A'}\n   • 👁️ ${v.views || 'N/A'}\n   • 🔗 ${v.url}`
+      const title = v.title || v.name || 'Sin título'
+      const url = v.url || v.link || v.videoUrl || '#'
+      const duration = v.duration || v.length || 'N/A'
+      const views = v.views || v.viewCount || 'N/A'
+      
+      return `${i + 1}. *${title}*\n   • ⏱️ ${duration}\n   • 👁️ ${views}`
     }).join('\n\n')
 
     let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
 
-    // Enviar mensaje con botones
+    // 🔥 BOTONES NATIVOS DE WHATSAPP
+    const buttons = [
+      { buttonId: '1', buttonText: { displayText: '1️⃣' }, type: 1 },
+      { buttonId: '2', buttonText: { displayText: '2️⃣' }, type: 1 },
+      { buttonId: '3', buttonText: { displayText: '3️⃣' }, type: 1 },
+      { buttonId: '4', buttonText: { displayText: '4️⃣' }, type: 1 },
+      { buttonId: '5', buttonText: { displayText: '5️⃣' }, type: 1 }
+    ]
+
     await conn.sendMessage(m.chat, {
       text: msg,
-      footer: '⏰ Elige en 60 segundos.',
-      templateButtons: [
-        { index: 1, quickReplyButton: { displayText: '1️⃣', id: 'yt1' } },
-        { index: 2, quickReplyButton: { displayText: '2️⃣', id: 'yt2' } },
-        { index: 3, quickReplyButton: { displayText: '3️⃣', id: 'yt3' } },
-        { index: 4, quickReplyButton: { displayText: '4️⃣', id: 'yt4' } },
-        { index: 5, quickReplyButton: { displayText: '5️⃣', id: 'yt5' } }
-      ]
+      footer: '⏰ Responde con el número en 60 segundos',
+      buttons: buttons,
+      headerType: 1
     }, { quoted: m })
 
-    // Colector de respuesta
+    // Colector de respuesta para selección de video
     let collector = conn.collectMessages(m.chat, {
       filter: (msg) => msg.sender === m.sender && /^[1-5]$/.test(msg.text),
       time: 60000,
@@ -72,16 +77,22 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     collector.on('collect', async ({ text: selected }) => {
       let index = parseInt(selected) - 1
       let video = videos[index]
+      let videoTitle = video.title || video.name
 
-      // Preguntar tipo de descarga
+      // 🔥 BOTONES PARA TIPO DE DESCARGA
+      const downloadButtons = [
+        { buttonId: 'audio', buttonText: { displayText: '🎵 MP3' }, type: 1 },
+        { buttonId: 'video', buttonText: { displayText: '🎥 MP4' }, type: 1 }
+      ]
+
       await conn.sendMessage(m.chat, {
-        text: `🎬 *Seleccionaste:* ${video.title}\n\n¿Descargar como audio o video?`,
-        templateButtons: [
-          { index: 1, quickReplyButton: { displayText: '🎵 MP3', id: 'audio' } },
-          { index: 2, quickReplyButton: { displayText: '🎥 MP4', id: 'video' } }
-        ]
+        text: `🎬 *Seleccionaste:* ${videoTitle}\n\n¿Descargar como audio o video?`,
+        buttons: downloadButtons,
+        footer: 'Elige una opción',
+        headerType: 1
       }, { quoted: m })
 
+      // Colector para tipo de descarga
       let typeCollector = conn.collectMessages(m.chat, {
         filter: (msg) => msg.sender === m.sender && /^(audio|video)$/i.test(msg.text),
         time: 30000,
@@ -92,10 +103,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await m.react('⏳')
         
         try {
-          // 2. Obtener enlace de descarga
+          const videoUrl = video.url || video.link || video.videoUrl
           const downloadUrl = type === 'audio' 
-            ? `${MP3_API}?url=${encodeURIComponent(video.url)}`
-            : `${MP4_API}?url=${encodeURIComponent(video.url)}`
+            ? `${MP3_API}?url=${encodeURIComponent(videoUrl)}`
+            : `${MP4_API}?url=${encodeURIComponent(videoUrl)}`
           
           console.log('Descargando desde:', downloadUrl)
 
@@ -108,16 +119,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
           console.log('Respuesta de descarga:', JSON.stringify(downloadResponse.data, null, 2))
 
-          // Validar respuesta de descarga
-          if (!downloadResponse.data || downloadResponse.data.status === false) {
-            throw new Error(downloadResponse.data?.message || 'Error en la API de descarga')
+          let downloadData
+          if (downloadResponse.data.result) {
+            downloadData = downloadResponse.data.result
+          } else if (downloadResponse.data.download) {
+            downloadData = downloadResponse.data.download
+          } else {
+            downloadData = downloadResponse.data
           }
 
-          const downloadData = downloadResponse.data.result
-          const fileUrl = downloadData.url
+          const fileUrl = downloadData.url || downloadData.downloadUrl || downloadData.link
+          if (!fileUrl) throw new Error('No se encontró enlace de descarga')
+
           const filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
 
-          // 3. Descargar el archivo
+          // Descargar archivo
           const writer = fs.createWriteStream(filename)
           const response = await axios({
             method: 'GET',
@@ -134,7 +150,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 url: filename 
               },
               mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
-              caption: `✅ *Descargado:* ${video.title}`
+              caption: `✅ *Descargado:* ${videoTitle}`
             }, { quoted: m })
             
             fs.unlinkSync(filename)
@@ -165,8 +181,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   } catch (error) {
     console.error('Error general:', error.message)
-    console.error('Stack:', error.stack)
-    m.reply('❌ Error en la búsqueda: ' + error.message)
+    m.reply('❌ Error: ' + error.message)
     await m.react('❌')
   }
 }
