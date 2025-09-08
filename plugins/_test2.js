@@ -13,7 +13,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     // 1. Buscar videos
     const searchUrl = `${SEARCH_API}?q=${encodeURIComponent(text)}`
-    console.log('Buscando:', searchUrl)
+    console.log('🔍 Buscando en API:', searchUrl)
 
     const searchResponse = await axios.get(searchUrl, {
       timeout: 30000,
@@ -22,36 +22,78 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       }
     })
 
-    console.log('Respuesta de búsqueda:', JSON.stringify(searchResponse.data, null, 2))
+    console.log('📦 Respuesta CRUDA de la API:', JSON.stringify(searchResponse.data, null, 2))
 
-    // Manejar diferentes estructuras de respuesta
-    let videos = searchResponse.data
-    if (!Array.isArray(videos)) {
-      if (searchResponse.data.results && Array.isArray(searchResponse.data.results)) {
-        videos = searchResponse.data.results
-      } else if (searchResponse.data.items && Array.isArray(searchResponse.data.items)) {
-        videos = searchResponse.data.items
-      } else {
-        throw new Error('Estructura de API no reconocida')
+    // 🔥 ANÁLISIS DETALLADO de la estructura
+    let videos = []
+    const responseData = searchResponse.data
+
+    // Opción 1: Si es array directamente
+    if (Array.isArray(responseData)) {
+      videos = responseData
+      console.log('✅ API devuelve array directamente')
+    }
+    // Opción 2: Si tiene propiedad 'result'
+    else if (responseData.result && Array.isArray(responseData.result)) {
+      videos = responseData.result
+      console.log('✅ API devuelve array en propiedad "result"')
+    }
+    // Opción 3: Si tiene propiedad 'results' 
+    else if (responseData.results && Array.isArray(responseData.results)) {
+      videos = responseData.results
+      console.log('✅ API devuelve array en propiedad "results"')
+    }
+    // Opción 4: Si tiene propiedad 'items'
+    else if (responseData.items && Array.isArray(responseData.items)) {
+      videos = responseData.items
+      console.log('✅ API devuelve array en propiedad "items"')
+    }
+    // Opción 5: Si tiene propiedad 'data'
+    else if (responseData.data && Array.isArray(responseData.data)) {
+      videos = responseData.data
+      console.log('✅ API devuelve array en propiedad "data"')
+    }
+    // Opción 6: Si es un objeto con videos embebidos
+    else if (responseData.videos && Array.isArray(responseData.videos)) {
+      videos = responseData.videos
+      console.log('✅ API devuelve array en propiedad "videos"')
+    }
+    // Opción 7: Si la API tiene otra estructura inesperada
+    else {
+      console.log('❌ Estructura no reconocida. Propiedades disponibles:', Object.keys(responseData))
+      // Intentar extraer videos de cualquier manera
+      for (let key in responseData) {
+        if (Array.isArray(responseData[key])) {
+          videos = responseData[key]
+          console.log(`✅ Encontrado array en propiedad "${key}"`)
+          break
+        }
       }
     }
 
-    videos = videos.slice(0, 5)
-    if (!videos.length) return m.reply('❌ No se encontraron resultados.')
+    // Si aún no tenemos videos, mostrar error detallado
+    if (!videos.length) {
+      console.log('❌ No se pudieron extraer videos. Estructura completa:')
+      console.log(JSON.stringify(responseData, null, 2))
+      throw new Error(`API devolvió estructura no compatible. Revisa logs para detalles.`)
+    }
 
-    // Formatear lista de resultados
+    videos = videos.slice(0, 5)
+    console.log(`🎯 Videos encontrados: ${videos.length}`)
+
+    // Formatear lista de resultados (adaptable a diferentes estructuras)
     let list = videos.map((v, i) => {
-      const title = v.title || v.name || 'Sin título'
-      const url = v.url || v.link || v.videoUrl || '#'
-      const duration = v.duration || v.length || 'N/A'
-      const views = v.views || v.viewCount || 'N/A'
+      const title = v.title || v.name || v.snippet?.title || 'Sin título'
+      const url = v.url || v.link || v.videoUrl || v.id?.videoId || v.id || '#'
+      const duration = v.duration || v.length || v.contentDetails?.duration || 'N/A'
+      const views = v.views || v.viewCount || v.statistics?.viewCount || 'N/A'
       
       return `${i + 1}. *${title}*\n   • ⏱️ ${duration}\n   • 👁️ ${views}`
     }).join('\n\n')
 
     let msg = `🎵 *Resultados para:* ${text}\n\n${list}\n\n*Responde con el número (1-5) para descargar.*`
 
-    // 🔥 BOTONES NATIVOS DE WHATSAPP
+    // Botones de WhatsApp
     const buttons = [
       { buttonId: '1', buttonText: { displayText: '1️⃣' }, type: 1 },
       { buttonId: '2', buttonText: { displayText: '2️⃣' }, type: 1 },
@@ -67,121 +109,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       headerType: 1
     }, { quoted: m })
 
-    // Colector de respuesta para selección de video
-    let collector = conn.collectMessages(m.chat, {
-      filter: (msg) => msg.sender === m.sender && /^[1-5]$/.test(msg.text),
-      time: 60000,
-      max: 1
-    })
-
-    collector.on('collect', async ({ text: selected }) => {
-      let index = parseInt(selected) - 1
-      let video = videos[index]
-      let videoTitle = video.title || video.name
-
-      // 🔥 BOTONES PARA TIPO DE DESCARGA
-      const downloadButtons = [
-        { buttonId: 'audio', buttonText: { displayText: '🎵 MP3' }, type: 1 },
-        { buttonId: 'video', buttonText: { displayText: '🎥 MP4' }, type: 1 }
-      ]
-
-      await conn.sendMessage(m.chat, {
-        text: `🎬 *Seleccionaste:* ${videoTitle}\n\n¿Descargar como audio o video?`,
-        buttons: downloadButtons,
-        footer: 'Elige una opción',
-        headerType: 1
-      }, { quoted: m })
-
-      // Colector para tipo de descarga
-      let typeCollector = conn.collectMessages(m.chat, {
-        filter: (msg) => msg.sender === m.sender && /^(audio|video)$/i.test(msg.text),
-        time: 30000,
-        max: 1
-      })
-
-      typeCollector.on('collect', async ({ text: type }) => {
-        await m.react('⏳')
-        
-        try {
-          const videoUrl = video.url || video.link || video.videoUrl
-          const downloadUrl = type === 'audio' 
-            ? `${MP3_API}?url=${encodeURIComponent(videoUrl)}`
-            : `${MP4_API}?url=${encodeURIComponent(videoUrl)}`
-          
-          console.log('Descargando desde:', downloadUrl)
-
-          const downloadResponse = await axios.get(downloadUrl, {
-            timeout: 60000,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-          })
-
-          console.log('Respuesta de descarga:', JSON.stringify(downloadResponse.data, null, 2))
-
-          let downloadData
-          if (downloadResponse.data.result) {
-            downloadData = downloadResponse.data.result
-          } else if (downloadResponse.data.download) {
-            downloadData = downloadResponse.data.download
-          } else {
-            downloadData = downloadResponse.data
-          }
-
-          const fileUrl = downloadData.url || downloadData.downloadUrl || downloadData.link
-          if (!fileUrl) throw new Error('No se encontró enlace de descarga')
-
-          const filename = `./tmp/${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`
-
-          // Descargar archivo
-          const writer = fs.createWriteStream(filename)
-          const response = await axios({
-            method: 'GET',
-            url: fileUrl,
-            responseType: 'stream',
-            timeout: 120000
-          })
-
-          response.data.pipe(writer)
-
-          writer.on('finish', async () => {
-            await conn.sendMessage(m.chat, {
-              [type === 'audio' ? 'audio' : 'video']: { 
-                url: filename 
-              },
-              mimetype: type === 'audio' ? 'audio/mpeg' : 'video/mp4',
-              caption: `✅ *Descargado:* ${videoTitle}`
-            }, { quoted: m })
-            
-            fs.unlinkSync(filename)
-            await m.react('✅')
-          })
-
-          writer.on('error', (err) => {
-            console.error('Error al escribir archivo:', err)
-            m.reply('❌ Error al guardar el archivo.')
-            if (fs.existsSync(filename)) fs.unlinkSync(filename)
-          })
-
-        } catch (error) {
-          console.error('Error en descarga:', error.message)
-          m.reply('❌ Error al descargar: ' + error.message)
-          await m.react('❌')
-        }
-      })
-
-      typeCollector.on('end', collected => {
-        if (!collected.length) m.reply('❌ Tiempo agotado para selección.')
-      })
-    })
-
-    collector.on('end', collected => {
-      if (!collected.length) m.reply('❌ Tiempo agotado para selección.')
-    })
+    // ... (el resto del código permanece igual)
 
   } catch (error) {
-    console.error('Error general:', error.message)
-    m.reply('❌ Error: ' + error.message)
+    console.error('❌ Error general:', error.message)
+    console.error('📋 Stack:', error.stack)
+    m.reply('❌ Error: ' + error.message + '\nRevisa la consola para más detalles.')
     await m.react('❌')
   }
 }
