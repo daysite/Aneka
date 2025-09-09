@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys';
 
 // API oficial de Pokémon TCG
 const POKEMON_TCG_API = 'https://api.pokemontcg.io/v2/cards';
@@ -171,28 +172,6 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
       m);
     }
     
-    // Mostrar información de las cartas encontradas
-    let cardInfo = `🃏 *Pokémon Cards Encontradas* 🃏\n\n`;
-    cardInfo += `🔍 *Búsqueda:* ${text}\n`;
-    cardInfo += `📊 *Total de cartas:* ${cards.length}\n\n`;
-    
-    // Mostrar primeras 5 cartas
-    cards.slice(0, 5).forEach((card, index) => {
-      cardInfo += `*${index + 1}.* ${card.name}\n`;
-      if (card.set) cardInfo += `- *Set:* ${card.set.name}\n`;
-      if (card.rarity) cardInfo += `- *Rareza:* ${card.rarity}\n`;
-      if (card.hp) cardInfo += `- *HP:* ${card.hp}\n`;
-      cardInfo += `\n`;
-    });
-    
-    if (cards.length > 5) {
-      cardInfo += `ℹ️ *Y ${cards.length - 5} cartas más...*\n\n`;
-    }
-    
-    cardInfo += `💡 *Usa:* ${usedPrefix}pokecarding <número> para ver una carta`;
-    
-    await conn.reply(m.chat, cardInfo, m);
-    
     // Guardar las cartas en temporal
     if (!global.pokecards) global.pokecards = {};
     global.pokecards[m.sender] = {
@@ -200,6 +179,61 @@ let handler = async (m, { conn, command, usedPrefix, args, text }) => {
       timestamp: Date.now(),
       search: text
     };
+    
+    // Seleccionar una carta aleatoria para mostrar en el encabezado
+    const randomCard = cards[Math.floor(Math.random() * cards.length)];
+    
+    // Preparar la imagen para el mensaje interactivo
+    let media;
+    try {
+      media = await prepareWAMessageMedia(
+        { image: { url: randomCard.images.large } },
+        { upload: conn.waUploadToServer }
+      );
+    } catch (error) {
+      console.error('Error al preparar la imagen:', error);
+      // Si falla, crear un mensaje sin imagen
+      media = { imageMessage: null };
+    }
+    
+    // Crear el mensaje interactivo con lista de opciones
+    const interactiveMessage = {
+      body: {
+        text: `> *Resultados:* \`${cards.length}\` cartas encontradas\n\n*${randomCard.name}*\n\n≡ 🎴 *Set:* ${randomCard.set?.name || 'Desconocido'}\n≡ ⭐ *Rareza:* ${randomCard.rarity || 'Común'}\n≡ ❤️ *HP:* ${randomCard.hp || 'N/A'}`
+      },
+      footer: { text: '🃏 Pokémon TCG Finder' },
+      header: {
+        title: '```乂 POKÉMON - CARDS```',
+        hasMediaAttachment: !!media.imageMessage,
+        ...(media.imageMessage && { imageMessage: media.imageMessage })
+      },
+      nativeFlowMessage: {
+        buttons: [
+          {
+            name: 'single_select',
+            buttonParamsJson: JSON.stringify({
+              title: 'Selecciona una carta para ver detalles',
+              sections: cards.slice(0, 10).map((card, index) => ({
+                title: `${card.name}`,
+                rows: [
+                  {
+                    header: card.name,
+                    title: `Carta #${index + 1}`,
+                    description: `Set: ${card.set?.name || 'Desconocido'} | Rareza: ${card.rarity || 'Común'}`,
+                    id: `.pokecarding ${index + 1}`
+                  }
+                ]
+              }))
+            })
+          }
+        ],
+        messageParamsJson: ''
+      }
+    };
+
+    const userJid = conn?.user?.jid || m.key.participant || m.chat;
+    const msg = generateWAMessageFromContent(m.chat, { interactiveMessage }, { userJid, quoted: m });
+    await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
     
     await m.react('✅');
     
