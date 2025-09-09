@@ -1,5 +1,7 @@
 import fetch from 'node-fetch';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
 
@@ -8,77 +10,68 @@ if (!text) {
         `° *Uso:* ${usedPrefix}appdownload <enlace|id>\n` +
         `° *Ejemplos:*\n` +
         `  ${usedPrefix}appdownload https://apps.apple.com/us/app/whatsapp/id310633997\n` +
-        `  ${usedPrefix}appdownload 310633997\n\n` +
-        `° *Servicios soportados:* iOSEmus, AppAddict, IPARhino`);
+        `  ${usedPrefix}appdownload 310633997`);
 }
 
 try {
 let appId = text.trim();
 
-// Extraer ID de diferentes formatos de enlace
+// Extraer ID de la URL
 if (appId.includes('apps.apple.com')) {
     const idMatch = appId.match(/id(\d+)/);
     if (idMatch) appId = idMatch[1];
-} else if (appId.includes('itunes.apple.com')) {
-    const idMatch = appId.match(/\/(id)(\d+)/);
-    if (idMatch) appId = idMatch[2];
 }
 
-// Validar ID
 if (!/^\d+$/.test(appId)) {
-    return m.reply(`*${xdownload} ID inválido. Debe ser numérico.*\nEjemplo: 310633997`);
+    return m.reply(`*${xdownload} ID inválido. Debe ser numérico.*`);
 }
 
 m.react('🔍');
 
 // Obtener información de la app
-const [appInfo, downloadInfo] = await Promise.all([
-    getAppInfo(appId),
-    getDownloadInfo(appId)
-]);
-
+const appInfo = await getAppInfo(appId);
 if (!appInfo) {
     return m.reply(`*${xdownload} Aplicación no encontrada.*`);
 }
 
-// Mensaje de información
-let infoTxt = `\`\`\`乂 APP STORE DOWNLOAD\`\`\`\n\n` +
-`° 📱 *${appInfo.trackName}* v${appInfo.version}\n` +
+// Información inicial
+let infoTxt = `\`\`\`乂 DESCARGANDO APP\`\`\`\n\n` +
+`° 📱 *${appInfo.trackName}*\n` +
 `° 👨‍💻 ${appInfo.artistName}\n` +
-`️° 💰 ${appInfo.price === 0 ? '🆓 Gratis' : '💲 $' + appInfo.price}\n` +
-`° ⭐ ${appInfo.averageUserRating ? appInfo.averageUserRating.toFixed(1) + '/5' : 'Sin rating'}\n` +
+`° 🅅 v${appInfo.version}\n` +
 `° 📦 ${appInfo.fileSizeBytes ? (appInfo.fileSizeBytes / (1024 * 1024)).toFixed(2) + ' MB' : 'N/A'}\n\n` +
-`° 📥 *PROCESSING DOWNLOAD...*`;
+`° ⏳ *Descargando...* Por favor espere.`;
 
 await conn.sendMessage(m.chat, { text: infoTxt }, { quoted: fkontak });
 
-// Enlaces de descarga
-if (!downloadInfo || downloadInfo.length === 0) {
-    return m.reply(`*${xdownload} No hay enlaces disponibles para esta app.*`);
+// Descargar la aplicación
+const downloadResult = await downloadApp(appId, appInfo.trackName);
+
+if (!downloadResult.success) {
+    return m.reply(`*${xdownload} Error al descargar: ${downloadResult.error}*`);
 }
 
-let downloadTxt = `\`\`\`乂 ENLACES DE DESCARGA\`\`\`\n\n` +
-`° 📱 *${appInfo.trackName}*\n\n` +
-`° 🔗 *Enlaces disponibles:*\n`;
+m.react('📦');
 
-downloadInfo.forEach((link, index) => {
-    downloadTxt += `° ${index + 1}. *${link.service}* [${link.quality}]\n`;
-    downloadTxt += `   📥 ${link.url}\n`;
-    if (link.password) downloadTxt += `   🔐 Pass: ${link.password}\n`;
-    downloadTxt += `\n`;
-});
+// Enviar el archivo IPA
+const filePath = downloadResult.filePath;
+const fileName = `${appInfo.trackName.replace(/[^a-zA-Z0-9]/g, '_')}_v${appInfo.version}.ipa`;
 
-downloadTxt += `° ⚠️ *Nota:* Requiere instalación manual via AltStore, Sideloadly, etc.`;
+await conn.sendMessage(m.chat, {
+    document: { url: `file://${filePath}` },
+    fileName: fileName,
+    mimetype: 'application/octet-stream',
+    caption: `*${appInfo.trackName}* v${appInfo.version}\n` +
+            `📦 Tamaño: ${(fs.statSync(filePath).size / (1024 * 1024)).toFixed(2)} MB\n` +
+            `⚡ Listo para instalar via AltStore/Sideloadly`
+}, { quoted: fkontak });
 
-await conn.sendMessage(m.chat, { text: downloadTxt }, { quoted: fkontak });
-
-// Enviar imagen
-if (appInfo.artworkUrl512) {
-    await conn.sendMessage(m.chat, {
-        image: { url: appInfo.artworkUrl512 },
-        caption: `🎨 ${appInfo.trackName}`
-    }, { quoted: fkontak });
-}
+// Limpiar archivo temporal después de enviar
+setTimeout(() => {
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+    }
+}, 30000);
 
 m.react('✅');
 
@@ -101,59 +94,137 @@ async function getAppInfo(appId) {
     }
 }
 
-// Función para obtener información de descarga
-async function getDownloadInfo(appId) {
-    const services = [
-        {
-            name: 'iOSEmus',
-            url: `https://api.iosem.us/ipa/${appId}`,
-            processor: data => data.url ? [{ service: 'iOSEmus', quality: 'High', url: data.url }] : []
-        },
-        {
-            name: 'AppAddict',
-            url: `https://appaddict.org/api/app/${appId}`,
-            processor: data => data.downloadUrl ? [{ service: 'AppAddict', quality: 'Medium', url: data.downloadUrl }] : []
+// Función principal para descargar la app
+async function downloadApp(appId, appName) {
+    try {
+        // Primero intentar con servicios directos
+        const directDownload = await tryDirectDownload(appId);
+        if (directDownload.success) {
+            return directDownload;
         }
-    ];
 
-    const results = [];
-
-    for (const service of services) {
-        try {
-            const response = await axios.get(service.url, { timeout: 8000 });
-            const links = service.processor(response.data);
-            results.push(...links);
-        } catch (error) {
-            console.log(`Service ${service.name} failed:`, error.message);
+        // Si falla, intentar con servicios alternativos
+        const alternativeDownload = await tryAlternativeServices(appId, appName);
+        if (alternativeDownload.success) {
+            return alternativeDownload;
         }
-    }
 
-    // Enlaces de respaldo
-    if (results.length === 0) {
-        results.push(
-            {
-                service: 'iOSGods',
-                quality: 'Modded',
-                url: `https://iosgods.com/app/${appId}`
-            },
-            {
-                service: 'AppCake',
-                quality: 'Original',
-                url: `https://www.iphonecake.com/app_${appId}.html`
-            },
-            {
-                service: 'IPARhino',
-                quality: 'Premium',
-                url: `https://iparhino.com/dl/${appId}`
-            }
-        );
-    }
+        throw new Error('No se pudo descargar la aplicación');
 
-    return results.slice(0, 5); // Limitar a 5 enlaces
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
-handler.help = ['appdownload', 'ipadownload', 'iosdownload'];
+// Intentar descarga directa
+async function tryDirectDownload(appId) {
+    const tempDir = './temp/';
+    if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    const filePath = path.join(tempDir, `${appId}_${Date.now()}.ipa`);
+
+    try {
+        // Servicio 1: IPA Download directo
+        const downloadUrl = `https://ipa.getapp.net/download/${appId}`;
+        
+        const response = await axios({
+            method: 'GET',
+            url: downloadUrl,
+            responseType: 'stream',
+            timeout: 120000
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => resolve({
+                success: true,
+                filePath: filePath,
+                size: fs.statSync(filePath).size
+            }));
+            writer.on('error', reject);
+        });
+
+    } catch (error) {
+        // Si falla, limpiar archivo
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        throw error;
+    }
+}
+
+// Intentar con servicios alternativos
+async function tryAlternativeServices(appId, appName) {
+    const tempDir = './temp/';
+    const filePath = path.join(tempDir, `${appId}_${Date.now()}.ipa`);
+
+    try {
+        // Lista de servicios de descarga
+        const services = [
+            `https://ipadownload.now.sh/api/ipa/${appId}`,
+            `https://iosapp.download/api/get.php?id=${appId}`,
+            `https://app.ioserver.com/download/${appId}`
+        ];
+
+        for (const serviceUrl of services) {
+            try {
+                const response = await axios({
+                    method: 'GET',
+                    url: serviceUrl,
+                    responseType: 'stream',
+                    timeout: 60000
+                });
+
+                const writer = fs.createWriteStream(filePath);
+                response.data.pipe(writer);
+
+                await new Promise((resolve, reject) => {
+                    writer.on('finish', resolve);
+                    writer.on('error', reject);
+                });
+
+                // Verificar que el archivo sea válido
+                const stats = fs.statSync(filePath);
+                if (stats.size > 1024) { // Archivo mayor a 1KB
+                    return {
+                        success: true,
+                        filePath: filePath,
+                        size: stats.size
+                    };
+                } else {
+                    fs.unlinkSync(filePath);
+                }
+
+            } catch (e) {
+                // Continuar con el siguiente servicio
+                continue;
+            }
+        }
+
+        throw new Error('Todos los servicios fallaron');
+
+    } catch (error) {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        throw error;
+    }
+}
+
+handler.help = ['appdownload', 'ipadownload', 'descargarapp'];
 handler.tags = ['download', 'apps', 'tools'];
-handler.command = ['appdownload', 'ipadownload', 'iosdownload', 'descargarapp', 'appdl'];
+handler.command = ['appdownload', 'ipadownload', 'descargarapp', 'appdl'];
+
+// Configuración adicional
+handler.limit = true;
+handler.premium = false;
+handler.register = true;
 
 export default handler;
