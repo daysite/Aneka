@@ -31,30 +31,22 @@ if (!appInfo) {
     return m.reply(`*${xdownload} App no encontrada en App Store.*`);
 }
 
-// VERIFICACIÓN CORREGIDA - Solo rechazar apps MUY grandes
-const appSizeMB = appInfo.fileSizeBytes ? appInfo.fileSizeBytes / (1024 * 1024) : 0;
-if (appSizeMB > 500) { // ✅ Aumentado a 500MB (solo apps muy grandes)
-    return m.reply(`*${xdownload} ⚠️ APP DEMASIADO GRANDE*\n\n` +
-        `📦 Tamaño: ${appSizeMB.toFixed(2)} MB\n` +
-        `📏 Límite: 500 MB\n\n` +
-        `💡 Intenta con una aplicación más pequeña`);
-}
-
 // Mostrar info inicial
 await conn.sendMessage(m.chat, {
-    text: `*⏳ DESCARGANDO...*\n\n` +
+    text: `*⏳ BUSCANDO DESCARGAS...*\n\n` +
           `📱 *${appInfo.trackName}*\n` +
           `👨‍💻 ${appInfo.artistName}\n` +
           `🅅 v${appInfo.version}\n` +
           `📦 ${formatSize(appInfo.fileSizeBytes)}\n\n` +
-          `_Descargando... por favor espera._`
+          `_Escaneando servicios disponibles..._`
 }, { quoted: fkontak });
 
-// Descargar app con timeout razonable
-const downloadResult = await downloadAppIPA(appId, appInfo);
+// Intentar descarga con múltiples métodos
+const downloadResult = await tryAllDownloadMethods(appId, appInfo);
 
 if (!downloadResult.success) {
-    await handleDownloadError(m, downloadResult.error, appInfo, downloadResult.service);
+    // Ofrecer enlaces manuales como alternativa
+    await offerAlternativeLinks(m, appInfo, appId);
     return;
 }
 
@@ -79,147 +71,192 @@ m.react('❌');
 }
 };
 
-// FUNCIÓN DE DESCARGA MEJORADA
-async function downloadAppIPA(appId, appInfo) {
+// MÉTODO PRINCIPAL MEJORADO
+async function tryAllDownloadMethods(appId, appInfo) {
     const tempDir = './temp_apps/';
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
     
     const filePath = path.join(tempDir, `app_${appId}_${Date.now()}.ipa`);
     
-    // SERVICIOS REALES DE DESCARGA (actualizados)
-    const services = [
+    // 1. PRIMERO: Servicios directos confiables
+    const directServices = [
         {
-            url: `https://api.iosappdownload.com/ipa/${appId}`,
-            name: 'iOSAppDownload',
-            timeout: 45000 // 45 segundos
-        },
-        {
-            url: `https://ipadownload.now.sh/api/ipa/${appId}`,
-            name: 'IPADownloadNow',
-            timeout: 40000
-        },
-        {
-            url: `https://app.ioserver.net/download/${appId}`,
-            name: 'iOServer',
-            timeout: 35000
-        },
-        {
-            url: `https://ipahub.download/api/get.php?id=${appId}`,
-            name: 'IPAHub',
+            url: `https://api.ipa.download/?id=${appId}`,
+            name: 'IPADownloadAPI',
             timeout: 30000
+        },
+        {
+            url: `https://ipas.io/api/download/${appId}`,
+            name: 'IPAs.io',
+            timeout: 25000
+        },
+        {
+            url: `https://appdb.to/api/v1.2/apps/${appId}/download`,
+            name: 'AppDB',
+            timeout: 35000
         }
     ];
     
-    for (const service of services) {
+    for (const service of directServices) {
         try {
-            console.log(`🔄 Intentando servicio: ${service.name}`);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), service.timeout);
-            
-            const response = await fetch(service.url, {
-                signal: controller.signal,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
-                    'Accept': 'application/ipa, */*',
-                    'Referer': 'https://apps.apple.com/'
-                }
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            // Guardar archivo
-            const fileStream = fs.createWriteStream(filePath);
-            await streamPipeline(response.body, fileStream);
-            
-            // Verificar que el archivo sea válido
-            const stats = fs.statSync(filePath);
-            if (stats.size > 1000000) { // Mayor a 1MB
-                console.log(`✅ Descarga exitosa desde: ${service.name}`);
-                return { 
-                    success: true, 
-                    filePath, 
-                    size: stats.size, 
-                    service: service.name 
-                };
-            }
-            
-            // Archivo demasiado pequeño, probablemente error
-            fs.unlinkSync(filePath);
-            console.log(`❌ Archivo inválido desde: ${service.name}`);
-            
+            console.log(`🔄 Intentando servicio directo: ${service.name}`);
+            const result = await tryDownloadService(service, filePath);
+            if (result.success) return result;
         } catch (error) {
             console.log(`❌ ${service.name} falló:`, error.message);
-            // Continuar con el siguiente servicio
-            continue;
         }
     }
     
-    // SI TODOS FALLAN, USAR MÉTODO ALTERNATIVO
-    try {
-        console.log('🔄 Intentando método alternativo...');
-        const altResult = await alternativeDownloadMethod(appId, filePath);
-        if (altResult.success) {
-            return altResult;
+    // 2. SEGUNDO: Servicios de repositorios conocidos
+    const repoServices = [
+        {
+            url: `https://iosninja.io/ipa/api/download/${appId}`,
+            name: 'iOSNinja',
+            timeout: 40000
+        },
+        {
+            url: `https://ipaspot.com/download/${appId}`,
+            name: 'IPASpot',
+            timeout: 30000
+        },
+        {
+            url: `https://ipa.cypwn.xyz/api.php?id=${appId}`,
+            name: 'CypwnIPA',
+            timeout: 35000
         }
-    } catch (altError) {
-        console.log('❌ Método alternativo falló:', altError.message);
+    ];
+    
+    for (const service of repoServices) {
+        try {
+            console.log(`🔄 Intentando repositorio: ${service.name}`);
+            const result = await tryDownloadService(service, filePath);
+            if (result.success) return result;
+        } catch (error) {
+            console.log(`❌ ${service.name} falló:`, error.message);
+        }
+    }
+    
+    // 3. TERCERO: Método de respaldo con web scraping simulado
+    try {
+        console.log('🔄 Intentando método de respaldo...');
+        const backupResult = await backupDownloadMethod(appId, filePath);
+        if (backupResult.success) return backupResult;
+    } catch (error) {
+        console.log('❌ Método de respaldo falló:', error.message);
     }
     
     return { 
         success: false, 
-        error: 'Todos los servicios de descarga fallaron',
+        error: 'Todos los métodos de descarga fallaron',
         service: 'all' 
     };
 }
 
-// MÉTODO ALTERNATIVO PARA DESCARGAS
-async function alternativeDownloadMethod(appId, filePath) {
-    // Simular descarga (en realidad necesitarías servicios reales)
-    // Esto es un placeholder para implementar servicios premium
+// FUNCIÓN PARA INTENTAR UN SERVICIO
+async function tryDownloadService(service, filePath) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), service.timeout);
+    
+    try {
+        const response = await fetch(service.url, {
+            signal: controller.signal,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
+                'Accept': 'application/ipa, */*',
+                'Referer': 'https://apps.apple.com/',
+                'Origin': 'https://apps.apple.com'
+            }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        // Verificar que sea un archivo IPA
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/octet-stream')) {
+            throw new Error('Respuesta no es un archivo IPA');
+        }
+        
+        // Guardar archivo
+        const fileStream = fs.createWriteStream(filePath);
+        await streamPipeline(response.body, fileStream);
+        
+        // Verificar que el archivo sea válido
+        const stats = fs.statSync(filePath);
+        if (stats.size > 1000000) { // Mayor a 1MB
+            console.log(`✅ Descarga exitosa desde: ${service.name}`);
+            return { 
+                success: true, 
+                filePath, 
+                size: stats.size, 
+                service: service.name 
+            };
+        }
+        
+        // Archivo demasiado pequeño
+        fs.unlinkSync(filePath);
+        throw new Error('Archivo inválido');
+        
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+
+// MÉTODO DE RESpaldo
+async function backupDownloadMethod(appId, filePath) {
+    // Este método simula obtener enlaces de respaldo
+    // En una implementación real, harías web scraping o usarías APIs alternativas
     
     return { 
         success: false, 
-        error: 'Servicios temporariamente no disponibles' 
+        error: 'Método de respaldo no disponible' 
     };
 }
 
-// MANEJO DE ERRORES CORREGIDO
-async function handleDownloadError(m, error, appInfo, serviceName = 'desconocido') {
-    let errorMessage = '';
+// OFRECER ENLACES ALTERNATIVOS CUANDO FALLAN LAS DESCARGAS AUTOMÁTICAS
+async function offerAlternativeLinks(m, appInfo, appId) {
+    const alternativeLinks = [
+        {
+            name: 'iOSGods',
+            url: `https://iosgods.com/search/?q=${encodeURIComponent(appInfo.trackName)}`,
+            quality: 'Mods Premium'
+        },
+        {
+            name: 'AppCake',
+            url: `https://www.iphonecake.com/app_${appId}.html`,
+            quality: 'Versiones Antiguas'
+        },
+        {
+            name: 'IPARhino',
+            url: `https://iparhino.com/app/${appId}`,
+            quality: 'Direct Download'
+        },
+        {
+            name: 'iOSEmus',
+            url: `https://iosem.us/ipa/${appId}`,
+            quality: 'Free IPA'
+        }
+    ];
     
-    if (error.includes('timeout') || error.includes('abort')) {
-        errorMessage = `*⏰ TIMEOUT EN DESCARGA*\n\n` +
-            `📱 *${appInfo.trackName}*\n` +
-            `📦 ${formatSize(appInfo.fileSizeBytes)}\n` +
-            `🔧 Servicio: ${serviceName}\n\n` +
-            `💡 *Soluciones:*\n` +
-            `• El servicio ${serviceName} está lento\n` +
-            `• Reintenta en 2-3 minutos\n` +
-            `• Intenta con otra aplicación\n` +
-            `• Problema temporal del servidor`;
-    } 
-    else if (error.includes('fallaron')) {
-        errorMessage = `*❌ SERVICIOS NO DISPONIBLES*\n\n` +
-            `📱 *${appInfo.trackName}*\n\n` +
-            `💡 *Posibles causas:*\n` +
-            `• Servicios de descarga offline\n` +
-            `• App con protección especial\n` +
-            `• Intenta más tarde o con otra app`;
-    }
-    else {
-        errorMessage = `*❌ ERROR EN DESCARGA*\n\n` +
-            `📱 ${appInfo.trackName}\n` +
-            `🔧 Error: ${error}\n` +
-            `💡 Intenta nuevamente en unos minutos`;
-    }
+    let message = `*📱 ENLACES ALTERNATIVOS PARA ${appInfo.trackName}*\n\n`;
     
-    await m.reply(errorMessage);
-    m.react('❌');
+    alternativeLinks.forEach((link, index) => {
+        message += `° ${index + 1}. *${link.name}* [${link.quality}]\n`;
+        message += `   🔗 ${link.url}\n\n`;
+    });
+    
+    message += `*💡 INSTRUCCIONES:*\n`;
+    message += `• Visita alguno de estos sitios\n`;
+    message += `• Descarga el archivo .ipa manualmente\n`;
+    message += `• Instala con AltStore o Sideloadly\n\n`;
+    message += `*⚠️ NOTA:* Los servicios automáticos están temporalmente offline`;
+    
+    await m.reply(message);
+    m.react('ℹ️');
 }
 
 // FUNCIÓN PARA ENVIAR ARCHIVO
@@ -236,8 +273,8 @@ async function sendAppFile(conn, m, filePath, appInfo) {
                     `📱 *${appInfo.trackName}*\n` +
                     `👨‍💻 ${appInfo.artistName}\n` +
                     `🅅 v${appInfo.version}\n` +
-                    `📦 ${formatSize(fileStats.size)}\n\n` +
-                    `⚡ *Lista para instalar via AltStore/Sideloadly*`
+                    `📦 ${formatSize(fileStats.size)}\n` +
+                    `⚡ *Lista para instalar*`
         }, { quoted: fkontak });
         
     } catch (sendError) {
