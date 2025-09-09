@@ -10,7 +10,7 @@ const MISIONES = [
     nombre: "🌿 Captura Básica",
     descripcion: "Captura 3 Pokémon comunes",
     objetivo: { tipo: 'capturas', cantidad: 3, rareza: 'comun' },
-    recompensa: { dinero: 50, experiencia: 10 },
+    recompensa: { dinero: 9999, experiencia: 10 },
     duracion: 30
   },
   {
