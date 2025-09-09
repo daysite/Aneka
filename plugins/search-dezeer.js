@@ -2,7 +2,10 @@ import fetch from 'node-fetch';
 import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 import { spawn } from 'child_process';
+import ytdl from 'ytdl-core';
+import yts from 'yt-search';
 
 const DEEZER_API_URL = 'https://api.deezer.com/search';
 
@@ -46,7 +49,7 @@ const handler = async (m, { conn, usedPrefix, command, args, text }) => {
     return;
   }
   
-  // Subcomando para descargar (simulado)
+  // Subcomando para descargar canción
   if (command === 'deezermp3') {
     if (!args[0]) return m.reply('❌ ID de canción no proporcionado');
     
@@ -61,15 +64,73 @@ const handler = async (m, { conn, usedPrefix, command, args, text }) => {
         return m.reply('❌ No se encontró la canción');
       }
       
-      await m.reply(`⚠️ *Función en desarrollo*\n\n` +
-                   `🎵 *Canción:* ${trackData.title}\n` +
-                   `🎤 *Artista:* ${trackData.artist.name}\n` +
-                   `💿 *Álbum:* ${trackData.album.title}\n\n` +
-                   `ℹ️ La descarga directa desde Deezer no está disponible actualmente.`);
+      await m.reply(`⬇️ *Descargando:* ${trackData.title}\n🎤 *Artista:* ${trackData.artist.name}\n\n⏳ *Esto puede tomar unos segundos...*`);
+      
+      // Buscar en YouTube la canción para descargar
+      const searchQuery = `${trackData.title} ${trackData.artist.name} audio oficial`;
+      const searchResults = await yts(searchQuery);
+      
+      if (!searchResults.videos || searchResults.videos.length === 0) {
+        return m.reply('❌ No se pudo encontrar la canción en YouTube');
+      }
+      
+      const video = searchResults.videos[0];
+      const videoUrl = video.url;
+      
+      // Descargar el audio usando ytdl
+      const tempDir = './tmp';
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir);
+      }
+      
+      const outputFile = path.join(tempDir, `deezer_${trackId}_${Date.now()}.mp3`);
+      
+      // Descargar audio
+      const audioStream = ytdl(videoUrl, {
+        filter: 'audioonly',
+        quality: 'highestaudio',
+      });
+      
+      const writeStream = fs.createWriteStream(outputFile);
+      audioStream.pipe(writeStream);
+      
+      await new Promise((resolve, reject) => {
+        writeStream.on('finish', resolve);
+        writeStream.on('error', reject);
+        audioStream.on('error', reject);
+      });
+      
+      // Enviar el audio
+      await conn.sendMessage(
+        m.chat,
+        {
+          audio: fs.readFileSync(outputFile),
+          mimetype: 'audio/mp3',
+          fileName: `${trackData.artist.name} - ${trackData.title}.mp3`.replace(/[^\w\s.-]/gi, ''),
+          contextInfo: {
+            externalAdReply: {
+              title: trackData.title,
+              body: trackData.artist.name,
+              thumbnailUrl: trackData.album.cover_medium,
+              sourceUrl: trackData.link,
+              mediaType: 1,
+              renderLargerThumbnail: true
+            }
+          }
+        },
+        { quoted: m }
+      );
+      
+      // Eliminar archivo temporal
+      setTimeout(() => {
+        if (fs.existsSync(outputFile)) {
+          fs.unlinkSync(outputFile);
+        }
+      }, 5000);
       
     } catch (error) {
       console.error('Error en deezermp3:', error);
-      m.reply('❌ Error al procesar la solicitud de descarga');
+      m.reply('❌ Error al descargar la canción. Intenta con otra canción.');
     }
     return;
   }
@@ -125,7 +186,7 @@ const handler = async (m, { conn, usedPrefix, command, args, text }) => {
       body: {
         text: `> *Resultados:* \`${tracks.length}\` canciones encontradas\n\n*${randomTrack.title}*\n\n≡ 🎤 *Artista:* ${randomTrack.artist.name}\n≡ 💿 *Álbum:* ${randomTrack.album.title}\n≡ ⏱ *Duración:* ${formatDuration(randomTrack.duration)}`
       },
-      footer: { text: '🎵 Deezer Music Search' },
+      footer: { text: '🎵 Deezer Music Search • Descargas disponibles' },
       header: {
         title: '```乂 DEEZER - SEARCH```',
         hasMediaAttachment: !!media.imageMessage,
@@ -190,7 +251,7 @@ function formatDuration(seconds) {
 }
 
 handler.help = ['deezer <búsqueda>', 'deezerplay <url>', 'deezermp3 <id>'];
-handler.tags = ['music', 'search'];
+handler.tags = ['music', 'search', 'download'];
 handler.command = /^(deezer|dz|deezerplay|deezermp3)$/i;
 handler.register = true;
 
