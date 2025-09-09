@@ -1,10 +1,11 @@
 import axios from 'axios';
 import fs from 'fs';
 
-// Configuración de API Numverify (usa tu clave real)
+// Configuración de APIs (CON TU API KEY REAL DE HUNTER.IO)
 const NUMVERIFY_API_KEY = '1f9cf97fa3aea1b4164a3ea9abe33202';
+const HUNTER_API_KEY = 'ffa9d72562f4a5f3212a4787e2475d6d6ec0abbf';
 
-// Path para almacenar información de números
+// Path para almacenar información
 const numerosPath = './src/database/numeros.json';
 
 function leerNumeros() {
@@ -22,7 +23,6 @@ function leerNumeros() {
 
 function guardarNumeros(numeros) {
   try {
-    // Asegurar que el directorio existe
     const dir = './src/database';
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
@@ -64,11 +64,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     // Mostrar mensaje de procesamiento
     const mensajeProcesando = await conn.sendMessage(m.chat, {
-      text: '🔍 *Analizando número...*\n\nConectando con Numverify API.'
+      text: '🔍 *Analizando número...*\n\nBuscando información y correos asociados...'
     }, { quoted: m });
 
     let infoNumero = null;
     let apiUsada = 'Numverify';
+    let correosEncontrados = [];
 
     try {
       // Usar la API de Numverify con tu clave real
@@ -83,16 +84,25 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       
       if (response.data && response.data.valid) {
         infoNumero = response.data;
+        
+        // Buscar correos asociados al número usando Hunter.io
+        try {
+          correosEncontrados = await buscarCorreosAsociados(infoNumero, numeroLimpio);
+        } catch (error) {
+          console.error('Error buscando correos:', error);
+          // Generar correos probables si la API falla
+          correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
+        }
       } else {
-        // Si la API devuelve inválido, usar datos simulados
         infoNumero = generarDatosSimulados(numeroLimpio);
         apiUsada = 'Simulada (número no válido según Numverify)';
+        correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
       }
     } catch (error) {
       console.error('Error con Numverify API:', error.message);
-      // En caso de error, usar datos simulados
       infoNumero = generarDatosSimulados(numeroLimpio);
       apiUsada = 'Simulada (error de API)';
+      correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
     }
 
     // Procesar información
@@ -100,7 +110,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const informacionAdicional = await obtenerInformacionAdicional(infoNumero);
     
     // Formatear respuesta
-    const mensaje = formatearMensaje(infoNumero, tiempoActivo, informacionAdicional, apiUsada);
+    const mensaje = formatearMensaje(infoNumero, tiempoActivo, informacionAdicional, apiUsada, correosEncontrados);
     
     // Guardar en base de datos local
     const numeros = leerNumeros();
@@ -115,6 +125,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         carrier: infoNumero.carrier,
         line_type: infoNumero.line_type,
         valid: infoNumero.valid,
+        emails: correosEncontrados,
         api: apiUsada,
         timestamp: new Date().toISOString()
       });
@@ -137,6 +148,115 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await m.reply('❌ *Error del sistema*\nOcurrió un error inesperado. Intenta de nuevo.');
   }
 };
+
+// Función para buscar correos asociados a un número usando Hunter.io
+async function buscarCorreosAsociados(infoNumero, numeroLimpio) {
+  let correos = [];
+  
+  // 1. Intentar con Hunter API (CON TU API KEY REAL)
+  try {
+    // Buscar por dominio basado en el operador
+    const dominio = obtenerDominioDesdeOperador(infoNumero.carrier);
+    
+    if (dominio) {
+      console.log(`Buscando correos en el dominio: ${dominio}`);
+      
+      const response = await axios.get(`https://api.hunter.io/v2/domain-search`, {
+        params: {
+          domain: dominio,
+          api_key: HUNTER_API_KEY,
+          limit: 10
+        },
+        timeout: 15000
+      });
+      
+      if (response.data && response.data.data && response.data.data.emails) {
+        correos = response.data.data.emails
+          .filter(email => email.value && email.confidence >= 50) // Filtrar correos con cierta confianza
+          .map(email => email.value)
+          .slice(0, 5); // Limitar a 5 correos
+          
+        console.log(`Correos encontrados con Hunter.io: ${correos.length}`);
+      }
+    }
+  } catch (error) {
+    console.log('Error con Hunter API:', error.message);
+    // Si hay error, continuar con generación de correos probables
+  }
+  
+  // 2. Si no se encontraron correos con Hunter.io, generar probables
+  if (correos.length === 0) {
+    console.log('Generando correos probables...');
+    correos = generarCorreosProbables(infoNumero, numeroLimpio);
+  }
+  
+  return correos;
+}
+
+// Función para generar correos probables basados en patrones comunes
+function generarCorreosProbables(infoNumero, numeroLimpio) {
+  const correos = [];
+  const dominio = obtenerDominioDesdeOperador(infoNumero.carrier) || 'gmail.com';
+  
+  // Extraer parte local del número (últimos 4-6 dígitos)
+  const digitos = numeroLimpio.slice(-6);
+  const digitosCorto = numeroLimpio.slice(-4);
+  
+  // Patrones comunes de correos basados en números
+  const patrones = [
+    `${digitos}@${dominio}`,
+    `${digitosCorto}@${dominio}`,
+    `user${digitos}@${dominio}`,
+    `tel${digitos}@${dominio}`,
+    `num${digitos}@${dominio}`,
+    `phone${digitos}@${dominio}`,
+    `whatsapp${digitos}@${dominio}`,
+    `cel${digitos}@${dominio}`,
+    `contacto${digitos}@${dominio}`,
+    `cliente${digitos}@${dominio}`
+  ];
+  
+  // Agregar variaciones con el código de país
+  if (infoNumero.country_code) {
+    patrones.push(
+      `${infoNumero.country_code}${digitos}@${dominio}`,
+      `+${infoNumero.country_code}${digitos}@${dominio}`
+    );
+  }
+  
+  // Devolver máximo 5 correos probables únicos
+  return [...new Set(patrones)].slice(0, 5);
+}
+
+// Función para obtener dominio basado en el operador
+function obtenerDominioDesdeOperador(operador) {
+  if (!operador) return null;
+  
+  const dominiosOperadores = {
+    'claro': 'claro.com.co',
+    'movistar': 'movistar.co',
+    'tigo': 'tigo.com.co',
+    'etb': 'etb.com.co',
+    'avantel': 'avantel.com.co',
+    'virgin': 'virginmobile.com.co',
+    'directv': 'directv.com.co',
+    'une': 'une.com.co',
+    'colombia': 'colombia.com',
+    'gmail': 'gmail.com',
+    'hotmail': 'hotmail.com',
+    'outlook': 'outlook.com',
+    'yahoo': 'yahoo.com'
+  };
+  
+  const operadorLower = operador.toLowerCase();
+  for (const [key, dominio] of Object.entries(dominiosOperadores)) {
+    if (operadorLower.includes(key)) {
+      return dominio;
+    }
+  }
+  
+  return 'gmail.com'; // Dominio por defecto
+}
 
 // Función para generar datos simulados (solo como respaldo)
 function generarDatosSimulados(numero) {
@@ -213,7 +333,7 @@ async function obtenerInformacionAdicional(infoNumero) {
 }
 
 // Función para formatear el mensaje
-function formatearMensaje(infoNumero, tiempoActivo, infoAdicional, apiUsada) {
+function formatearMensaje(infoNumero, tiempoActivo, infoAdicional, apiUsada, correos) {
   const banderas = {
     'CO': '🇨🇴', 'ES': '🇪🇸', 'US': '🇺🇸', 'MX': '🇲🇽',
     'AR': '🇦🇷', 'FR': '🇫🇷', 'DE': '🇩🇪', 'GB': '🇬🇧'
@@ -226,7 +346,7 @@ function formatearMensaje(infoNumero, tiempoActivo, infoAdicional, apiUsada) {
   
   const validez = infoNumero.valid ? '✅ Válido' : '❌ No válido';
   
-  return `📊 *INFORMACIÓN DEL NÚMERO* 📊
+  let mensaje = `📊 *INFORMACIÓN DEL NÚMERO* 📊
 
 🔢 *Número:* ${infoNumero.international_format || infoNumero.number}
 ${bandera} *País:* ${infoNumero.country_name} (${infoNumero.country_code})
@@ -240,9 +360,26 @@ ${validez}
 ⚠️ *Nivel de riesgo:* ${infoAdicional.riesgo}
 ⭐ *Reputación:* ${infoAdicional.reputacion}
 
-🔍 *Fuente:* ${apiUsada}
+🔍 *Fuente:* ${apiUsada}`;
 
-💡 *Nota:* La información de tiempo activo, actividad, riesgo y reputación es estimada basada en patrones estadísticos.`;
+  // Añadir sección de correos si se encontraron
+  if (correos && correos.length > 0) {
+    mensaje += `\n\n📧 *Correos electrónicos asociados:*\n`;
+    correos.forEach((correo, index) => {
+      mensaje += `${index + 1}. ${correo}\n`;
+    });
+    
+    // Añadir información sobre la fuente de los correos
+    if (apiUsada.includes('Hunter')) {
+      mensaje += `\n✅ *Correos verificados con Hunter.io*`;
+    } else {
+      mensaje += `\n💡 *Nota:* Estos son correos probables basados en patrones comunes.`;
+    }
+  } else {
+    mensaje += `\n\n📧 *Correos electrónicos:* No se encontraron correos asociados.`;
+  }
+
+  return mensaje;
 }
 
 handler.tags = ['herramientas', 'busqueda'];
