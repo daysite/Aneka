@@ -34,7 +34,7 @@ let handler = async (m, { conn, text }) => {
     try {
         const buffer = await fetchSticker(text);
         const stiker = await sticker(buffer, false,
-'propietario del bot:\nIG:Jotaa.hrz\n\n', global.botname, '\n\n', global.authN);
+'propietario del bot:\nLucxxs.qzy x Aneka\n\n', global.botname, '\n\n', global.authN);
 
         if (stiker) {
             // Reacciona con ✅ al enviar el sticker exitosamente
