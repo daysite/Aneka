@@ -14,37 +14,61 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         let video = searchResults[0];
         let thumbnail = await (await fetch(video.miniatura)).buffer();
 
-        let messageText = `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n`;
-        messageText += `\`›Titulo:\`  ${video.titulo}*\n`;
-        messageText += `\`›Duración:\` ${video.duracion || 'No disponible'}\n`;
-        messageText += `\`›Autor:\` ${video.canal || 'Desconocido'}\n`;
-        messageText += `\`›Url:\` ${video.url}\n\n`
-        messageText += `> 🚩 Selecciona un boton para descargar.`;
+        const media = await prepareWAMessageMedia(
+            { image: { url: video.miniatura } },
+            { upload: conn.waUploadToServer }
+        );
 
-        await conn.sendMessage(m.chat, {
-            image: thumbnail,
-            caption: messageText,
-            footer: club,
-            contextInfo: {
-                mentionedJid: [m.sender],
-                forwardingScore: 999,
-                isForwarded: true
+        const interactiveMessage = {
+            body: {
+                text: `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n` +
+                      `\`›Titulo:\` ${video.titulo}\n` +
+                      `\`›Duración:\` ${video.duracion || 'No disponible'}\n` +
+                      `\`›Autor:\` ${video.canal || 'Desconocido'}\n` +
+                      `\`›Url:\` ${video.url}\n\n` +
+                      `> 🚩 Selecciona una opción de la lista para descargar.`
             },
-            buttons: [
-                {
-                    buttonId: `${usedPrefix}ytmp3 ${video.url}`,
-                    buttonText: { displayText: '💽 𝖠𝗎𝖽𝗂𝗈' },
-                    type: 1,
-                },
-                {
-                    buttonId: `${usedPrefix}ytmp4 ${video.url}`,
-                    buttonText: { displayText: '📽️ 𝖵𝗂𝖽𝖾𝗈' },
-                    type: 1,
-                }
-            ],
-            headerType: 1,
-            viewOnce: true
-        }, { quoted: m });
+            footer: club,
+            header: {
+                title: '```乂 YOUTUBE - SEARCH```',
+                hasMediaAttachment: true,
+                imageMessage: media.imageMessage
+            },
+            nativeFlowMessage: {
+                buttons: [
+                    {
+                        name: 'single_select',
+                        buttonParamsJson: JSON.stringify({
+                            title: 'Opciones de descarga',
+                            sections: [
+                                {
+                                    title: `${video.titulo}`,
+                                    rows: [
+                                        {
+                                            header: video.titulo,
+                                            title: '🎵 Descargar Audio',
+                                            description: `Descargar audio | Duración: ${video.duracion}`,
+                                            id: `${usedPrefix}ytmp3 ${video.url}`
+                                        },
+                                        {
+                                            header: video.titulo,
+                                            title: '🎬 Descargar Video',
+                                            description: `Descargar video | Duración: ${video.duracion}`,
+                                            id: `${usedPrefix}ytmp4 ${video.url}`
+                                        }
+                                    ]
+                                }
+                            ]
+                        })
+                    }
+                ],
+                messageParamsJson: ''
+            }
+        };
+
+        const userJid = conn?.user?.jid || m.key.participant || m.chat;
+        const msg = generateWAMessageFromContent(m.chat, { interactiveMessage }, { userJid, quoted: m });
+        conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
 
         await m.react('☑️');
     } catch (e) {
@@ -75,13 +99,4 @@ async function searchVideos(query) {
         console.error('*Error en yt-search:*', error.message);
         return [];
     }
-}
-
-function convertTimeToSpanish(timeText) {
-    return timeText
-        .replace(/year/, 'año').replace(/years/, 'años')
-        .replace(/month/, 'mes').replace(/months/, 'meses')
-        .replace(/day/, 'día').replace(/days/, 'días')
-        .replace(/hour/, 'hora').replace(/hours/, 'horas')
-        .replace(/minute/, 'minuto').replace(/minutes/, 'minutos');
 }
