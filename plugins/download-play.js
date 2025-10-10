@@ -3,32 +3,27 @@ import fetch from 'node-fetch';
 import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0]) return conn.reply(m.chat, `*${xdownload} Por favor, ingresa un título de YouTube.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Corazón Serrano - Olvídalo Corazón`, m);
+    if (!args[0]) return conn.reply(m.chat, `*Por favor, ingresa un título de YouTube.*\n> *\`Ejemplo:\`* ${usedPrefix + command} Corazón Serrano - Olvídalo Corazón`, m);
 
     await m.react('⌛');
     try {
-        let searchResults = await searchVideos(args.join(" "));
+        const results = await yts(args.join(" "));
+        const videos = results.videos.slice(0, 10);
 
-        if (!searchResults.length) throw new Error('*✖️ No se encontraron resultados.*');
+        if (!videos.length) throw '⚠️ *No se encontraron resultados para tu búsqueda.*';
 
-        let video = searchResults[0];
-        let thumbnail = await (await fetch(video.miniatura)).buffer();
+        const video = videos[0];
 
         const media = await prepareWAMessageMedia(
-            { image: { url: video.miniatura } },
+            { image: { url: video.thumbnail } },
             { upload: conn.waUploadToServer }
         );
 
         const interactiveMessage = {
             body: {
-                text: `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n` +
-                      `\`›Titulo:\` ${video.titulo}\n` +
-                      `\`›Duración:\` ${video.duracion || 'No disponible'}\n` +
-                      `\`›Autor:\` ${video.canal || 'Desconocido'}\n` +
-                      `\`›Url:\` ${video.url}\n\n` +
-                      `> 🚩 Selecciona una opción de la lista para descargar.`
+                text: `> *Resultados:* \`${videos.length}\`\n\n*${video.title}*\n\n≡ 🌵 *\`Autor:\`* ${video.author.name}\n≡ 🍁 *\`Duración:\`* ${video.duration.timestamp || 'No disponible'}\n≡ 🌿 *\`Enlace:\`* ${video.url}`
             },
-            footer: club,
+            footer: global.club || 'Bot WhatsApp',
             header: {
                 title: '```乂 YOUTUBE - SEARCH```',
                 hasMediaAttachment: true,
@@ -42,18 +37,18 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
                             title: 'Opciones de descarga',
                             sections: [
                                 {
-                                    title: `${video.titulo}`,
+                                    title: `${video.title.substring(0, 20)}...`,
                                     rows: [
                                         {
-                                            header: video.titulo,
+                                            header: video.title.substring(0, 20),
                                             title: '🎵 Descargar Audio',
-                                            description: `Descargar audio | Duración: ${video.duracion}`,
+                                            description: `Descargar audio | Duración: ${video.duration.timestamp}`,
                                             id: `${usedPrefix}ytmp3 ${video.url}`
                                         },
                                         {
-                                            header: video.titulo,
+                                            header: video.title.substring(0, 20),
                                             title: '🎬 Descargar Video',
-                                            description: `Descargar video | Duración: ${video.duracion}`,
+                                            description: `Descargar video | Duración: ${video.duration.timestamp}`,
                                             id: `${usedPrefix}ytmp4 ${video.url}`
                                         }
                                     ]
@@ -68,13 +63,13 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const userJid = conn?.user?.jid || m.key.participant || m.chat;
         const msg = generateWAMessageFromContent(m.chat, { interactiveMessage }, { userJid, quoted: m });
-        conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
+        await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
 
         await m.react('☑️');
     } catch (e) {
         console.error(e);
         await m.react('✖️');
-        conn.reply(m.chat, '*✖️ Video no encontrado en Youtube.*', m);
+        conn.reply(m.chat, '*✖️ Error al buscar el video en Youtube.*', m);
     }
 };
 
@@ -82,21 +77,3 @@ handler.help = ['play'];
 handler.tags = ['download'];
 handler.command = ['play', 'play2'];
 export default handler;
-
-async function searchVideos(query) {
-    try {
-        const res = await yts(query);
-        return res.videos.slice(0, 10).map(video => ({
-            titulo: video.title,
-            url: video.url,
-            miniatura: video.thumbnail,
-            canal: video.author.name,
-            publicado: video.timestamp || 'No disponible',
-            vistas: video.views || 'No disponible',
-            duracion: video.duration.timestamp || 'No disponible'
-        }));
-    } catch (error) {
-        console.error('*Error en yt-search:*', error.message);
-        return [];
-    }
-}
