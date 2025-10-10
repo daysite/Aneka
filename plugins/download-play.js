@@ -9,45 +9,42 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     await m.react('⌛');
     
     try {
-        // 1. Realizar la búsqueda
+        // Realizar la búsqueda
         const searchQuery = args.join(" ");
         const results = await yts(searchQuery);
         const videos = results.videos;
 
-        // 2. Verificar si se encontraron resultados
+        // Verificar si se encontraron resultados
         if (!videos || videos.length === 0) {
             await m.react('✖️');
             return conn.reply(m.chat, '*✖️ No se encontraron resultados para tu búsqueda.*', m);
         }
 
-        // 3. Obtener el primer video
+        // Obtener el primer video
         const video = videos[0];
-        console.log('Video encontrado:', video); // Para depuración
 
-        // 4. Verificar que el video tenga una URL válida
-        if (!video.url) {
-            await m.react('✖️');
-            return conn.reply(m.chat, '*✖️ El resultado de la búsqueda no contiene una URL válida.*', m);
-        }
-
-        // 5. Preparar y enviar el mensaje interactivo
+        // Preparar la miniatura
         const media = await prepareWAMessageMedia(
             { image: { url: video.thumbnail } },
             { upload: conn.waUploadToServer }
         );
 
+        // CORRECCIÓN PRINCIPAL: Estructura correcta del mensaje interactivo
         const interactiveMessage = {
             body: {
-                text: `\`\`\`ゲ◜៹ YouTube Search ៹◞ゲ\`\`\`\n\n` +
-                      `*${video.title}*\n\n` +
-                      `≡ 🌵 *Autor:* ${video.author?.name || 'Desconocido'}\n` +
-                      `≡ 🍁 *Duración:* ${video.duration?.timestamp || 'No disponible'}\n` +
-                      `≡ 🌿 *Vistas:* ${video.views ? video.views.toLocaleString() : 'No disponible'}\n` +
-                      `≡ 📎 *URL:* ${video.url}`
+                text: `🎵 *YouTube Search*\n\n` +
+                      `*Título:* ${video.title}\n` +
+                      `*Autor:* ${video.author?.name || 'Desconocido'}\n` +
+                      `*Duración:* ${video.duration?.timestamp || 'No disponible'}\n` +
+                      `*Vistas:* ${video.views ? video.views.toLocaleString() : 'No disponible'}\n\n` +
+                      `Selecciona una opción de descarga:`
             },
-            footer: global.club || 'Bot WhatsApp',
+            // CORRECCIÓN: Footer debe ser un objeto con text
+            footer: {
+                text: global.club || 'Bot WhatsApp'
+            },
             header: {
-                title: '```乂 YOUTUBE - SEARCH```',
+                title: 'YouTube Search',
                 hasMediaAttachment: true,
                 imageMessage: media.imageMessage
             },
@@ -59,18 +56,18 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
                             title: 'Opciones de descarga',
                             sections: [
                                 {
-                                    title: `Selecciona el tipo de descarga`,
+                                    title: `Tipo de descarga`,
                                     rows: [
                                         {
                                             header: 'Audio',
                                             title: '🎵 Descargar Audio',
-                                            description: `Descargar audio | Duración: ${video.duration?.timestamp || 'N/A'}`,
+                                            description: `Audio MP3 | ${video.duration?.timestamp || 'N/A'}`,
                                             id: `${usedPrefix}ytmp3 ${video.url}`
                                         },
                                         {
-                                            header: 'Video',
+                                            header: 'Video', 
                                             title: '🎬 Descargar Video',
-                                            description: `Descargar video | Duración: ${video.duration?.timestamp || 'N/A'}`,
+                                            description: `Video MP4 | ${video.duration?.timestamp || 'N/A'}`,
                                             id: `${usedPrefix}ytmp4 ${video.url}`
                                         }
                                     ]
@@ -92,7 +89,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     } catch (error) {
         console.error('Error detallado:', error);
         await m.react('✖️');
-        conn.reply(m.chat, `*✖️ Ocurrió un error inesperado:* ${error.message}`, m);
+        conn.reply(m.chat, `*✖️ Error:* ${error.message}`, m);
     }
 };
 
