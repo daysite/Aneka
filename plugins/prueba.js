@@ -1,145 +1,67 @@
 let handler = async (m, { conn, participants, usedPrefix, command, isROwner }) => {
-  try {
-    // 1. Verificar restricción
-    if (!global.db.data.settings[conn.user.jid].restrict) {
-      return m.reply('🍭 El owner tiene restringido está opción');
-    }
-
-    // 2. Verificar que el comando se usa en grupo
-    if (!m.isGroup) return m.reply('❌ Este comando solo funciona en grupos');
-
-    // 3. Obtener metadata del grupo con validación
-    let groupMetadata;
-    try {
-      groupMetadata = await conn.groupMetadata(m.chat);
-    } catch (e) {
-      return m.reply('❌ No se pudo obtener la información del grupo');
-    }
-
-    // 4. Validar que el bot es administrador
-    let botAdmin = groupMetadata.participants.find(p => p.id === conn.user.jid)?.admin;
-    if (!botAdmin) {
-      return m.reply('❌ Necesito ser administrador para usar este comando');
-    }
-
-    // 5. Obtener owner del grupo
-    let owner = groupMetadata.owner || groupMetadata.participants.find(p => p.admin === 'superadmin')?.id;
-    let botJid = conn.user.jid;
-
-    // 6. Obtener participantes de forma segura
-    let allParticipants = groupMetadata.participants.map(p => p.id) || [];
-    
-    // 7. Filtrar participantes a eliminar
-    let usersToRemove = allParticipants.filter(user => 
-      user !== owner && 
-      user !== botJid &&
-      user !== m.sender // No eliminar a quien ejecuta el comando
-    );
-
-    if (usersToRemove.length === 0) {
-      return m.reply('🍭 No hay participantes para eliminar');
-    }
-
-    // 8. SISTEMA DE CONFIRMACÓN MEJORADO (sin conn.ev.wait)
-    let confirmationKey = `${m.chat}_${m.sender}_kickall`;
-    global.kickallConfirmation = global.kickallConfirmation || {};
-    
-    global.kickallConfirmation[confirmationKey] = {
-      usersToRemove: usersToRemove,
-      timestamp: Date.now()
-    };
-
-    await m.reply(
-      `⚠️ *CONFIRMACIÓN REQUERIDA*\n\n` +
-      `¿Eliminar a *${usersToRemove.length}* participantes?\n\n` +
-      `Escribe: *${usedPrefix}confirmar kickall* para proceder\n` +
-      `O: *${usedPrefix}cancelar kickall* para cancelar\n\n` +
-      `⏰ Esta confirmación expira en 2 minutos`
-    );
-
-    // Esperar confirmación manual
-    return;
-
-  } catch (error) {
-    console.error('Error en kickall:', error);
-    m.reply('❌ Error interno del comando');
+  if (!global.db.data.settings[conn.user.jid].restrict) {
+    return m.reply('🍭 El owner tiene restringido está opción');
   }
-}
 
-// COMANDO DE CONFIRMACIÓN SEPARADO
-let confirmHandler = async (m, { conn, usedPrefix, command }) => {
-  try {
-    let confirmationKey = `${m.chat}_${m.sender}_kickall`;
-    let confirmation = global.kickallConfirmation?.[confirmationKey];
+  // Comando para eliminar a todos los miembros
+  if (command === 'kickall' || command === 'expulsartodos' || command === 'banall' || command === 'sacartodos') {
+    let groupMetadata = await conn.groupMetadata(m.chat);
+    let owner = groupMetadata.owner;
+    let botId = conn.user.jid;
     
-    if (!confirmation) {
-      return m.reply('❌ No hay confirmación pendiente o expiró');
+    // Obtener todos los participantes excepto el owner y el bot
+    let membersToRemove = participants
+      .filter(p => p.id !== owner && p.id !== botId && !p.isAdmin)
+      .map(p => p.id);
+
+    if (membersToRemove.length === 0) {
+      return m.reply('🍭 No hay miembros para eliminar (solo quedan admins y el bot).');
     }
 
-    // Verificar expiración (2 minutos)
-    if (Date.now() - confirmation.timestamp > 120000) {
-      delete global.kickallConfirmation[confirmationKey];
-      return m.reply('❌ La confirmación expiró');
-    }
+    m.reply(`🔄 Eliminando a ${membersToRemove.length} miembros del grupo...`);
 
-    let usersToRemove = confirmation.usersToRemove;
-    
-    // Eliminar la confirmación
-    delete global.kickallConfirmation[confirmationKey];
-
-    // Proceder con la eliminación
-    await m.reply(`🔄 Eliminando ${usersToRemove.length} participantes...`);
-
-    let successCount = 0;
-    let failCount = 0;
-
-    for (let i = 0; i < usersToRemove.length; i += 5) {
-      let batch = usersToRemove.slice(i, i + 5);
-      
+    // Eliminar miembros en lotes para evitar errores
+    for (let i = 0; i < membersToRemove.length; i++) {
       try {
-        await conn.groupParticipantsUpdate(m.chat, batch, 'remove');
-        successCount += batch.length;
-        
-        // Pausa entre lotes
-        if (i + 5 < usersToRemove.length) {
-          await new Promise(resolve => setTimeout(resolve, 2500));
-        }
-      } catch (batchError) {
-        failCount += batch.length;
-        console.error('Error en lote:', batchError);
+        await conn.groupParticipantsUpdate(m.chat, [membersToRemove[i]], 'remove');
+        // Pequeña pausa entre eliminaciones para evitar límites
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.log(`Error al eliminar a ${membersToRemove[i]}:`, error);
       }
     }
 
-    let resultMessage = `✅ *Eliminación completada*\n\n` +
-                       `✓ Eliminados: ${successCount}\n` +
-                       (failCount > 0 ? `✖ Fallidos: ${failCount}` : '');
-
-    await m.reply(resultMessage);
-
-  } catch (error) {
-    console.error('Error en confirmación:', error);
-    m.reply('❌ Error al procesar la confirmación');
+    return m.reply(`✅ Se eliminaron ${membersToRemove.length} miembros del grupo.`);
   }
+
+  // Comando original para eliminar un solo miembro
+  let kickte = `*${xgc} Menciona algún participante que desea eliminar del grupo.*`
+
+  if (!m.mentionedJid[0] && !m.quoted) return m.reply(kickte, m.chat, { mentions: conn.parseMention(kickte)})
+
+  let user = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted.sender
+  let owr = m.chat.split`-`[0]
+
+  // Verificamos si el usuario a eliminar es el creador del grupo
+  let groupMetadata = await conn.groupMetadata(m.chat)
+  let owner = groupMetadata.owner
+
+  if (user === owner) {
+    return m.reply(`🍭 No puedes eliminar al Creador del Grupo`)
+  }
+
+  await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
+
+  m.reply(`🍟 El participante @${user.split('@')[0]} lo desaparecieron.`, m.chat, {
+    mentions: [user]
+  })
 }
 
-// COMANDO DE CANCELACIÓN
-let cancelHandler = async (m) => {
-  let confirmationKey = `${m.chat}_${m.sender}_kickall`;
-  if (global.kickallConfirmation?.[confirmationKey]) {
-    delete global.kickallConfirmation[confirmationKey];
-    m.reply('❌ Operación cancelada');
-  } else {
-    m.reply('❌ No hay confirmación pendiente');
-  }
-}
-
-handler.help = ['kickall']
+handler.help = ['kick', 'kickall']
 handler.tags = ['gc']
-handler.command = ['kickall', 'expulsartodos', 'banall', 'sacartodos', 'removeall'] 
+handler.command = ['kick', 'expulsar', 'ban', 'rip', 'sacar', 'remove', 'kickall', 'expulsartodos', 'banall', 'sacartodos'] 
 handler.admin = true
 handler.group = true
 handler.botAdmin = true
-handler.owner = true
 
-// Agregar handlers para confirmar y cancelar
-export { handler as default, confirmHandler, cancelHandler }
+export default handler
