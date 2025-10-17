@@ -1,388 +1,493 @@
-import axios from 'axios';
-import fs from 'fs';
+import os from "os";
+import fs from "fs";
 
-// Configuración de APIs (CON TU API KEY REAL DE HUNTER.IO)
-const NUMVERIFY_API_KEY = '1f9cf97fa3aea1b4164a3ea9abe33202';
-const HUNTER_API_KEY = 'ffa9d72562f4a5f3212a4787e2475d6d6ec0abbf';
+// DECORACIÃ“N APLICADA AQUÃ
+const defaultMenu = {
+    before: `
+*â•­â”€â”ˆãƒ»à­¨ ðŸ§¸ à­§ãƒ»â”ˆãƒ»â”ˆâ”€â•®*
+> *Ëšâ‚Šâ€§ ð‘°ð‘µð‘­ð‘¶ ð‘«ð‘¬ð‘³ ð‘¼ð‘ºð‘¼ð‘¨ð‘¹ð‘°ð‘¶ â€§â‚ŠËš*
+> 
+>  â–¸ ðŸ© *Nombre* : %name
+>  â–¸ ðŸ§ *Estado* : %status
+*â•°â”€â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆâ”€â•¯*
 
-// Path para almacenar información
-const numerosPath = './src/database/numeros.json';
-
-function leerNumeros() {
-  try {
-    if (fs.existsSync(numerosPath)) {
-      const data = fs.readFileSync(numerosPath, 'utf8');
-      return JSON.parse(data) || {};
-    }
-    return {};
-  } catch (error) {
-    console.error('Error leyendo números:', error);
-    return {};
-  }
-}
-
-function guardarNumeros(numeros) {
-  try {
-    const dir = './src/database';
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(numerosPath, JSON.stringify(numeros, null, 2));
-  } catch (error) {
-    console.error('Error guardando números:', error);
-  }
-}
-
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-  try {
-    const sender = m.sender;
-    let numero = args[0] || '';
-
-    // Extraer número del mensaje si no se proporcionó como argumento
-    if (!numero && m.quoted && m.quoted.text) {
-      const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}/g;
-      const matches = m.quoted.text.match(phoneRegex);
-      if (matches && matches.length > 0) {
-        numero = matches[0];
-      }
-    }
-
-    // Si aún no hay número, mostrar ayuda
-    if (!numero) {
-      return conn.sendMessage(m.chat, {
-        text: `📱 *PLUGIN DE INFORMACIÓN DE NÚMEROS*\n\n*Uso:* ${usedPrefix}${command} +57123456789\n*Ejemplo:* ${usedPrefix}${command} +573155227977\n\nTambién puedes responder a un mensaje que contenga un número.`
-      }, { quoted: m });
-    }
-
-    // Limpiar y validar el número
-    const numeroLimpio = numero.replace(/\D/g, '');
-    if (numeroLimpio.length < 8) {
-      return conn.sendMessage(m.chat, {
-        text: `❌ *NÚMERO INVÁLIDO*\n\nEl número proporcionado es demasiado corto. Incluye el código de país.\n*Ejemplo:* +573155227977`
-      }, { quoted: m });
-    }
-
-    // Mostrar mensaje de procesamiento
-    const mensajeProcesando = await conn.sendMessage(m.chat, {
-      text: '🔍 *Analizando número...*\n\nBuscando información y correos asociados...'
-    }, { quoted: m });
-
-    let infoNumero = null;
-    let apiUsada = 'Numverify';
-    let correosEncontrados = [];
-
-    try {
-      // Usar la API de Numverify con tu clave real
-      const response = await axios.get(`http://apilayer.net/api/validate`, {
-        params: {
-          access_key: NUMVERIFY_API_KEY,
-          number: numeroLimpio,
-          format: 1
-        },
-        timeout: 10000
-      });
-      
-      if (response.data && response.data.valid) {
-        infoNumero = response.data;
-        
-        // Buscar correos asociados al número usando Hunter.io
-        try {
-          correosEncontrados = await buscarCorreosAsociados(infoNumero, numeroLimpio);
-        } catch (error) {
-          console.error('Error buscando correos:', error);
-          // Generar correos probables si la API falla
-          correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
-        }
-      } else {
-        infoNumero = generarDatosSimulados(numeroLimpio);
-        apiUsada = 'Simulada (número no válido según Numverify)';
-        correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
-      }
-    } catch (error) {
-      console.error('Error con Numverify API:', error.message);
-      infoNumero = generarDatosSimulados(numeroLimpio);
-      apiUsada = 'Simulada (error de API)';
-      correosEncontrados = generarCorreosProbables(infoNumero, numeroLimpio);
-    }
-
-    // Procesar información
-    const tiempoActivo = calcularTiempoActivo(infoNumero.country_code);
-    const informacionAdicional = await obtenerInformacionAdicional(infoNumero);
-    
-    // Formatear respuesta
-    const mensaje = formatearMensaje(infoNumero, tiempoActivo, informacionAdicional, apiUsada, correosEncontrados);
-    
-    // Guardar en base de datos local
-    const numeros = leerNumeros();
-    if (!numeros[sender]) numeros[sender] = [];
-    
-    // Evitar duplicados
-    const existe = numeros[sender].find(n => n.number === (infoNumero.international_format || infoNumero.number));
-    if (!existe) {
-      numeros[sender].push({
-        number: infoNumero.international_format || infoNumero.number,
-        country: infoNumero.country_name,
-        carrier: infoNumero.carrier,
-        line_type: infoNumero.line_type,
-        valid: infoNumero.valid,
-        emails: correosEncontrados,
-        api: apiUsada,
-        timestamp: new Date().toISOString()
-      });
-      guardarNumeros(numeros);
-    }
-
-    // Enviar resultado
-    await conn.relayMessage(m.chat, {
-      protocolMessage: {
-        key: mensajeProcesando.key,
-        type: 14,
-        editedMessage: {
-          conversation: mensaje
-        }
-      }
-    }, {});
-
-  } catch (error) {
-    console.error('Error en handler numero:', error);
-    await m.reply('❌ *Error del sistema*\nOcurrió un error inesperado. Intenta de nuevo.');
-  }
+*â•­â”€â”ˆãƒ»à­¨ ðŸŽ€ à­§ãƒ»â”ˆãƒ»â”ˆâ”€â•®*
+> *Ëšâ‚Šâ€§ ð‘³ð‘°ð‘ºð‘»ð‘¨ ð‘«ð‘¬ ð‘ªð‘¶ð‘´ð‘¨ð‘µð‘«ð‘¶ð‘º â€§â‚ŠËš*
+>
+> â–¸ *ðŸ…Ÿ = Premium*
+> â–¸ *ðŸ… = Admin*
+> â–¸ *ðŸ…“ = Desarrollador*
+> â–¸ *ðŸ…ž = DueÃ±o*
+*â•°â”€â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆâ”€â•¯*
+`.trimStart(),
+    header: `
+> â”Œâ”€â”€ã€Œ *%category* ã€`,
+    body: `> â”‚â–¸ %cmd %isPremium %isAdmin %isMods %isOwner`,
+    footer: `> â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ï½¥ï½¡ï¾Ÿ`,
+    after: `
+>
+*âŽ¯âŽ¯ã…¤ã…¤Ö´ã…¤ã…¤à­¨   ðŸ°  à­§ã…¤ã…¤Ö´   ã…¤âŽ¯âŽ¯*
+> *Copyright Â© Kenisawadevolper 2025*
+*âŽ¯âŽ¯ã…¤ã…¤Ö´ã…¤ã…¤à­¨   ðŸ°  à­§ã…¤ã…¤Ö´   ã…¤âŽ¯âŽ¯*
+`,
 };
 
-// Función para buscar correos asociados a un número usando Hunter.io
-async function buscarCorreosAsociados(infoNumero, numeroLimpio) {
-  let correos = [];
-  
-  // 1. Intentar con Hunter API (CON TU API KEY REAL)
-  try {
-    // Buscar por dominio basado en el operador
-    const dominio = obtenerDominioDesdeOperador(infoNumero.carrier);
-    
-    if (dominio) {
-      console.log(`Buscando correos en el dominio: ${dominio}`);
-      
-      const response = await axios.get(`https://api.hunter.io/v2/domain-search`, {
-        params: {
-          domain: dominio,
-          api_key: HUNTER_API_KEY,
-          limit: 10
-        },
-        timeout: 15000
-      });
-      
-      if (response.data && response.data.data && response.data.data.emails) {
-        correos = response.data.data.emails
-          .filter(email => email.value && email.confidence >= 50) // Filtrar correos con cierta confianza
-          .map(email => email.value)
-          .slice(0, 5); // Limitar a 5 correos
-          
-        console.log(`Correos encontrados con Hunter.io: ${correos.length}`);
-      }
+let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, isPrems, args }) => {
+    try {
+        await global.loading(m, conn);
+        let tags;
+        let teks = `${args[0]}`.toLowerCase();
+        let arrayMenu = [
+            "all",
+            "ai",
+            "downloader",
+            "group",
+            "info",
+            "internet",
+            "rpg",
+            "maker",
+            "owner",
+            "server",
+            "tools",
+        ];
+        if (!arrayMenu.includes(teks)) teks = "404";
+        if (teks == "all")
+            tags = {
+                ai: "ðŸ§  MenÃº de IA",
+                downloader: "ðŸ¥ MenÃº de Descargas",
+                group: "ðŸ§ƒ MenÃº de Grupos",
+                info: "ðŸ“– MenÃº de InformaciÃ³n",
+                internet: "ðŸ’Œ MenÃº de Internet",
+                rpg: "â›ï¸ MenÃº Rpg",
+                maker: "ðŸŽ€ MenÃº de Creadores",
+                owner: "ðŸª„ MenÃº del DueÃ±o",
+                tools: "ðŸ§¸ MenÃº de Herramientas",
+            };
+        if (teks == "ai") tags = { ai: "ðŸ§  MenÃº de IA" };
+        if (teks == "downloader") tags = { downloader: "ðŸ¥ MenÃº de Descargas" };
+        if (teks == "group") tags = { group: "ðŸ§ƒ MenÃº de Grupos" };
+        if (teks == "info") tags = { info: "ðŸ“– MenÃº de InformaciÃ³n" };
+        if (teks == "internet") tags = { internet: "ðŸ’Œ MenÃº de Internet" };
+        if (teks == "rpg") tags = { rpg: "â›ï¸ MenÃº Rpg" };
+        if (teks == "maker") tags = { maker: "ðŸŽ€ MenÃº de Creadores" };
+        if (teks == "owner") tags = { owner: "ðŸª„ MenÃº del DueÃ±o" };
+        if (teks == "tools") tags = { tools: "ðŸ§¸ MenÃº de Herramientas" };
+
+        let name = conn.getName(m.sender);
+        let status = isMods
+            ? "ðŸ§ Desarrollador"
+            : isOwner
+                ? "ðŸª„ DueÃ±o"
+                : isPrems
+                    ? "ðŸ’– Usuario Premium"
+                    : "ðŸ¬ Usuario Gratis";
+        let vcard = `BEGIN:VCARD
+VERSION:3.0
+N:;ttname;;;
+FN:ttname
+item1.TEL;waid=13135550002:+1 (313) 555-0002
+item1.X-ABLabel:Ponsel
+END:VCARD`;
+        let q = {
+            key: {
+                fromMe: false,
+                participant: "13135550002@s.whatsapp.net",
+                remoteJid: "status@broadcast",
+            },
+            message: {
+                contactMessage: {
+                    displayName: "ðŸ° ð‘¾ð’‚ð’ˆð’–ð’“ð’Š ð‘¨ð’Š",
+                    vcard,
+                },
+            },
+        };
+        let member = Object.keys(global.db.data.users)
+            .filter(
+                (v) =>
+                    typeof global.db.data.users[v].commandTotal != "undefined" && v != conn.user.jid
+            )
+            .sort((a, b) => {
+                const totalA = global.db.data.users[a].command;
+                const totalB = global.db.data.users[b].command;
+                return totalB - totalA;
+            });
+        const icons = ["ðŸ“", "ðŸ’", "ðŸ§", "ðŸ©", "ðŸª", "ðŸ§", "ðŸ¡", "ðŸ®", "ðŸ«", "ðŸ¬", "ðŸ­"];
+        let commandToday = 0;
+        for (let number of member) {
+            commandToday += global.db.data.users[number].command;
+        }
+        let totalf = Object.values(global.plugins)
+            .filter((v) => Array.isArray(v.help))
+            .reduce((acc, v) => acc + v.help.length, 0);
+        let uptime = formatUptime(process.uptime());
+        let muptime = formatUptime(os.uptime());
+        let timeID = new Intl.DateTimeFormat("es-AR", {
+            timeZone: "America/Buenos_Aires",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(new Date());
+        let subtitle = `ðŸ•’ ${timeID}`;
+        const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+        const Version = packageJson.version;
+        const mode = global.opts.self ? "Privado" : "PÃºblico";
+
+        // DECORACIÃ“N APLICADA AQUÃ
+        let listCmd = `
+*â•­â”€â”ˆãƒ»â”ˆãƒ»à­¨ ðŸ“ à­§ãƒ»â”ˆãƒ»â”ˆâ”€â•®*
+> *Ëšâ‚Šâ€§ ð‘°ð‘µð‘­ð‘¶ ð‘«ð‘¬ð‘³ ð‘©ð‘¶ð‘» â€§â‚ŠËš*
+> 
+>  â–¸ ðŸ§ *Nombre* : ${conn.user.name}
+>  â–¸ ðŸ’ *VersiÃ³n* : ${Version}
+>  â–¸ ðŸ¡ *Modo* : ${mode}
+>  â–¸ ðŸ© *Base de Datos* : ${bytesToMB(fs.readFileSync("./database.db").byteLength)} Mb
+>  â–¸ ðŸ§ *Tiempo Activo* : ${uptime}
+>  â–¸ ðŸ® *Uptime SV* : ${muptime}
+>  â–¸ ðŸ« *Comandos Hoy* : ${commandToday}
+*â•°â”€â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆãƒ»â”ˆâ”€â•¯*
+`.trimStart();
+
+        let lists = arrayMenu.map((v, i) => {
+            let icon = icons[i] || "â­";
+            return {
+                title: `${icon} Menu ${capitalize(v)}`,
+                description: `${icon} ${v} estÃ¡ disponible en Waguri Ai ðŸš€`,
+                id: `${usedPrefix + command} ${v}`,
+            };
+        });
+        if (teks == "404") {
+            return await conn.sendMessage(
+                m.chat,
+                {
+                    document: { url: "https://files.catbox.moe/6sb6u1.jpg" },
+                    mimetype: "application/pdf",
+                    fileName: `ðŸŒ¸ ${global.config.watermark}`,
+                    fileLength: 0,
+                    pageCount: 0,
+                    caption: listCmd,
+                    footer: global.config.author,
+                    title: wish(),
+                    contextInfo: {
+                        externalAdReply: {
+                            title: global.config.author,
+                            body: subtitle,
+                            mediaType: 1,
+                            thumbnailUrl: "https://files.catbox.moe/6sb6u1.jpg",
+                            sourceUrl: global.config.website,
+                            renderLargerThumbnail: true,
+                        },
+                    },
+                    interactiveButtons: [
+                        {
+                            name: "single_select",
+                            buttonParamsJson: JSON.stringify({
+                                title: "ðŸ­ Elige aquÃ­~",
+                                sections: [
+                                    {
+                                        title: `ðŸ“‘ Funciones disponibles del Bot: ${totalf}`,
+                                        rows: lists,
+                                    },
+                                ],
+                            }),
+                        },
+                        {
+                            name: "cta_url",
+                            buttonParamsJson: JSON.stringify({
+                                display_text: "ðŸŽ Contactar al Owner",
+                                url: global.config.website,
+                                merchant_url: global.config.website,
+                            }),
+                        },
+                    ],
+                    hasMediaAttachment: false,
+                },
+                { quoted: q }
+            );
+        }
+        let help = Object.values(global.plugins)
+            .filter((plugin) => !plugin.disabled)
+            .map((plugin) => {
+                return {
+                    help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
+                    tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
+                    prefix: "customPrefix" in plugin,
+                    premium: plugin.premium,
+                    mods: plugin.mods,
+                    owner: plugin.owner,
+                    admin: plugin.admin,
+                    enabled: !plugin.disabled,
+                };
+            });
+        let groups = {};
+        for (let tag in tags) {
+            groups[tag] = [];
+            for (let plugin of help)
+                if (plugin.tags && plugin.tags.includes(tag))
+                    if (plugin.help) groups[tag].push(plugin);
+        }
+        conn.menu = conn.menu ? conn.menu : {};
+        let before = conn.menu.before || defaultMenu.before;
+        let header = conn.menu.header || defaultMenu.header;
+        let body = conn.menu.body || defaultMenu.body;
+        let footer = conn.menu.footer || defaultMenu.footer;
+        let after =
+            conn.menu.after ||
+            (conn.user.jid == global.conn.user.jid
+                ? ""
+                : `*Powered by https://wa.me/${global.conn.user.jid.split`@`[0]}*`) +
+                defaultMenu.after;
+        let _text = [
+            before,
+            ...Object.keys(tags).map((tag) => {
+                return (
+                    header.replace(/%category/g, tags[tag]) +
+                    "\n" +
+                    [
+                        ...help
+                            .filter((menu) => menu.tags && menu.tags.includes(tag) && menu.help)
+                            .map((menu) => {
+                                return menu.help
+                                    .map((help) => {
+                                        return body
+                                            .replace(/%cmd/g, menu.prefix ? help : "%p" + help)
+                                            .replace(/%isPremium/g, menu.premium ? "ðŸ…Ÿ" : "")
+                                            .replace(/%isAdmin/g, menu.admin ? "ðŸ…" : "")
+                                            .replace(/%isMods/g, menu.mods ? "ðŸ…“" : "")
+                                            .replace(/%isOwner/g, menu.owner ? "ðŸ…ž" : "")
+                                            .trim();
+                                    })
+                                    .join("\n");
+                            }),
+                        footer,
+                    ].join("\n")
+                );
+            }),
+            after,
+        ].join("\n");
+        let text =
+            typeof conn.menu == "string" ? conn.menu : typeof conn.menu == "object" ? _text : "";
+        let replace = {
+            "%": "%",
+            p: usedPrefix,
+            name,
+            status,
+        };
+        text = text.replace(
+            new RegExp(
+                `%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`,
+                "g"
+            ),
+            (_, name) => "" + replace[name]
+        );
+        await conn.sendMessage(
+            m.chat,
+            {
+                document: { url: "https://files.catbox.moe/6sb6u1.jpg" },
+                mimetype: "application/pdf",
+                fileName: `ðŸŒ¸ ${global.config.watermark}.pdf`,
+                fileLength: 0,
+                pageCount: 0,
+                caption: text.trim(),
+                footer: global.config.author,
+                title: wish(),
+                contextInfo: {
+                    externalAdReply: {
+                        title: global.config.author,
+                        body: subtitle,
+                        mediaType: 1,
+                        thumbnailUrl: "https://files.catbox.moe/6sb6u1.jpg",
+                        sourceUrl: global.config.website,
+                        renderLargerThumbnail: true,
+                    },
+                },
+                interactiveButtons: [
+                    {
+                        name: "single_select",
+                        buttonParamsJson: JSON.stringify({
+                            title: "ðŸŒ¥ï¸ MenÃº Adicional ~",
+                            sections: [
+                                {
+                                    title: `ðŸ“‘ Funciones disponibles de Waguri Ai: ${totalf}`,
+                                    rows: lists,
+                                },
+                            ],
+                        }),
+                    },
+                ],
+                hasMediaAttachment: false,
+            },
+            { quoted: q }
+        );
+    } finally {
+        await global.loading(m, conn, true);
     }
-  } catch (error) {
-    console.log('Error con Hunter API:', error.message);
-    // Si hay error, continuar con generación de correos probables
-  }
-  
-  // 2. Si no se encontraron correos con Hunter.io, generar probables
-  if (correos.length === 0) {
-    console.log('Generando correos probables...');
-    correos = generarCorreosProbables(infoNumero, numeroLimpio);
-  }
-  
-  return correos;
-}
+};
 
-// Función para generar correos probables basados en patrones comunes
-function generarCorreosProbables(infoNumero, numeroLimpio) {
-  const correos = [];
-  const dominio = obtenerDominioDesdeOperador(infoNumero.carrier) || 'gmail.com';
-  
-  // Extraer parte local del número (últimos 4-6 dígitos)
-  const digitos = numeroLimpio.slice(-6);
-  const digitosCorto = numeroLimpio.slice(-4);
-  
-  // Patrones comunes de correos basados en números
-  const patrones = [
-    `${digitos}@${dominio}`,
-    `${digitosCorto}@${dominio}`,
-    `user${digitos}@${dominio}`,
-    `tel${digitos}@${dominio}`,
-    `num${digitos}@${dominio}`,
-    `phone${digitos}@${dominio}`,
-    `whatsapp${digitos}@${dominio}`,
-    `cel${digitos}@${dominio}`,
-    `contacto${digitos}@${dominio}`,
-    `cliente${digitos}@${dominio}`
-  ];
-  
-  // Agregar variaciones con el código de país
-  if (infoNumero.country_code) {
-    patrones.push(
-      `${infoNumero.country_code}${digitos}@${dominio}`,
-      `+${infoNumero.country_code}${digitos}@${dominio}`
-    );
-  }
-  
-  // Devolver máximo 5 correos probables únicos
-  return [...new Set(patrones)].slice(0, 5);
-}
+handler.help = ["menu"];
+handler.command = /^(menuprueba|help)$/i;
 
-// Función para obtener dominio basado en el operador
-function obtenerDominioDesdeOperador(operador) {
-  if (!operador) return null;
-  
-  const dominiosOperadores = {
-    'claro': 'claro.com.co',
-    'movistar': 'movistar.co',
-    'tigo': 'tigo.com.co',
-    'etb': 'etb.com.co',
-    'avantel': 'avantel.com.co',
-    'virgin': 'virginmobile.com.co',
-    'directv': 'directv.com.co',
-    'une': 'une.com.co',
-    'colombia': 'colombia.com',
-    'gmail': 'gmail.com',
-    'hotmail': 'hotmail.com',
-    'outlook': 'outlook.com',
-    'yahoo': 'yahoo.com'
-  };
-  
-  const operadorLower = operador.toLowerCase();
-  for (const [key, dominio] of Object.entries(dominiosOperadores)) {
-    if (operadorLower.includes(key)) {
-      return dominio;
-    }
-  }
-  
-  return 'gmail.com'; // Dominio por defecto
-}
-
-// Función para generar datos simulados (solo como respaldo)
-function generarDatosSimulados(numero) {
-  const codigoPais = numero.startsWith('57') ? 'CO' : 
-                     numero.startsWith('1') ? 'US' : 
-                     numero.startsWith('34') ? 'ES' :
-                     numero.startsWith('52') ? 'MX' :
-                     numero.startsWith('54') ? 'AR' :
-                     numero.startsWith('33') ? 'FR' :
-                     numero.startsWith('49') ? 'DE' :
-                     numero.startsWith('44') ? 'GB' : 'US';
-  
-  const paises = {
-    'CO': {nombre: 'Colombia', prefijo: '57'},
-    'ES': {nombre: 'España', prefijo: '34'},
-    'US': {nombre: 'Estados Unidos', prefijo: '1'},
-    'MX': {nombre: 'México', prefijo: '52'},
-    'AR': {nombre: 'Argentina', prefijo: '54'},
-    'FR': {nombre: 'Francia', prefijo: '33'},
-    'DE': {nombre: 'Alemania', prefijo: '49'},
-    'GB': {nombre: 'Reino Unido', prefijo: '44'}
-  };
-  
-  const operadores = {
-    'CO': ['Claro CO', 'Movistar CO', 'Tigo', 'ETB', 'Avantel'],
-    'ES': ['Movistar', 'Vodafone ES', 'Orange ES', 'Yoigo'],
-    'US': ['Verizon', 'AT&T', 'T-Mobile', 'Sprint'],
-    'MX': ['Telcel', 'Movistar MX', 'AT&T MX'],
-    'AR': ['Claro AR', 'Movistar AR', 'Personal'],
-    'FR': ['Orange FR', 'SFR', 'Free Mobile', 'Bouygues Telecom'],
-    'DE': ['Telekom DE', 'Vodafone DE', 'O2 DE'],
-    'GB': ['Vodafone UK', 'O2 UK', 'EE', 'Three UK']
-  };
-  
-  return {
-    valid: true,
-    number: numero,
-    international_format: `+${numero}`,
-    country_name: paises[codigoPais]?.nombre || 'Desconocido',
-    country_code: codigoPais,
-    carrier: operadores[codigoPais] ? 
-             operadores[codigoPais][Math.floor(Math.random() * operadores[codigoPais].length)] : 
-             'Operador desconocido',
-    line_type: Math.random() > 0.5 ? 'mobile' : 'landline',
-    location: 'Información no disponible'
-  };
-}
-
-// Función para calcular tiempo activo estimado
-function calcularTiempoActivo(codigoPais) {
-  const tiempos = {
-    'CO': ['3-6 meses', '6-12 meses', '1-2 años', '2-4 años', '4-6 años', 'Más de 6 años'],
-    'ES': ['6-12 meses', '1-2 años', '2-4 años', '4-6 años', 'Más de 6 años'],
-    'US': ['3-9 meses', '1-3 años', '3-5 años', '5-8 años', 'Más de 8 años'],
-    'MX': ['1-2 años', '2-3 años', '3-5 años', '5-7 años', 'Más de 7 años'],
-    'AR': ['1-2 años', '2-4 años', '4-5 años', '5-7 años', 'Más de 7 años'],
-    'FR': ['1-2 años', '2-3 años', '3-5 años', '5-8 años', 'Más de 8 años'],
-    'DE': ['1-3 años', '3-4 años', '4-6 años', '6-9 años', 'Más de 9 años'],
-    'GB': ['1-2 años', '2-4 años', '4-6 años', '6-8 años', 'Más de 8 años']
-  };
-  
-  return tiempos[codigoPais] ? 
-         tiempos[codigoPais][Math.floor(Math.random() * tiempos[codigoPais].length)] : 
-         '2-4 años';
-}
-
-// Función para obtener información adicional
-async function obtenerInformacionAdicional(infoNumero) {
-  return {
-    riesgo: Math.random() > 0.7 ? 'Alto' : Math.random() > 0.4 ? 'Medio' : 'Bajo',
-    actividad: Math.random() > 0.6 ? 'Alta' : Math.random() > 0.3 ? 'Media' : 'Baja',
-    reputacion: Math.random() > 0.7 ? 'Mala' : Math.random() > 0.4 ? 'Neutral' : 'Buena'
-  };
-}
-
-// Función para formatear el mensaje
-function formatearMensaje(infoNumero, tiempoActivo, infoAdicional, apiUsada, correos) {
-  const banderas = {
-    'CO': '🇨🇴', 'ES': '🇪🇸', 'US': '🇺🇸', 'MX': '🇲🇽',
-    'AR': '🇦🇷', 'FR': '🇫🇷', 'DE': '🇩🇪', 'GB': '🇬🇧'
-  };
-  
-  const bandera = banderas[infoNumero.country_code] || '🌐';
-  const tipoLinea = infoNumero.line_type === 'mobile' ? '📱 Móvil' : 
-                   infoNumero.line_type === 'landline' ? '🏠 Fija' : 
-                   infoNumero.line_type === 'voip' ? '📞 VoIP' : '❓ Desconocido';
-  
-  const validez = infoNumero.valid ? '✅ Válido' : '❌ No válido';
-  
-  let mensaje = `📊 *INFORMACIÓN DEL NÚMERO* 📊
-
-🔢 *Número:* ${infoNumero.international_format || infoNumero.number}
-${bandera} *País:* ${infoNumero.country_name} (${infoNumero.country_code})
-🏢 *Operador:* ${infoNumero.carrier || 'Desconocido'}
-${tipoLinea}
-📍 *Ubicación:* ${infoNumero.location || 'No disponible'}
-${validez}
-
-⏰ *Tiempo activo estimado:* ${tiempoActivo}
-📈 *Nivel de actividad:* ${infoAdicional.actividad}
-⚠️ *Nivel de riesgo:* ${infoAdicional.riesgo}
-⭐ *Reputación:* ${infoAdicional.reputacion}
-
-🔍 *Fuente:* ${apiUsada}`;
-
-  // Añadir sección de correos si se encontraron
-  if (correos && correos.length > 0) {
-    mensaje += `\n\n📧 *Correos electrónicos asociados:*\n`;
-    correos.forEach((correo, index) => {
-      mensaje += `${index + 1}. ${correo}\n`;
-    });
-    
-    // Añadir información sobre la fuente de los correos
-    if (apiUsada.includes('Hunter')) {
-      mensaje += `\n✅ *Correos verificados con Hunter.io*`;
-    } else {
-      mensaje += `\n💡 *Nota:* Estos son correos probables basados en patrones comunes.`;
-    }
-  } else {
-    mensaje += `\n\n📧 *Correos electrónicos:* No se encontraron correos asociados.`;
-  }
-
-  return mensaje;
-}
-
-handler.tags = ['herramientas', 'busqueda'];
-handler.help = ['numero <número>', 'phone'];
-handler.command = ['numero', 'phone', 'num', 'telefono', 'infoNumero'];
 export default handler;
+
+function formatUptime(seconds) {
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+    let days = Math.floor(hours / 24);
+    let months = Math.floor(days / 30);
+    let years = Math.floor(months / 12);
+
+    minutes %= 60;
+    hours %= 24;
+    days %= 30;
+    months %= 12;
+
+    let result = [];
+    if (years) result.push(`${years} aÃ±o${years > 1 ? 's' : ''}`);
+    if (months) result.push(`${months} mes${months > 1 ? 'es' : ''}`);
+    if (days) result.push(`${days} dÃ­a${days > 1 ? 's' : ''}`);
+    if (hours) result.push(`${hours} hora${hours > 1 ? 's' : ''}`);
+    if (minutes || result.length === 0) result.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+
+    return result.join(" ");
+}
+
+function wish() {
+    let time = new Date(new Date().toLocaleString("es-AR", { timeZone: "America/Buenos_Aires" }));
+    let hours = time.getHours();
+    let minutes = time.getMinutes();
+    let quarter = Math.floor(minutes / 15);
+
+    const messages = {
+        0: [
+            "ðŸ© Ya es medianoche, a dormir~",
+            "ðŸ§ No te quedes despierto, cuida tu salud~",
+            "ðŸ“ Noche tranquila, a descansar~",
+        ],
+        1: [
+            "ðŸ¡ Es la 1 am, hora de dormir~",
+            "ðŸ§ Ojos pesados, vamos a descansar~",
+            "ðŸ® Que tengas sueÃ±os dulces~",
+        ],
+        2: [
+            "ðŸ« 2 am, no olvides descansar~",
+            "ðŸ© Ya muy tarde, a dormir~",
+            "ðŸ’ Dormir a esta hora se siente bien~",
+        ],
+        3: [
+            "ðŸ“ 3 am, hora de dormir bien~",
+            "ðŸ§ Descansa para despertar fresco maÃ±ana~",
+            "ðŸ¡ Dormir profundo es lo mejor~",
+        ],
+        4: [
+            "ðŸŒ¸ Amanecer fresco, Ã¡nimo para levantarse~",
+            "ðŸµ Hora del tÃ© calentito~",
+            "ðŸ“ MaÃ±ana clara, a ejercitarse~",
+        ],
+        5: [
+            "ðŸ“ El gallo canta, Â¡a levantarse!~",
+            "ðŸž Desayuna para tener energÃ­a~",
+            "ðŸ¯ Â¡Buenos dÃ­as dulzura~!",
+        ],
+        6: [
+            "ðŸŽ Primero, un poco de ejercicio matutino~",
+            "ðŸ« Ãnimo para trabajo/clases~",
+            "â˜€ï¸ MaÃ±ana soleada, feliz dÃ­a~",
+        ],
+        7: [
+            "â˜• CafÃ© primero para despejar~",
+            "ðŸª Vamos a concentrarnos en el trabajo~",
+            "ðŸ© MaÃ±ana productiva~",
+        ],
+        8: [
+            "ðŸ’ Snack de la maÃ±ana para energÃ­a~",
+            "ðŸ¥¤ No olvides hidratarte~",
+            "ðŸ± Se acerca la hora del almuerzo~",
+        ],
+        9: [
+            "ðŸš Buen mediodÃ­a, a comer~",
+            "ðŸ› Â¿QuÃ© estÃ¡s comiendo?~",
+            "ðŸ® DespuÃ©s de comer, a relajarse un poco~",
+        ],
+        10: [
+            "ðŸµ Calor de mediodÃ­a, a beber algo~",
+            "ðŸ« MantÃ©n el enfoque~",
+            "ðŸ§ TÃ© helado refrescante~",
+        ],
+        11: [
+            "ðŸ© Se acerca la tarde, termina tu trabajo~",
+            "ðŸª Merienda de tarde, Â¡quÃ© divertido!~",
+            "ðŸŒ¸ El cielo se ve precioso~",
+        ],
+        12: [
+            "ðŸš Ya son las 12, hora de almorzar~",
+            "ðŸ² No te saltes el almuerzo~",
+            "ðŸµ Descansa un poco despuÃ©s de comer~",
+        ],
+        13: [
+            "ðŸ§ Calor de mediodÃ­a, bebe algo fresco~",
+            "ðŸ¹ Mantente hidratado~",
+            "ðŸ‰ Medio dÃ­a, calor intenso~",
+        ],
+        14: [
+            "ðŸ« Hora de un snack~",
+            "ðŸ¥¤ Bebe algo refrescante~",
+            "ðŸ“– RelÃ¡jate un poco~",
+        ],
+        15: [
+            "ðŸª Ya es tarde, haz un poco de stretching~",
+            "ðŸ© Galletitas para merendar~",
+            "ðŸŒ‡ Cielo de tarde precioso~",
+        ],
+        16: [
+            "ðŸµ TÃ© de la tarde + snack, perfecto~",
+            "ðŸ° RelÃ¡jate viendo algo~",
+            "ðŸ“¸ Hora de fotos del cielo~",
+        ],
+        17: [
+            "ðŸ½ï¸ Ya es tarde, prepÃ¡rate para la cena~",
+            "ðŸ² Â¿QuÃ© vas a cenar esta noche?~",
+            "ðŸŒ… Tarde fresca, quÃ© lindo~",
+        ],
+        18: [
+            "ðŸ› No olvides cenar~",
+            "ðŸ« Noche tranquila~",
+            "ðŸ“º RelÃ¡jate viendo algo~",
+        ],
+        19: [
+            "ðŸŽ¶ Noche divertida con mÃºsica~",
+            "ðŸ“± Un poco de redes sociales~",
+            "ðŸŽ® Juega tranquilo~",
+        ],
+        20: [
+            "ðŸµ Skincare + tiempo de relax~",
+            "ðŸ“– Leer antes de dormir~",
+            "ðŸ›Œ 8 pm, hora de descansar~",
+        ],
+        21: [
+            "ðŸ’ No trasnoches, a dormir~",
+            "ðŸ§ Dormir temprano para despertar fresco~",
+            "ðŸŒ™ Dulces sueÃ±os~",
+        ],
+        22: [
+            "ðŸ© Apaga las luces~",
+            "âœ¨ Que tengas sueÃ±os hermosos~",
+            "ðŸ›Œ Dormir lo suficiente es importante~",
+        ],
+        23: [
+            "ðŸ’¤ Medianoche, a dormir profundo~",
+            "ðŸ“ No trasnoches~",
+            "ðŸ® Buenas noches, dulces sueÃ±os~",
+        ],
+    };
+
+    let message = messages[hours]?.[quarter] || messages[hours]?.[3] || "âœ¨ El tiempo sigue avanzando~";
+    return `*${message}*`;
+}
+
+function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.substr(1);
+}
+
+function bytesToMB(bytes) {
+    return (bytes / 1048576).toFixed(2);
+      }
