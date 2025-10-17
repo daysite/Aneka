@@ -1,7 +1,7 @@
 import os from "os";
 import fs from "fs";
 
-// DECORACIÃ“N APLICADA AQUÃ
+// DECORACIÓN APLICADA AQUÍ
 const defaultMenu = {
     before: `
 *â•­â”€â”ˆãƒ»à­¨ ðŸ§¸ à­§ãƒ»â”ˆãƒ»â”ˆâ”€â•®*
@@ -32,9 +32,21 @@ const defaultMenu = {
 `,
 };
 
+// Función de loading alternativa
+const loading = async (m, conn, stop = false) => {
+    if (stop) {
+        // Lógica para detener el loading si es necesario
+        return;
+    }
+    // Simplemente no hacer nada o mostrar un mensaje en consola
+    console.log('⏳ Cargando menú...');
+};
+
 let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, isPrems, args }) => {
     try {
-        await global.loading(m, conn);
+        // Reemplazar global.loading con la función local
+        await loading(m, conn);
+        
         let tags;
         let teks = `${args[0]}`.toLowerCase();
         let arrayMenu = [
@@ -133,7 +145,7 @@ END:VCARD`;
         const Version = packageJson.version;
         const mode = global.opts.self ? "Privado" : "PÃºblico";
 
-        // DECORACIÃ“N APLICADA AQUÃ
+        // DECORACIÓN APLICADA AQUÍ
         let listCmd = `
 *â•­â”€â”ˆãƒ»â”ˆãƒ»à­¨ ðŸ“ à­§ãƒ»â”ˆãƒ»â”ˆâ”€â•®*
 > *Ëšâ‚Šâ€§ ð‘°ð‘µð‘­ð‘¶ ð‘«ð‘¬ð‘³ ð‘©ð‘¶ð‘» â€§â‚ŠËš*
@@ -320,7 +332,8 @@ END:VCARD`;
             { quoted: q }
         );
     } finally {
-        await global.loading(m, conn, true);
+        // Reemplazar global.loading con la función local
+        await loading(m, conn, true);
     }
 };
 
@@ -490,4 +503,4 @@ function capitalize(word) {
 
 function bytesToMB(bytes) {
     return (bytes / 1048576).toFixed(2);
-      }
+}
