@@ -32,7 +32,7 @@
 "license": "GPL-3.0-or-later",
 "dependencies": {
 "@vitalets/google-translate-api": "^9.2.0",
-"@whiskeysockets/baileys": "npm:@rexxhayanasi/elaina-bail",
+"@whiskeysockets/baileys": "github:this-xyz/bail",
 "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "google-libphonenumber": "latest",
 "@adiwajshing/keyed-db": "^0.2.4",
