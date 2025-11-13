@@ -87,45 +87,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
-// Handler separado para listamonedas
-let handlerLista = async (m, { conn, usedPrefix }) => {
-    const listaMonedas = `📋 *LISTA COMPLETA DE MONEDAS* 📋\n\n` +
-                        `🇵🇪 *PEN - Sol Peruano*\n` +
-                        `   → soles, sol, pen\n\n` +
-                        `🇦🇷 *ARS - Peso Argentino*\n` +
-                        `   → pesos argentinos, peso argentino, argentinos, pesos, ars\n\n` +
-                        `🇺🇸 *USD - Dólar Americano*\n` +
-                        `   → dólares, dólar, dolares, dolar, usd\n\n` +
-                        `🇪🇺 *EUR - Euro*\n` +
-                        `   → euros, euro, eur\n\n` +
-                        `🇧🇷 *BRL - Real Brasileño*\n` +
-                        `   → reales, real, brl\n\n` +
-                        `🇲🇽 *MXN - Peso Mexicano*\n` +
-                        `   → pesos mexicanos, mexicanos, mxn\n\n` +
-                        `🇧🇴 *BOB - Boliviano*\n` +
-                        `   → bolivianos, boliviano, bob\n\n` +
-                        `🇨🇱 *CLP - Peso Chileno*\n` +
-                        `   → pesos chilenos, chilenos, clp\n\n` +
-                        `🇺🇾 *UYU - Peso Uruguayo*\n` +
-                        `   → pesos uruguayos, uruguayos, uyu\n\n` +
-                        `🇵🇾 *PYG - Guaraní Paraguayo*\n` +
-                        `   → guaraníes, guaraní, guaranies, guarani, paraguayos, pyg\n\n` +
-                        `🇨🇴 *COP - Peso Colombiano*\n` +
-                        `   → pesos colombianos, colombianos, cop\n\n` +
-                        `💡 *Ejemplos de uso:*\n` +
-                        `• ${usedPrefix}cambio 5000 soles a pesos argentinos\n` +
-                        `• ${usedPrefix}cambio 100 usd a bolivianos\n` +
-                        `• ${usedPrefix}cambio 50000 pesos chilenos a soles`;
-    
-    const imagen = await fetch('https://files.catbox.moe/5w8szu.jpg');
-    const buffer = await imagen.buffer();
-    
-    return await conn.sendMessage(m.chat, {
-        image: buffer,
-        caption: listaMonedas
-    }, { quoted: m });
-};
-
 // Función para buscar código de moneda
 function buscarCodigoMoneda(texto) {
     const monedas = {
@@ -223,18 +184,9 @@ async function obtenerTasaCambio(cantidad, desde, hacia) {
     }
 }
 
-// Configuración del handler principal (.cambio)
 handler.help = ['cambio'];
 handler.tags = ['tools'];
 handler.command = /^(cambio|convertir|moneda|exchange|convert|tasacambio)$/i;
 handler.register = true;
 
-// Configuración del handler de lista (.listamonedas)
-handlerLista.help = ['listamonedas'];
-handlerLista.tags = ['tools'];
-handlerLista.command = /^(listamonedas|monedas|lista)$/i;
-handlerLista.register = true;
-
-// Exportar ambos handlers
 export default handler;
-export { handlerLista };
