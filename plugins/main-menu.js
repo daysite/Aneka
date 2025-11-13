@@ -21,7 +21,7 @@ let handler = async (m, { conn, usedPrefix, __dirname, command }) => {
     let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered).length
     const readMore = '\u200b'.repeat(850)
 
-    await m.react('🍟')
+    await m.react('🪸')
 
     let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     let perfil = await conn.profilePictureUrl(who, 'image').catch(_ => 'https://files.catbox.moe/ninsr8.jpg')
@@ -95,24 +95,24 @@ for (let key in emojis) {
 
 
     before: `ㅤ
-*꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷*
+*🥟 황현진 ₊˚⊹ 🥢*
 
-*Hello como se encuentra el dia de hoy?* ${taguser}
+*ּ ֶָ֢. 𝐎𝐥𝐢 𝐡𝐞𝐫𝐦𝐨𝐬𝐮𝐫𝐚 𝐜𝐨𝐦𝐨 𝐭𝐞 𝐞𝐧𝐜𝐮𝐞𝐧𝐭𝐫𝐚𝐬 𝐞𝐥 𝐝í𝐚 𝐝𝐞 𝐡𝐨𝐲* ${taguser}
 
-*꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷*
+*🥟 황현진 ₊˚⊹ 🥢*
 
- ${saludo} ׄ humano 👋🏻
+ ${saludo} ׄ 𝐋𝐢𝐧𝐝𝐮𝐫𝐚 👋🏻
 
-\`🍭 Activo:\` ${uptime}
-\`🗣️ Usuarios:\` ${totalreg}
-\`🍟 Versión:\` ${vs}
-\`💌 Creador:\` @${creadorN}
+\`🥮 Activo:\` ${uptime}
+\`🦊 Usuarios:\` ${totalreg}
+\`🪸 Versión:\` ${vs}
+\`🪄 Creador:\` @${creadorN}
 
 ㅤ ㅤ \`乂 ⺀ Comands List ⺀ 乂\`
 `,
 
       header: category => ` ${category}`,
-      body: (cmd, emoji) => `ര ׄ ${emoji}˚ ${cmd}`,
+      body: (cmd, emoji) => `༯ ׄ ${emoji}˚ ${cmd}`,
       footer: '',
       after: `> ${club}`
   }
