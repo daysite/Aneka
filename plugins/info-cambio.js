@@ -37,21 +37,18 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         // Obtener tasa de cambio
         const resultado = await obtenerTasaCambio(cantidad, codigoOrigen, codigoDestino);
         
-        // Enviar resultado con estilo similar al código base
+        // Cargar la imagen personalizada
+        const imagen = await fetch('https://files.catbox.moe/5w8szu.jpg');
+        const buffer = await imagen.buffer();
+        
+        // Enviar resultado con la imagen personalizada
         await conn.sendMessage(m.chat, {
-            text: `💱 *CONVERSIÓN DE MONEDAS* 💱\n\n` +
-                  `🪙 *${cantidad} ${codigoOrigen}* = *${resultado.convertido} ${codigoDestino}*\n\n` +
-                  `📊 *Tasa de cambio:* 1 ${codigoOrigen} = ${resultado.tasa} ${codigoDestino}\n` +
-                  `🕐 *Actualizado:* ${resultado.fecha}\n\n` +
-                  `💡 *Tip:* Usa el formato: .cambio [cantidad] [moneda] a [moneda]`,
-            contextInfo: {
-                externalAdReply: {
-                    title: `💰 Conversor de Monedas`,
-                    body: `Bot de WhatsApp`,
-                    thumbnail: await (await fetch('https://i.imgur.com/9C8Qy3A.png')).buffer(),
-                    sourceUrl: 'https://github.com/daysite/Aneka'
-                }
-            }
+            image: buffer,
+            caption: `💱 *CONVERSIÓN DE MONEDAS* 💱\n\n` +
+                     `🪙 *${cantidad} ${codigoOrigen}* = *${resultado.convertido} ${codigoDestino}*\n\n` +
+                     `📊 *Tasa de cambio:* 1 ${codigoOrigen} = ${resultado.tasa} ${codigoDestino}\n` +
+                     `🕐 *Actualizado:* ${resultado.fecha}\n\n` +
+                     `💡 *Tip:* Usa el formato: .cambio [cantidad] [moneda] a [moneda]`
         }, { quoted: m });
         
     } catch (error) {
