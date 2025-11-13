@@ -30,7 +30,7 @@ let handler = async (m, { conn, usedPrefix }) => {
                         `• ${usedPrefix}cambio 50000 pesos chilenos a soles\n\n` +
                         `🔄 *Formato:* .cambio [cantidad] [moneda] a [moneda]`;
     
-    const imagen = await fetch('https://files.catbox.moe/5w8szu.jpg');
+    const imagen = await fetch('https://files.catbox.moe/rig7ct.jpg');
     const buffer = await imagen.buffer();
     
     await conn.sendMessage(m.chat, {
