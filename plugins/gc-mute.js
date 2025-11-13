@@ -15,25 +15,19 @@ try {
 }
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-  // Obtener el usuario correctamente
-  let user = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : null;
+  // USAR EXACTAMENTE LA MISMA ESTRUCTURA QUE TU CÓDIGO FUNCIONAL
+  let mentionedJid = await m.mentionedJid
+  let user = mentionedJid && mentionedJid.length ? mentionedJid[0] : m.quoted && await m.quoted.sender ? await m.quoted.sender : null
   
   if (!user) {
     const msgError = command === 'mute'
-      ? `❀ Debes mencionar o responder a un usuario para mutear.`
-      : `❀ Debes mencionar o responder a un usuario para desmutear.`;
+      ? `❀ Debes mencionar a un usuario para poder mutearlo.`
+      : `❀ Debes mencionar a un usuario para poder desmutearlo.`;
     return conn.reply(m.chat, msgError, m);
   }
 
-  // Asegurar que el usuario tenga el formato correcto
-  if (!user.includes('@s.whatsapp.net')) {
-    user = user + '@s.whatsapp.net';
-  }
-
-  // Limpiar el ID del usuario (remover cualquier caracter extraño)
-  user = user.replace(/[^0-9@s.whatsapp.net]/g, '');
-
-  console.log('Usuario a mutear:', user); // Para debug
+  // El usuario ya viene en el formato correcto de tu código funcional
+  // No necesitamos normalizarlo porque mentionedJid ya lo trae bien
 
   const ownerBot = global.owner ? global.owner.map(owner => {
     if (Array.isArray(owner)) return owner[0] + '@s.whatsapp.net';
@@ -46,19 +40,19 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
   if (command === "mute") {
     if (mutedUsers.has(user)) {
-      return conn.reply(m.chat, `🚫 El usuario *@${user.split('@')[0]}* ya está muteado.`, m, { mentions: [user] });
+      return conn.reply(m.chat, `🚫 El usuario ya está muteado.`, m, { mentions: [user] });
     }
     mutedUsers.add(user);
     guardarMuteos();
-    await conn.reply(m.chat, `🚫 El usuario *@${user.split('@')[0]}* fue muteado.\n\n> Sus mensajes serán eliminados automáticamente.`, m, { mentions: [user] });
+    await conn.reply(m.chat, `🚫 El usuario fue muteado.\n\n> Sus mensajes serán eliminados automáticamente.`, m, { mentions: [user] });
 
   } else if (command === "unmute") {
     if (!mutedUsers.has(user)) {
-      return conn.reply(m.chat, `🔊 El usuario *@${user.split('@')[0]}* no está muteado.`, m, { mentions: [user] });
+      return conn.reply(m.chat, `🔊 El usuario no está muteado.`, m, { mentions: [user] });
     }
     mutedUsers.delete(user);
     guardarMuteos();
-    await conn.reply(m.chat, `🔊 El usuario *@${user.split('@')[0]}* fue desmuteado.\n\n> Sus mensajes ya no serán eliminados.`, m, { mentions: [user] });
+    await conn.reply(m.chat, `🔊 El usuario fue desmuteado.\n\n> Sus mensajes ya no serán eliminados.`, m, { mentions: [user] });
   }
 };
 
@@ -66,7 +60,6 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 function guardarMuteos() {
   try {
     fs.writeFileSync('./muted-users.json', JSON.stringify([...mutedUsers], null, 2));
-    console.log('Usuarios muteados guardados:', [...mutedUsers]); // Para debug
   } catch (e) {
     console.error('Error guardando usuarios muteados:', e);
   }
@@ -75,16 +68,8 @@ function guardarMuteos() {
 // Middleware para eliminar mensajes de usuarios muteados
 handler.before = async (m, { conn }) => {
   if (!m.sender) return;
-  
-  let sender = m.sender;
-  // Asegurar formato correcto del sender
-  if (!sender.includes('@s.whatsapp.net')) {
-    sender = sender + '@s.whatsapp.net';
-  }
 
-  console.log('Verificando mensaje de:', sender, 'Muteado?:', mutedUsers.has(sender)); // Para debug
-
-  if (mutedUsers.has(sender)) {
+  if (mutedUsers.has(m.sender)) {
     try {
       if (m.key && m.key.remoteJid === m.chat) {
         await conn.sendMessage(m.chat, { 
@@ -94,7 +79,6 @@ handler.before = async (m, { conn }) => {
             fromMe: false
           }
         });
-        console.log('Mensaje eliminado de usuario muteado:', sender); // Para debug
       }
     } catch (e) {
       console.error('Error eliminando mensaje de usuario muteado:', e);
