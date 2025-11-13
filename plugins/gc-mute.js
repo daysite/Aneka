@@ -15,21 +15,17 @@ try {
 }
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-  let user;
+  let mentionedJid = await m.mentionedJid
+  let user = mentionedJid && mentionedJid.length ? mentionedJid[0] : m.quoted && await m.quoted.sender ? await m.quoted.sender : null
   
-  // Mejorar la detección del usuario
-  if (m.quoted) {
-    user = m.quoted.sender;
-  } else if (m.mentionedJid && m.mentionedJid.length > 0) {
-    user = m.mentionedJid[0];
-  } else {
+  if (!user) {
     const msgError = command === 'mute'
-      ? `${xgc} Por favor, menciona o responde al usuario que deseas mutear`
-      : `${xgc} Por favor, menciona o responde al usuario que deseas desmutear`;
+      ? `❀ Debes mencionar o responder a un usuario para mutear.`
+      : `❀ Debes mencionar o responder a un usuario para desmutear.`;
     return conn.reply(m.chat, msgError, m);
   }
 
-  // Normalizar el formato del usuario (asegurar que tenga @s.whatsapp.net)
+  // Normalizar el formato del usuario
   if (!user.includes('@s.whatsapp.net')) {
     user = user.replace('@', '') + '@s.whatsapp.net';
   }
