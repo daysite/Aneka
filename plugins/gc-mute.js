@@ -15,8 +15,8 @@ try {
 }
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-  let mentionedJid = await m.mentionedJid
-  let user = mentionedJid && mentionedJid.length ? mentionedJid[0] : m.quoted && await m.quoted.sender ? await m.quoted.sender : null
+  // Obtener el usuario correctamente
+  let user = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : null;
   
   if (!user) {
     const msgError = command === 'mute'
@@ -25,10 +25,15 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     return conn.reply(m.chat, msgError, m);
   }
 
-  // Normalizar el formato del usuario
+  // Asegurar que el usuario tenga el formato correcto
   if (!user.includes('@s.whatsapp.net')) {
-    user = user.replace('@', '') + '@s.whatsapp.net';
+    user = user + '@s.whatsapp.net';
   }
+
+  // Limpiar el ID del usuario (remover cualquier caracter extraño)
+  user = user.replace(/[^0-9@s.whatsapp.net]/g, '');
+
+  console.log('Usuario a mutear:', user); // Para debug
 
   const ownerBot = global.owner ? global.owner.map(owner => {
     if (Array.isArray(owner)) return owner[0] + '@s.whatsapp.net';
@@ -61,24 +66,26 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 function guardarMuteos() {
   try {
     fs.writeFileSync('./muted-users.json', JSON.stringify([...mutedUsers], null, 2));
+    console.log('Usuarios muteados guardados:', [...mutedUsers]); // Para debug
   } catch (e) {
     console.error('Error guardando usuarios muteados:', e);
   }
 }
 
-// Middleware para eliminar mensajes de usuarios muteados (sin anuncio)
+// Middleware para eliminar mensajes de usuarios muteados
 handler.before = async (m, { conn }) => {
   if (!m.sender) return;
   
-  // Normalizar el sender
   let sender = m.sender;
+  // Asegurar formato correcto del sender
   if (!sender.includes('@s.whatsapp.net')) {
-    sender = sender.replace('@', '') + '@s.whatsapp.net';
+    sender = sender + '@s.whatsapp.net';
   }
+
+  console.log('Verificando mensaje de:', sender, 'Muteado?:', mutedUsers.has(sender)); // Para debug
 
   if (mutedUsers.has(sender)) {
     try {
-      // Verificar si el mensaje puede ser eliminado
       if (m.key && m.key.remoteJid === m.chat) {
         await conn.sendMessage(m.chat, { 
           delete: {
@@ -87,11 +94,12 @@ handler.before = async (m, { conn }) => {
             fromMe: false
           }
         });
+        console.log('Mensaje eliminado de usuario muteado:', sender); // Para debug
       }
     } catch (e) {
       console.error('Error eliminando mensaje de usuario muteado:', e);
     }
-    return true; // Detener el procesamiento del mensaje
+    return true;
   }
 };
 
