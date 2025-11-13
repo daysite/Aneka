@@ -1,364 +1,184 @@
-// sistema-keys.js - Sistema independiente de gestión de API Keys
+// sistema-keys.js - Sistema simple de gestión de keys
 import fs from 'fs';
-import path from 'path';
 
-// Configuración inicial
+// Configuración
 const KEYS_FILE = './keys_database.json';
-const PROPRIETARIO_PRINCIPAL = '5493884086954@c.us'; // Tu número de bot
+const OWNER_NUMBER = '51999999999'; // TU NÚMERO SIN + (ejemplo: 51987654321)
 
-// Estructura de la base de datos de keys
-let keysDatabase = {
-    ultimaActualizacion: new Date().toISOString(),
-    keys: {}
-};
+// Base de datos simple
+let keysDB = {};
 
-// Cargar base de datos existente
-function cargarBaseDeDatos() {
+// Cargar base de datos
+function loadDB() {
     try {
         if (fs.existsSync(KEYS_FILE)) {
             const data = fs.readFileSync(KEYS_FILE, 'utf8');
-            keysDatabase = JSON.parse(data);
-            console.log('✅ Base de datos de keys cargada correctamente');
+            keysDB = JSON.parse(data);
         }
-    } catch (error) {
-        console.log('📁 Creando nueva base de datos de keys...');
-        guardarBaseDeDatos();
+    } catch (e) {
+        keysDB = {};
     }
 }
 
 // Guardar base de datos
-function guardarBaseDeDatos() {
+function saveDB() {
     try {
-        keysDatabase.ultimaActualizacion = new Date().toISOString();
-        fs.writeFileSync(KEYS_FILE, JSON.stringify(keysDatabase, null, 2));
-    } catch (error) {
-        console.error('Error guardando base de datos:', error);
+        fs.writeFileSync(KEYS_FILE, JSON.stringify(keysDB, null, 2));
+    } catch (e) {
+        console.error('Error guardando DB:', e);
     }
 }
 
-// Generar key única
-function generarKeyUnica() {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substr(2, 9);
-    return `KEY_${timestamp}_${random}`.toUpperCase();
-}
-
-// SISTEMA PRINCIPAL DE GESTIÓN DE KEYS
-const SistemaKeys = {
-    // Inicializar sistema
-    inicializar: function() {
-        cargarBaseDeDatos();
-        this.limpiarKeysExpiradas();
-    },
-
+// Sistema de Keys
+const KeySystem = {
     // Generar nueva key
-    generarKey: function(nombreCliente, diasValidez = 30, limiteDiario = 50, notas = '') {
-        const key = generarKeyUnica();
-        const fechaCreacion = new Date();
-        const fechaExpiracion = new Date();
-        fechaExpiracion.setDate(fechaExpiracion.getDate() + diasValidez);
-
-        keysDatabase.keys[key] = {
-            nombreCliente: nombreCliente,
-            fechaCreacion: fechaCreacion.toISOString(),
-            fechaExpiracion: fechaExpiracion.toISOString(),
-            diasValidez: diasValidez,
-            limiteDiario: limiteDiario,
-            usosHoy: 0,
-            totalUsos: 0,
-            ultimoUso: null,
-            activa: true,
-            notas: notas,
-            ultimoReset: new Date().toDateString()
+    generateKey(clientName, days = 30, dailyLimit = 50) {
+        const key = 'KEY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        
+        const expiration = new Date();
+        expiration.setDate(expiration.getDate() + days);
+        
+        keysDB[key] = {
+            client: clientName,
+            created: new Date().toISOString(),
+            expires: expiration.toISOString(),
+            days: days,
+            dailyLimit: dailyLimit,
+            usedToday: 0,
+            totalUses: 0,
+            active: true,
+            lastReset: new Date().toDateString(),
+            lastUse: null
         };
-
-        guardarBaseDeDatos();
+        
+        saveDB();
         return key;
     },
 
     // Verificar key
-    verificarKey: function(key) {
-        const keyInfo = keysDatabase.keys[key];
-        
-        // Verificar si la key existe
-        if (!keyInfo) {
-            return { valida: false, error: 'Key no existe' };
+    verifyKey(key) {
+        if (!keysDB[key]) {
+            return { valid: false, error: 'Key no existe' };
         }
         
-        // Verificar si está activa
-        if (!keyInfo.activa) {
-            return { valida: false, error: 'Key desactivada' };
+        const keyInfo = keysDB[key];
+        
+        if (!keyInfo.active) {
+            return { valid: false, error: 'Key desactivada' };
         }
         
         // Verificar expiración
-        const ahora = new Date();
-        const expiracion = new Date(keyInfo.fechaExpiracion);
-        if (ahora > expiracion) {
-            return { valida: false, error: 'Key expirada' };
+        if (new Date() > new Date(keyInfo.expires)) {
+            return { valid: false, error: 'Key expirada' };
         }
         
-        // Verificar reset diario
-        const hoy = new Date().toDateString();
-        if (keyInfo.ultimoReset !== hoy) {
-            keyInfo.usosHoy = 0;
-            keyInfo.ultimoReset = hoy;
-            guardarBaseDeDatos();
+        // Reset diario
+        const today = new Date().toDateString();
+        if (keyInfo.lastReset !== today) {
+            keyInfo.usedToday = 0;
+            keyInfo.lastReset = today;
         }
         
-        // Verificar límite diario
-        if (keyInfo.usosHoy >= keyInfo.limitDiario) {
-            return { 
-                valida: false, 
-                error: `Límite diario alcanzado (${keyInfo.limiteDiario} usos)` 
-            };
+        // Verificar límite
+        if (keyInfo.usedToday >= keyInfo.dailyLimit) {
+            return { valid: false, error: `Límite diario alcanzado (${keyInfo.dailyLimit})` };
         }
         
-        // Actualizar contadores
-        keyInfo.usosHoy++;
-        keyInfo.totalUsos++;
-        keyInfo.ultimoUso = new Date().toISOString();
-        guardarBaseDeDatos();
+        // Actualizar uso
+        keyInfo.usedToday++;
+        keyInfo.totalUses++;
+        keyInfo.lastUse = new Date().toISOString();
+        saveDB();
         
         return {
-            valida: true,
+            valid: true,
             info: keyInfo,
-            usosRestantes: keyInfo.limiteDiario - keyInfo.usosHoy,
-            diasRestantes: Math.ceil((expiracion - ahora) / (1000 * 60 * 60 * 24))
+            remaining: keyInfo.dailyLimit - keyInfo.usedToday,
+            daysLeft: Math.ceil((new Date(keyInfo.expires) - new Date()) / (1000 * 60 * 60 * 24))
         };
     },
 
-    // Listar todas las keys
-    listarKeys: function() {
-        return keysDatabase.keys;
+    // Listar keys
+    listKeys() {
+        return keysDB;
     },
 
-    // Desactivar key
-    desactivarKey: function(key) {
-        if (keysDatabase.keys[key]) {
-            keysDatabase.keys[key].activa = false;
-            guardarBaseDeDatos();
-            return true;
-        }
-        return false;
-    },
-
-    // Activar key
-    activarKey: function(key) {
-        if (keysDatabase.keys[key]) {
-            keysDatabase.keys[key].activa = true;
-            guardarBaseDeDatos();
+    // Activar/Desactivar
+    setKeyStatus(key, status) {
+        if (keysDB[key]) {
+            keysDB[key].active = status;
+            saveDB();
             return true;
         }
         return false;
     },
 
     // Eliminar key
-    eliminarKey: function(key) {
-        if (keysDatabase.keys[key]) {
-            delete keysDatabase.keys[key];
-            guardarBaseDeDatos();
+    deleteKey(key) {
+        if (keysDB[key]) {
+            delete keysDB[key];
+            saveDB();
             return true;
         }
         return false;
     },
 
-    // Renovar key
-    renovarKey: function(key, diasExtra) {
-        const keyInfo = keysDatabase.keys[key];
-        if (keyInfo) {
-            const nuevaExpiracion = new Date(keyInfo.fechaExpiracion);
-            nuevaExpiracion.setDate(nuevaExpiracion.getDate() + diasExtra);
-            keyInfo.fechaExpiracion = nuevaExpiracion.toISOString();
-            keyInfo.diasValidez += diasExtra;
-            guardarBaseDeDatos();
-            return true;
-        }
-        return false;
-    },
-
-    // Limpiar keys expiradas automáticamente
-    limpiarKeysExpiradas: function() {
-        const ahora = new Date();
-        let keysEliminadas = 0;
-        
-        for (const [key, info] of Object.entries(keysDatabase.keys)) {
-            if (new Date(info.fechaExpiracion) < ahora) {
-                delete keysDatabase.keys[key];
-                keysEliminadas++;
-            }
-        }
-        
-        if (keysEliminadas > 0) {
-            guardarBaseDeDatos();
-            console.log(`🧹 ${keysEliminadas} keys expiradas eliminadas`);
-        }
-    },
-
-    // Estadísticas del sistema
-    obtenerEstadisticas: function() {
-        const totalKeys = Object.keys(keysDatabase.keys).length;
-        const keysActivas = Object.values(keysDatabase.keys).filter(k => k.activa).length;
-        const keysExpiradas = Object.values(keysDatabase.keys).filter(k => 
-            new Date(k.fechaExpiracion) < new Date()
-        ).length;
-        
+    // Estadísticas
+    getStats() {
+        const keys = Object.keys(keysDB);
         return {
-            totalKeys,
-            keysActivas,
-            keysExpiradas,
-            ultimaActualizacion: keysDatabase.ultimaActualizacion
+            total: keys.length,
+            active: keys.filter(k => keysDB[k].active).length,
+            expired: keys.filter(k => new Date(keysDB[k].expires) < new Date()).length
         };
     }
 };
 
-// HANDLER PARA COMANDOS DE GESTIÓN DE KEYS
-let handler = async (m, { conn, text, usedPrefix, command, sender }) => {
-    // Verificar si es el propietario
-    if (!sender.includes(PROPRIETARIO_PRINCIPAL)) {
+// Cargar base de datos al inicio
+loadDB();
+
+// Handler principal
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+    // Verificar si es el owner
+    const sender = m.sender;
+    if (!sender.includes(OWNER_NUMBER)) {
         return conn.sendMessage(m.chat, { 
-            text: '❌ Solo el propietario puede gestionar las keys.' 
+            text: '❌ Solo el propietario puede usar este comando.' 
         }, { quoted: m });
     }
 
-    const args = text.trim().split(' ');
-    const subcomando = args[0]?.toLowerCase();
+    if (!text) {
+        return showHelp(conn, m, usedPrefix, command);
+    }
+
+    const args = text.split(' ');
+    const action = args[0].toLowerCase();
 
     try {
-        switch (subcomando) {
+        switch (action) {
             case 'generar':
             case 'crear':
-                if (args.length < 2) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Formato: ${usedPrefix + command} generar [nombre] [días] [límite]\n💡 Ejemplo: ${usedPrefix + command} generar "Mi Bot" 30 100` 
-                    }, { quoted: m });
-                }
-                
-                const nombre = args[1];
-                const dias = parseInt(args[2]) || 30;
-                const limite = parseInt(args[3]) || 50;
-                const notas = args.slice(4).join(' ') || '';
-                
-                const nuevaKey = SistemaKeys.generarKey(nombre, dias, limite, notas);
-                
-                const mensajeKey = `🔑 *NUEVA KEY GENERADA* 🔑\n\n` +
-                                 `👤 *Cliente:* ${nombre}\n` +
-                                 `🔑 *Key:* \`${nuevaKey}\`\n` +
-                                 `📅 *Válida por:* ${dias} días\n` +
-                                 `📊 *Límite diario:* ${limite} usos\n` +
-                                 `📝 *Notas:* ${notas || 'Ninguna'}\n\n` +
-                                 `💡 *Comparte esta key con el desarrollador*`;
-                
-                return conn.sendMessage(m.chat, { text: mensajeKey }, { quoted: m });
-
+                return await generateKey(conn, m, args, usedPrefix, command);
+            
             case 'listar':
             case 'lista':
-                const keys = SistemaKeys.listarKeys();
-                if (Object.keys(keys).length === 0) {
-                    return conn.sendMessage(m.chat, { 
-                        text: '📭 No hay keys registradas en el sistema.' 
-                    }, { quoted: m });
-                }
-                
-                let listaMensaje = `📋 *KEYS REGISTRADAS* 📋\n\n`;
-                for (const [key, info] of Object.entries(keys)) {
-                    const estado = info.activa ? '🟢' : '🔴';
-                    const expiracion = new Date(info.fechaExpiracion);
-                    const diasRestantes = Math.ceil((expiracion - new Date()) / (1000 * 60 * 60 * 24));
-                    
-                    listaMensaje += `${estado} *${info.nombreCliente}*\n`;
-                    listaMensaje += `🔑 ${key}\n`;
-                    listaMensaje += `📅 Expira en: ${diasRestantes} días\n`;
-                    listaMensaje += `📊 Usos hoy: ${info.usosHoy}/${info.limiteDiario}\n`;
-                    listaMensaje += `🔧 Estado: ${info.activa ? 'Activa' : 'Inactiva'}\n\n`;
-                }
-                
-                return conn.sendMessage(m.chat, { text: listaMensaje }, { quoted: m });
-
-            case 'desactivar':
-                if (args.length < 2) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Formato: ${usedPrefix + command} desactivar [key]` 
-                    }, { quoted: m });
-                }
-                
-                const keyDesactivar = args[1];
-                if (SistemaKeys.desactivarKey(keyDesactivar)) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `✅ Key desactivada correctamente.` 
-                    }, { quoted: m });
-                } else {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Key no encontrada.` 
-                    }, { quoted: m });
-                }
-
+                return await listKeys(conn, m);
+            
             case 'activar':
-                if (args.length < 2) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Formato: ${usedPrefix + command} activar [key]` 
-                    }, { quoted: m });
-                }
-                
-                const keyActivar = args[1];
-                if (SistemaKeys.activarKey(keyActivar)) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `✅ Key activada correctamente.` 
-                    }, { quoted: m });
-                } else {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Key no encontrada.` 
-                    }, { quoted: m });
-                }
-
-            case 'renovar':
-                if (args.length < 3) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Formato: ${usedPrefix + command} renovar [key] [días]` 
-                    }, { quoted: m });
-                }
-                
-                const keyRenovar = args[1];
-                const diasExtra = parseInt(args[2]);
-                if (SistemaKeys.renovarKey(keyRenovar, diasExtra)) {
-                    return conn.sendMessage(m.chat, { 
-                        text: `✅ Key renovada por ${diasExtra} días adicionales.` 
-                    }, { quoted: m });
-                } else {
-                    return conn.sendMessage(m.chat, { 
-                        text: `❌ Key no encontrada.` 
-                    }, { quoted: m });
-                }
-
+                return await setKeyStatus(conn, m, args[1], true);
+            
+            case 'desactivar':
+                return await setKeyStatus(conn, m, args[1], false);
+            
+            case 'eliminar':
+                return await deleteKey(conn, m, args[1]);
+            
             case 'estadisticas':
             case 'stats':
-                const stats = SistemaKeys.obtenerEstadisticas();
-                const mensajeStats = `📊 *ESTADÍSTICAS DEL SISTEMA* 📊\n\n` +
-                                   `🔑 *Total de keys:* ${stats.totalKeys}\n` +
-                                   `🟢 *Keys activas:* ${stats.keysActivas}\n` +
-                                   `🔴 *Keys expiradas:* ${stats.keysExpiradas}\n` +
-                                   `🕐 *Última actualización:* ${new Date(stats.ultimaActualizacion).toLocaleString()}`;
-                
-                return conn.sendMessage(m.chat, { text: mensajeStats }, { quoted: m });
-
+                return await showStats(conn, m);
+            
             default:
-                const ayuda = `🔑 *SISTEMA DE GESTIÓN DE KEYS* 🔑\n\n` +
-                            `*Comandos disponibles:*\n\n` +
-                            `• ${usedPrefix + command} generar [nombre] [días] [límite]\n` +
-                            `  → Crear nueva key\n\n` +
-                            `• ${usedPrefix + command} listar\n` +
-                            `  → Ver todas las keys\n\n` +
-                            `• ${usedPrefix + command} activar [key]\n` +
-                            `  → Activar key\n\n` +
-                            `• ${usedPrefix + command} desactivar [key]\n` +
-                            `  → Desactivar key\n\n` +
-                            `• ${usedPrefix + command} renovar [key] [días]\n` +
-                            `  → Extender validez\n\n` +
-                            `• ${usedPrefix + command} estadisticas\n` +
-                            `  → Ver estadísticas\n\n` +
-                            `💡 *Ejemplo:*\n` +
-                            `${usedPrefix + command} generar "Bot Amigo" 30 100`;
-                
-                return conn.sendMessage(m.chat, { text: ayuda }, { quoted: m });
+                return showHelp(conn, m, usedPrefix, command);
         }
     } catch (error) {
         console.error(error);
@@ -368,14 +188,136 @@ let handler = async (m, { conn, text, usedPrefix, command, sender }) => {
     }
 };
 
-// Inicializar sistema al cargar
-SistemaKeys.inicializar();
+// Función para generar key
+async function generateKey(conn, m, args, usedPrefix, command) {
+    if (args.length < 2) {
+        return conn.sendMessage(m.chat, { 
+            text: `❌ Formato: ${usedPrefix + command} generar [nombre] [días] [límite]\n💡 Ejemplo: ${usedPrefix + command} generar "Mi Bot" 30 100` 
+        }, { quoted: m });
+    }
 
-// Exportar tanto el handler como el sistema para usar en otros comandos
+    const name = args[1];
+    const days = parseInt(args[2]) || 30;
+    const limit = parseInt(args[3]) || 50;
+
+    const newKey = KeySystem.generateKey(name, days, limit);
+
+    const message = `🔑 *NUEVA KEY CREADA* 🔑\n\n` +
+                   `👤 *Cliente:* ${name}\n` +
+                   `🔑 *Key:* \`${newKey}\`\n` +
+                   `📅 *Válida por:* ${days} días\n` +
+                   `📊 *Límite diario:* ${limit} usos\n\n` +
+                   `💡 *Comparte esta key con el desarrollador*`;
+
+    return conn.sendMessage(m.chat, { text: message }, { quoted: m });
+}
+
+// Función para listar keys
+async function listKeys(conn, m) {
+    const keys = KeySystem.listKeys();
+    const keyList = Object.keys(keys);
+
+    if (keyList.length === 0) {
+        return conn.sendMessage(m.chat, { 
+            text: '📭 No hay keys registradas.' 
+        }, { quoted: m });
+    }
+
+    let message = `📋 *KEYS REGISTRADAS* 📋\n\n`;
+    
+    keyList.forEach(key => {
+        const info = keys[key];
+        const status = info.active ? '🟢' : '🔴';
+        const daysLeft = Math.ceil((new Date(info.expires) - new Date()) / (1000 * 60 * 60 * 24));
+        
+        message += `${status} *${info.client}*\n`;
+        message += `🔑 ${key}\n`;
+        message += `📅 Días restantes: ${daysLeft}\n`;
+        message += `📊 Usos hoy: ${info.usedToday}/${info.dailyLimit}\n`;
+        message += `🔧 Estado: ${info.active ? 'Activa' : 'Inactiva'}\n\n`;
+    });
+
+    return conn.sendMessage(m.chat, { text: message }, { quoted: m });
+}
+
+// Función para activar/desactivar
+async function setKeyStatus(conn, m, key, status) {
+    if (!key) {
+        return conn.sendMessage(m.chat, { 
+            text: `❌ Debes especificar una key.` 
+        }, { quoted: m });
+    }
+
+    if (KeySystem.setKeyStatus(key, status)) {
+        const action = status ? 'activada' : 'desactivada';
+        return conn.sendMessage(m.chat, { 
+            text: `✅ Key ${action} correctamente.` 
+        }, { quoted: m });
+    } else {
+        return conn.sendMessage(m.chat, { 
+            text: `❌ Key no encontrada.` 
+        }, { quoted: m });
+    }
+}
+
+// Función para eliminar key
+async function deleteKey(conn, m, key) {
+    if (!key) {
+        return conn.sendMessage(m.chat, { 
+            text: `❌ Debes especificar una key.` 
+        }, { quoted: m });
+    }
+
+    if (KeySystem.deleteKey(key)) {
+        return conn.sendMessage(m.chat, { 
+            text: `✅ Key eliminada correctamente.` 
+        }, { quoted: m });
+    } else {
+        return conn.sendMessage(m.chat, { 
+            text: `❌ Key no encontrada.` 
+        }, { quoted: m });
+    }
+}
+
+// Función para estadísticas
+async function showStats(conn, m) {
+    const stats = KeySystem.getStats();
+    const message = `📊 *ESTADÍSTICAS DEL SISTEMA* 📊\n\n` +
+                   `🔑 *Total de keys:* ${stats.total}\n` +
+                   `🟢 *Keys activas:* ${stats.active}\n` +
+                   `🔴 *Keys expiradas:* ${stats.expired}\n` +
+                   `📈 *Sistema funcionando correctamente*`;
+
+    return conn.sendMessage(m.chat, { text: message }, { quoted: m });
+}
+
+// Función de ayuda
+async function showHelp(conn, m, usedPrefix, command) {
+    const help = `🔑 *SISTEMA DE GESTIÓN DE KEYS* 🔑\n\n` +
+                `*Comandos disponibles:*\n\n` +
+                `• ${usedPrefix + command} generar [nombre] [días] [límite]\n` +
+                `  → Crear nueva key\n\n` +
+                `• ${usedPrefix + command} listar\n` +
+                `  → Ver todas las keys\n\n` +
+                `• ${usedPrefix + command} activar [key]\n` +
+                `  → Activar key\n\n` +
+                `• ${usedPrefix + command} desactivar [key]\n` +
+                `  → Desactivar key\n\n` +
+                `• ${usedPrefix + command} eliminar [key]\n` +
+                `  → Eliminar key\n\n` +
+                `• ${usedPrefix + command} estadisticas\n` +
+                `  → Ver estadísticas\n\n` +
+                `💡 *Ejemplo práctico:*\n` +
+                `${usedPrefix + command} generar "Bot Amigo" 30 100`;
+
+    return conn.sendMessage(m.chat, { text: help }, { quoted: m });
+}
+
+// Configuración del handler
 handler.help = ['keys'];
 handler.tags = ['admin'];
-handler.command = /^(keys|apikeys|gestionarkeys)$/i;
+handler.command = /^(keys|apikeys|gestionarkeys|sistemakeys)$/i;
 handler.register = true;
 
 export default handler;
-export { SistemaKeys };
+export { KeySystem };
