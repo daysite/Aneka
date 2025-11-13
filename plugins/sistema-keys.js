@@ -4,7 +4,7 @@ import path from 'path';
 
 // Configuración inicial
 const KEYS_FILE = './keys_database.json';
-const PROPRIETARIO_PRINCIPAL = '51999999999@c.us'; // Tu número de bot
+const PROPRIETARIO_PRINCIPAL = '5493884086954@c.us'; // Tu número de bot
 
 // Estructura de la base de datos de keys
 let keysDatabase = {
